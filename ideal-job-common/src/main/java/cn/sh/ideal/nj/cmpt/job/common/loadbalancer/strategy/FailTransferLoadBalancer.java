@@ -28,7 +28,7 @@ public class FailTransferLoadBalancer implements LoadBalancer {
       return reachableServers.get(0);
     }
     for (LbServer reachableServer : reachableServers) {
-      boolean available = reachableServer.availableBeat();
+      boolean available = reachableServer.heartbeat();
       if (available) {
         return reachableServer;
       }

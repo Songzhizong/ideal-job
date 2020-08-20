@@ -17,11 +17,17 @@ import javax.annotation.Nullable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SocketMessage {
+  /**
+   * 消息类型
+   */
   private int messageType;
 
   @Nonnull
   private String payload = "";
 
+  /**
+   * 消息类型枚举
+   */
   public enum Type {
     /**
      * 客户端注册

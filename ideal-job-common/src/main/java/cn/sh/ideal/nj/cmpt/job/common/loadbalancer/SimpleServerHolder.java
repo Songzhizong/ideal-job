@@ -13,10 +13,12 @@ public class SimpleServerHolder implements LbServerHolder {
   /**
    * 所有服务列表
    */
+  @Nonnull
   private List<LbServer> allServers = new ArrayList<>();
   /**
    * 可用服务映射, instanceId -> LbServer
    */
+  @Nonnull
   private final ConcurrentMap<String, LbServer> reachableServerMap = new ConcurrentHashMap<>();
   /**
    * 心跳检测间隔
@@ -39,7 +41,9 @@ public class SimpleServerHolder implements LbServerHolder {
           // 如果服务之前未注册则直接添加到服务列表
           allServers.add(newServer);
         } else {
-          // 服务已注册, 将原有的替换成新的
+          // 服务已注册, 将原有的替换成新的并销毁原对象
+          LbServer server = allServers.get(integer);
+          server.destroy();
           allServers.set(integer, newServer);
         }
         if (reachable) {
@@ -64,7 +68,7 @@ public class SimpleServerHolder implements LbServerHolder {
     final String instanceId = server.getInstanceId();
     reachableServerMap.remove(instanceId);
     synchronized (this) {
-      List<LbServer> newAllServers = new ArrayList<>(allServers.size() - 1);
+      List<LbServer> newAllServers = new ArrayList<>(Math.max(allServers.size() - 1, 0));
       for (LbServer lbServer : allServers) {
         if (!instanceId.equals(lbServer.getInstanceId())) {
           newAllServers.add(lbServer);
@@ -94,7 +98,7 @@ public class SimpleServerHolder implements LbServerHolder {
     synchronized (this) {
       for (LbServer server : allServers) {
         String instanceId = server.getInstanceId();
-        boolean available = server.availableBeat();
+        boolean available = server.heartbeat();
         if (available) {
           reachableServerMap.put(instanceId, server);
         } else {

@@ -3,9 +3,11 @@ package cn.sh.ideal.nj.cmpt.job.scheduler.core.socket
 import cn.sh.ideal.nj.cmpt.job.common.loadbalancer.LbFactory
 import cn.sh.ideal.nj.cmpt.job.common.pojo.SocketMessage
 import cn.sh.ideal.nj.cmpt.job.common.utils.JsonUtils
+import cn.sh.ideal.nj.cmpt.job.scheduler.core.conf.JobSchedulerProperties
 import cn.sh.ideal.nj.cmpt.job.scheduler.core.socket.handler.MessageHandlerFactory
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import javax.websocket.*
 import javax.websocket.server.PathParam
@@ -16,11 +18,26 @@ import javax.websocket.server.ServerEndpoint
  * @date 2020/8/20
  */
 @Component
-@ServerEndpoint("/websocket/v1/{appName}/{instanceId}")
-class SocketServer(private val lbFactory: LbFactory) {
-  private val log: Logger = LoggerFactory.getLogger(this.javaClass)
+@ServerEndpoint("/websocket/executor/{appName}/{instanceId}")
+class SocketServer {
+  companion object {
+    private val log: Logger = LoggerFactory.getLogger(SocketServer::class.java)
+    private lateinit var lbFactory: LbFactory
+    private lateinit var properties: JobSchedulerProperties
+  }
 
+  private lateinit var session: Session
   private lateinit var socketExecutor: SocketExecutor
+
+  @Autowired
+  fun setLbFactory(lbFactory: LbFactory) {
+    SocketServer.lbFactory = lbFactory
+  }
+
+  @Autowired
+  fun setJobSchedulerProperties(properties: JobSchedulerProperties) {
+    SocketServer.properties = properties
+  }
 
   /**
    * 建立连接处理
@@ -30,8 +47,11 @@ class SocketServer(private val lbFactory: LbFactory) {
              @PathParam("appName") appName: String,
              @PathParam("instanceId") instanceId: String) {
     val executor = SocketExecutor(appName, instanceId, session)
+    val weightRegisterSeconds = properties.weightRegisterSeconds
+    executor.weightRegisterSeconds = weightRegisterSeconds
+    this.session = session
     this.socketExecutor = executor
-    log.info("app: {}, instanceId: {} 已建立连接", appName, instanceId)
+    log.info("app: {}, instanceId: {}, sessionId: {} 已建立连接", appName, instanceId, session.id)
   }
 
   @OnClose
@@ -40,7 +60,7 @@ class SocketServer(private val lbFactory: LbFactory) {
     val instanceId = socketExecutor.instanceId
     val serverHolder = lbFactory.getServerHolder(appName)
     serverHolder.removeServer(socketExecutor)
-    log.info("app: {}, instanceId: {} 下线", appName, instanceId)
+    log.info("app: {}, instanceId: {}, sessionId: {} 下线", appName, instanceId, session.id)
   }
 
   @OnMessage

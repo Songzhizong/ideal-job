@@ -78,12 +78,7 @@ public class WebSocketRemoteExecutor implements RemoteExecutor {
   }
 
   @Override
-  public boolean isReady() {
-    return true;
-  }
-
-  @Override
-  public boolean availableBeat() {
+  public boolean heartbeat() {
     return false;
   }
 
@@ -95,5 +90,10 @@ public class WebSocketRemoteExecutor implements RemoteExecutor {
   @Override
   public int getWeight() {
     return 1;
+  }
+
+  @Override
+  public void destroy() {
+
   }
 }

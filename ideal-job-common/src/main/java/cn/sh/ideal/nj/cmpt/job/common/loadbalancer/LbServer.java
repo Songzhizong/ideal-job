@@ -16,13 +16,13 @@ public interface LbServer extends Comparable<LbServer> {
   String getInstanceId();
 
   /**
-   * 可用性测试
+   * 心跳检测
    * <pre>
    *   1. LbServerFactory心跳测试
    *   2. 故障转移
    * </pre>
    */
-  boolean availableBeat();
+  boolean heartbeat();
 
   /**
    * 空闲度测试
@@ -50,6 +50,11 @@ public interface LbServer extends Comparable<LbServer> {
     }
     return weight;
   }
+
+  /**
+   * 销毁对象
+   */
+  void destroy();
 
   @Override
   default int compareTo(@Nonnull LbServer o) {

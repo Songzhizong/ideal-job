@@ -48,6 +48,7 @@ final class RegisterMessageHandler(
       }
     }
     executor.weight = registerParam.weight
+    executor.isRegistered = true
     serverHolder.markServerReachable(executor)
   }
 }
