@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>ideal-job-scheduler</artifactId>
-    <groupId>org.example</groupId>
+    <groupId>cn.sh.ideal</groupId>
     <version>1.0.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
@@ -13,20 +13,19 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.example</groupId>
+      <groupId>cn.sh.ideal</groupId>
       <artifactId>ideal-job-scheduler-api</artifactId>
       <version>${ideal-job.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.example</groupId>
+      <groupId>cn.sh.ideal</groupId>
       <artifactId>ideal-job-common</artifactId>
       <version>${ideal-job.version}</version>
     </dependency>
-    <!-- commons-lang3 -->
     <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>${commons-lang3.version}</version>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-kotlin</artifactId>
+      <version>${jackson.version}</version>
     </dependency>
     <!-- commons-pool2 -->
     <dependency>
@@ -43,7 +42,7 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-webflux</artifactId>
-      <version>${spring-webflux.version}</version>
+      <version>${spring-framework.version}</version>
     </dependency>
     <!-- web -->
     <dependency>

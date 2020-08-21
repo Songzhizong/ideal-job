@@ -4,18 +4,16 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <parent>
     <artifactId>ideal-job</artifactId>
-    <groupId>org.example</groupId>
+    <groupId>cn.sh.ideal</groupId>
     <version>1.0.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-
   <artifactId>ideal-job-scheduler</artifactId>
   <packaging>pom</packaging>
+
   <modules>
     <module>ideal-job-scheduler-api</module>
     <module>ideal-job-scheduler-core</module>
     <module>ideal-job-scheduler-server</module>
   </modules>
-
-
 </project>

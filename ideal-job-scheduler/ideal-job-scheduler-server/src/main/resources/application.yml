@@ -27,7 +27,7 @@ spring:
   profiles:
     active: dev
   application:
-    name: CMPT-JOB-SCHEDULER
+    name: JOB-SCHEDULER
   jackson:
     locale: zh_CN
     time-zone: 'GMT+8'
