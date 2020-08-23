@@ -1,14 +1,17 @@
 package cn.sh.ideal.job.executor.spring.boot.starter;
 
+import cn.sh.ideal.job.common.utils.IpUtil;
 import cn.sh.ideal.job.executor.core.IdealJobSpringExecutor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.context.WebServerApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -26,12 +29,15 @@ public class IdealJobBeanConfig {
     this.properties = properties;
   }
 
-  @Value("${spring.application.name}")
+  @Value("${spring.application.name:}")
   private String applicationName;
+
+  @Value("${server.port:-1}")
+  private Integer serverPort;
 
   @Bean
   @Nullable
-  public IdealJobSpringExecutor idealJobSpringExecutor() {
+  public IdealJobSpringExecutor idealJobSpringExecutor(@Nonnull WebServerApplicationContext context) {
     String appName = properties.getAppName();
     if (StringUtils.isBlank(appName)) {
       appName = applicationName;
@@ -39,8 +45,18 @@ public class IdealJobBeanConfig {
     final String accessToken = properties.getAccessToken();
     final int weight = properties.getWeight();
     final String schedulerAddresses = properties.getSchedulerAddresses();
-    final String ip = properties.getIp();
-    final int port = properties.getPort();
+    String ip = properties.getIp();
+    if (StringUtils.isBlank(ip)) {
+      ip = IpUtil.getIp();
+    }
+    int port = properties.getPort();
+    if (port < 1) {
+      if (serverPort == null || serverPort < 1) {
+        port = context.getWebServer().getPort();
+      } else {
+        port = serverPort;
+      }
+    }
     final long connectTimeOut = properties.getConnectTimeOut().toMillis();
     final long writeTimeOut = properties.getWriteTimeOut().toMillis();
     final long readTimeOut = properties.getReadTimeOut().toMillis();

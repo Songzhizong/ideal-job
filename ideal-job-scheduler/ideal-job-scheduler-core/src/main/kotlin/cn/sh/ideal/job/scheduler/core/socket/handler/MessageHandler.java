@@ -1,6 +1,7 @@
 package cn.sh.ideal.job.scheduler.core.socket.handler;
 
-import cn.sh.ideal.job.scheduler.core.socket.SocketExecutor;
+import cn.sh.ideal.job.common.message.SocketMessage;
+import cn.sh.ideal.job.scheduler.core.socket.SocketJobExecutor;
 
 import javax.annotation.Nonnull;
 
@@ -12,5 +13,9 @@ import javax.annotation.Nonnull;
  */
 public interface MessageHandler {
 
-  void execute(@Nonnull SocketExecutor executor, @Nonnull String messagePayload);
+  /**
+   * 处理请求消息
+   */
+  void execute(@Nonnull SocketJobExecutor executor,
+               @Nonnull SocketMessage socketMessage);
 }

@@ -1,6 +1,6 @@
 package cn.sh.ideal.job.scheduler.core.socket.handler;
 
-import cn.sh.ideal.job.common.pojo.SocketMessage;
+import cn.sh.ideal.job.common.message.MessageType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -12,15 +12,15 @@ import java.util.Map;
  * @date 2020/8/20
  */
 public final class MessageHandlerFactory {
-  private static final Map<SocketMessage.Type, MessageHandler> handlerMapper = new HashMap<>();
+  private static final Map<MessageType, MessageHandler> handlerMapper = new HashMap<>();
 
-  public static void register(@Nonnull SocketMessage.Type type,
+  public static void register(@Nonnull MessageType type,
                               @Nonnull MessageHandler handler) {
     handlerMapper.put(type, handler);
   }
 
   @Nullable
-  public static MessageHandler getHandler(@Nonnull SocketMessage.Type type) {
+  public static MessageHandler getHandler(@Nonnull MessageType type) {
     return handlerMapper.get(type);
   }
 }

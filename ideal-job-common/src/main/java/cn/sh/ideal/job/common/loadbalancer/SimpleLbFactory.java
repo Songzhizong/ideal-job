@@ -4,8 +4,10 @@ import cn.sh.ideal.job.common.loadbalancer.strategy.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 
 /**
  * @author 宋志宗
@@ -14,6 +16,7 @@ import java.util.concurrent.ConcurrentMap;
 public class SimpleLbFactory implements LbFactory {
   private final ConcurrentMap<String, LbServerHolder> serverHolderMap = new ConcurrentHashMap<>();
   private final ConcurrentMap<String, LoadBalancer> loadBalancerMap = new ConcurrentHashMap<>();
+  private volatile boolean destroyed;
 
   @Nullable
   @Override
@@ -33,8 +36,24 @@ public class SimpleLbFactory implements LbFactory {
   }
 
   @Override
-  public LbServerHolder getServerHolder(@Nonnull String serverName) {
-    return serverHolderMap.computeIfAbsent(serverName, (k) -> new SimpleServerHolder());
+  public LbServerHolder getServerHolder(@Nonnull String serverName,
+                                        @Nullable Function<String, LbServerHolder> function) {
+    if (function == null) {
+      return serverHolderMap.computeIfAbsent(serverName, (k) -> new SimpleServerHolder());
+    } else {
+      return serverHolderMap.computeIfAbsent(serverName, function);
+    }
+  }
+
+  @Override
+  public void destroy() {
+    if (!destroyed) {
+      destroyed = true;
+      Collection<LbServerHolder> serverHolders = serverHolderMap.values();
+      for (LbServerHolder serverHolder : serverHolders) {
+        serverHolder.destroy();
+      }
+    }
   }
 
   @SuppressWarnings("DuplicateBranchesInSwitch")

@@ -1,5 +1,7 @@
 package cn.sh.ideal.job.common.loadbalancer;
 
+import cn.sh.ideal.job.common.Destroyable;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -7,7 +9,7 @@ import javax.annotation.Nullable;
  * @author 宋志宗
  * @date 2020/8/19
  */
-public interface LbServer extends Comparable<LbServer> {
+public interface LbServer extends Destroyable, Comparable<LbServer> {
 
   /**
    * @return 唯一ID
@@ -50,11 +52,6 @@ public interface LbServer extends Comparable<LbServer> {
     }
     return weight;
   }
-
-  /**
-   * 销毁对象
-   */
-  void destroy();
 
   @Override
   default int compareTo(@Nonnull LbServer o) {

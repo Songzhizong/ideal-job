@@ -1,7 +1,10 @@
 package cn.sh.ideal.job.common.loadbalancer;
 
+import cn.sh.ideal.job.common.Destroyable;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.function.Function;
 
 /**
  * 负载均衡器工厂
@@ -9,7 +12,7 @@ import javax.annotation.Nullable;
  * @author 宋志宗
  * @date 2020/8/20
  */
-public interface LbFactory {
+public interface LbFactory extends Destroyable {
 
   /**
    * 选取一个server, 默认为轮询策略
@@ -63,13 +66,27 @@ public interface LbFactory {
   LoadBalancer getLoadBalancer(@Nonnull String serverName,
                                @Nonnull LbStrategyEnum strategy);
 
+
   /**
-   * 获取服务持有者
+   * 获取服务持有者, 如果不存在会自动创建一个新的
    *
    * @param serverName 服务名称
    * @return LbServerFactory
    * @author 宋志宗
    * @date 2020/8/20 10:27 上午
    */
-  LbServerHolder getServerHolder(@Nonnull String serverName);
+  default LbServerHolder getServerHolder(@Nonnull String serverName) {
+    return getServerHolder(serverName, null);
+  }
+
+  /**
+   * 获取服务持有者, 如果不存在则会使用指定值
+   *
+   * @param serverName 服务名称
+   * @return LbServerFactory
+   * @author 宋志宗
+   * @date 2020/8/20 10:27 上午
+   */
+  LbServerHolder getServerHolder(@Nonnull String serverName,
+                                 @Nullable Function<String, LbServerHolder> function);
 }

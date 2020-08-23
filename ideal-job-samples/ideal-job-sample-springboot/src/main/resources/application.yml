@@ -1,0 +1,18 @@
+server:
+  port: 8081
+logging:
+  config: classpath:logback-spring-dev.xml
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    name: JOB-EXECUTOR
+  jackson:
+    locale: zh_CN
+    time-zone: 'GMT+8'
+    date-format: yyyy-MM-dd HH:mm:ss
+    default-property-inclusion: non_null
+ideal:
+  job:
+    access-token: 'dfjakflkj;lj'
+    scheduler-addresses: ws://127.0.0.1:8804

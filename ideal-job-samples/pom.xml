@@ -8,13 +8,10 @@
     <version>1.0.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-
-  <artifactId>ideal-job-executor</artifactId>
+  <artifactId>ideal-job-samples</artifactId>
   <packaging>pom</packaging>
+
   <modules>
-    <module>ideal-job-executor-core</module>
-    <module>ideal-job-executor-springboot-starter</module>
+    <module>ideal-job-sample-springboot</module>
   </modules>
-
-
 </project>

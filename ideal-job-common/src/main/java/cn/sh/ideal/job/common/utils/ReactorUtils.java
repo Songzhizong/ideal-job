@@ -5,6 +5,7 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import reactor.netty.http.client.HttpClient;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -13,6 +14,7 @@ import java.util.concurrent.TimeUnit;
  */
 public final class ReactorUtils {
 
+  @Nonnull
   public static HttpClient createHttpClient(int connectTimeOut,
                                             long writeTimeOut,
                                             long readTimeOut) {
@@ -22,11 +24,13 @@ public final class ReactorUtils {
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .doOnConnected(connection -> {
-                  connection
-                      .addHandlerLast(
-                          new WriteTimeoutHandler(writeTimeOut, TimeUnit.MILLISECONDS))
-                      .addHandlerLast(
-                          new ReadTimeoutHandler(readTimeOut, TimeUnit.MILLISECONDS));
-                }));
+                      connection
+                          .addHandlerLast(
+                              new WriteTimeoutHandler(writeTimeOut, TimeUnit.MILLISECONDS))
+                          .addHandlerLast(
+                              new ReadTimeoutHandler(readTimeOut, TimeUnit.MILLISECONDS));
+                    }
+                )
+        );
   }
 }

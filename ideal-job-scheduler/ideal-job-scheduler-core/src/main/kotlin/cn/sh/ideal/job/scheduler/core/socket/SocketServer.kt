@@ -1,8 +1,8 @@
 package cn.sh.ideal.job.scheduler.core.socket
 
 import cn.sh.ideal.job.common.loadbalancer.LbFactory
-import cn.sh.ideal.job.common.pojo.SocketMessage
-import cn.sh.ideal.job.common.utils.JsonUtils
+import cn.sh.ideal.job.common.message.MessageType
+import cn.sh.ideal.job.common.message.SocketMessage
 import cn.sh.ideal.job.scheduler.core.conf.JobSchedulerProperties
 import cn.sh.ideal.job.scheduler.core.socket.handler.MessageHandlerFactory
 import org.slf4j.Logger
@@ -27,7 +27,7 @@ class SocketServer {
   }
 
   private lateinit var session: Session
-  private lateinit var socketExecutor: SocketExecutor
+  private lateinit var socketExecutor: SocketJobExecutor
 
   @Autowired
   fun setLbFactory(lbFactory: LbFactory) {
@@ -46,9 +46,9 @@ class SocketServer {
   fun onOpen(session: Session,
              @PathParam("appName") appName: String,
              @PathParam("instanceId") instanceId: String) {
-    val executor = SocketExecutor(appName, instanceId, session)
+    val executor = SocketJobExecutor(appName, instanceId, session)
     val weightRegisterSeconds = properties.weightRegisterSeconds
-    executor.weightRegisterSeconds = weightRegisterSeconds
+    executor.setWeightRegisterSeconds(weightRegisterSeconds)
     this.session = session
     this.socketExecutor = executor
     log.info("app: {}, instanceId: {}, sessionId: {} 已建立连接",
@@ -69,24 +69,23 @@ class SocketServer {
   fun onMessage(message: String) {
     log.debug("接收到客户端消息: {}", message)
     val socketMessage = try {
-      JsonUtils.parseJson(message, SocketMessage::class.java)
+      SocketMessage.parseMessage(message)
     } catch (e: Exception) {
-      log.info("客户端消息解析出现异常: {}", e.message)
+      log.warn("客户端消息解析出现异常: {}", e.message)
       return
     }
     val messageType = socketMessage.messageType
-    val payload = socketMessage.payload
-    val type = SocketMessage.Type.valueOfCode(messageType)
+    val type = MessageType.valueOfCode(messageType)
     if (type == null) {
       log.warn("未知的消息类型: {}", messageType)
       return
     }
     val handler = MessageHandlerFactory.getHandler(type)
     if (handler == null) {
-      log.error("messageType: {} 缺少处理器", type.name)
+      log.error("messageType: {} 缺少处理器", messageType)
       return
     }
-    handler.execute(socketExecutor, payload)
+    handler.execute(socketExecutor, socketMessage)
   }
 
   @OnError
