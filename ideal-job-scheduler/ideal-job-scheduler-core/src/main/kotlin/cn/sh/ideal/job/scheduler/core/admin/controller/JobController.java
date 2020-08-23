@@ -1,6 +1,6 @@
-package cn.sh.ideal.job.scheduler.core.controller;
+package cn.sh.ideal.job.scheduler.core.admin.controller;
 
-import cn.sh.ideal.job.scheduler.core.service.JobService;
+import cn.sh.ideal.job.scheduler.core.admin.service.JobService;
 import cn.sh.ideal.job.common.res.Res;
 import cn.sh.ideal.job.scheduler.api.client.JobApi;
 import org.springframework.validation.annotation.Validated;

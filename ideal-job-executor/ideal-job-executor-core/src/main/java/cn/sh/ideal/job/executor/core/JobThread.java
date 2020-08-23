@@ -1,6 +1,5 @@
 package cn.sh.ideal.job.executor.core;
 
-import cn.sh.ideal.job.common.Destroyable;
 import cn.sh.ideal.job.common.constants.BlockStrategyEnum;
 import cn.sh.ideal.job.common.constants.HandleStatusEnum;
 import cn.sh.ideal.job.common.executor.RemoteJobExecutor;
@@ -12,21 +11,26 @@ import cn.sh.ideal.job.common.message.payload.IdleBeatCallback;
 import cn.sh.ideal.job.executor.core.handler.IJobHandler;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
+ * 任务线程
+ *
  * @author 宋志宗
  * @date 2020/8/22
  */
-public class JobThread extends Thread implements Destroyable {
+public final class JobThread extends Thread {
   private static final Logger log = LoggerFactory.getLogger(JobThread.class);
+  private static final long autoIdleBeatNoticeTime = 10 * 1000;
+  private static final int jobQueueSize = 1000;
+  @SuppressWarnings("PointlessArithmeticExpression")
+  private static final long autoDestroyMills = 1 * 60 * 60 * 1000;
 
   @Getter
   @Nonnull
@@ -35,21 +39,36 @@ public class JobThread extends Thread implements Destroyable {
   @Nonnull
   private final IJobHandler jobHandler;
   private final BlockingQueue<ExecuteJobParam> jobQueue;
-  private volatile boolean threadRunning = false;
+  private final ExecutorService idleBeatPool;
+
+  private volatile boolean start = false;
   private volatile boolean jobRunning = false;
   private volatile boolean destroyed = false;
+  /**
+   * 标识当前线程的丢弃状态, 如果为true, 当现有的任务全部执行完成就销毁此线程
+   */
   @Setter
   private volatile boolean deprecated = false;
   @Setter
   private volatile boolean idleBeat = false;
+  private volatile long lastIdleBeatNoticeTime = 0;
+  private volatile long lastExecuteTime = System.currentTimeMillis();
 
   public JobThread(@Nonnull String jobId, @Nonnull IJobHandler jobHandler) {
     this.jobId = jobId;
     this.jobHandler = jobHandler;
-    jobQueue = new ArrayBlockingQueue<>(100);
+    jobQueue = new ArrayBlockingQueue<>(jobQueueSize);
+    idleBeatPool = new ThreadPoolExecutor(0, 1,
+        60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1),
+        runnable -> new Thread(runnable, "idle-beat-pool-" + jobId + "-" + runnable.hashCode()),
+        new ThreadPoolExecutor.DiscardPolicy());
   }
 
   public void addJob(@Nonnull ExecuteJobParam param) {
+    if (!start || destroyed) {
+      log.error("JobThread已被丢弃, 但仍然收到添加任务请求, jobId: {}", jobId);
+      return;
+    }
     int strategy = param.getBlockStrategy();
     if (strategy == BlockStrategyEnum.DISCARD_LATER.getCode()) {
       // 丢弃后续调度
@@ -64,18 +83,22 @@ public class JobThread extends Thread implements Destroyable {
 
   @Override
   public void run() {
-    if (threadRunning) {
+    if (start) {
       // 防止无必要的重复调用
       return;
     }
-    threadRunning = true;
+    start = true;
     try {
       jobHandler.init();
     } catch (Exception exception) {
       String errMsg = exception.getClass().getName() + ":" + exception.getMessage();
       log.error("Handler init exception: {}", errMsg);
     }
-    while (threadRunning) {
+    while (start) {
+      long currentTimeMillis = System.currentTimeMillis();
+      if (currentTimeMillis - lastIdleBeatNoticeTime > autoIdleBeatNoticeTime) {
+        idleBeatNotice();
+      }
       jobRunning = false;
       ExecuteJobParam jobParam;
       ExecuteJobCallback callback = null;
@@ -85,8 +108,13 @@ public class JobThread extends Thread implements Destroyable {
         jobParam = jobQueue.poll(3L, TimeUnit.SECONDS);
         if (jobParam == null) {
           if (deprecated) {
-            destroy();
+            // 任务已经全部执行完成, 销毁此线程
+            shutdown();
             return;
+          }
+          if (currentTimeMillis - lastExecuteTime > autoDestroyMills) {
+            log.info("任务线程空闲时间超时, 注销此任务线程, jobId: {}", jobId);
+            JobThreadFactory.remove(this);
           }
           continue;
         }
@@ -94,7 +122,6 @@ public class JobThread extends Thread implements Destroyable {
         log.info("poll jobParam throw InterruptedException: {}", e.getMessage());
         continue;
       }
-
       jobRunning = true;
       long triggerId = jobParam.getTriggerId();
       String executorParams = jobParam.getExecutorParams();
@@ -120,9 +147,16 @@ public class JobThread extends Thread implements Destroyable {
         log.info("exception: {}", errMsg);
       }
 
-      executeTime = System.currentTimeMillis();
+      lastExecuteTime = currentTimeMillis;
+      executeTime = currentTimeMillis;
       try {
-        jobHandler.execute(executorParams);
+        Object execute = jobHandler.execute(executorParams);
+        if (execute != null && callback != null) {
+          String handleMessage = execute.toString();
+          if (StringUtils.isNotBlank(handleMessage)) {
+            callback.setHandleMessage(handleMessage);
+          }
+        }
       } catch (Exception e) {
         String errMsg = e.getClass().getSimpleName() + ":" + e.getMessage();
         log.info("Job execute exception: {}", errMsg);
@@ -136,16 +170,15 @@ public class JobThread extends Thread implements Destroyable {
           int handleStatus = callback.getHandleStatus();
           if (handleStatus == -1) {
             callback.setHandleStatus(HandleStatusEnum.COMPLETE.getCode());
-            callback.setHandleMessage("success");
           }
-          callback.setTimeConsuming(System.currentTimeMillis() - executeTime);
+          if (StringUtils.isNotBlank(callback.getHandleMessage())) {
+            callback.setHandleMessage("Success");
+          }
+          callback.setTimeConsuming(currentTimeMillis - executeTime);
           executor.executeJobCallback(callback);
         }
-        if (idleBeat) {
-          idleBeatNotice();
-        }
+        idleBeatNotice();
       }
-
     }
 
     try {
@@ -157,28 +190,40 @@ public class JobThread extends Thread implements Destroyable {
   }
 
   private void idleBeatNotice() {
-    int queueSize = jobQueue.size();
-    IdleBeatCallback idleBeatCallback = new IdleBeatCallback();
-    idleBeatCallback.setJobId(jobId);
-    if (jobRunning) {
-      idleBeatCallback.setIdleLevel(queueSize + 1);
-    } else {
-      idleBeatCallback.setIdleLevel(queueSize);
-    }
-    LbServerHolder serverHolder = JobExecutor.getServerHolder();
-    List<LbServer> reachableServers = serverHolder.getReachableServers();
-    for (LbServer server : reachableServers) {
-
+    // 如果任务线程被丢弃了, 就没必要发送空闲状态通知了
+    if (!deprecated && idleBeat) {
+      idleBeatPool.submit(() -> {
+        IdleBeatCallback idleBeatCallback = new IdleBeatCallback();
+        idleBeatCallback.setJobId(jobId);
+        idleBeatCallback.setIdleLevel(getJobCount());
+        LbServerHolder serverHolder = JobExecutor.getServerHolder();
+        List<LbServer> reachableServers = serverHolder.getReachableServers();
+        for (LbServer server : reachableServers) {
+          RemoteJobExecutor executor = (RemoteJobExecutor) server;
+          executor.idleBeatCallback(idleBeatCallback);
+        }
+        lastIdleBeatNoticeTime = System.currentTimeMillis();
+      });
     }
   }
 
-  @SuppressWarnings("deprecation")
-  @Override
-  public void destroy() {
+  public int getJobCount() {
+    int queueSize = jobQueue.size();
+    if (jobRunning) {
+      return queueSize + 1;
+    } else {
+      return queueSize;
+    }
+  }
+
+
+  public void shutdown() {
     if (destroyed) {
       return;
     }
     destroyed = true;
-    threadRunning = false;
+    start = false;
+    idleBeatPool.shutdown();
+    this.interrupt();
   }
 }

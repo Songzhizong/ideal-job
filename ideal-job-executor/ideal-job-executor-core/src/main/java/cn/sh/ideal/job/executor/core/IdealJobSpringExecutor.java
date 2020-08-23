@@ -21,7 +21,7 @@ import java.util.Map;
  * @author 宋志宗
  * @date 2020/8/21
  */
-public class IdealJobSpringExecutor extends JobExecutor
+public final class IdealJobSpringExecutor extends JobExecutor
     implements ApplicationContextAware, SmartInitializingSingleton {
   private static final Logger log = LoggerFactory.getLogger(IdealJobSpringExecutor.class);
   private static ApplicationContext applicationContext;

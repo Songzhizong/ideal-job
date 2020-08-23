@@ -251,20 +251,17 @@ public final class WebSocketRemoteJobExecutor extends Thread implements RemoteJo
 
   @Override
   public boolean heartbeat() {
-    // todo 对服务端进行心跳检测
-    return true;
+    return running && !destroyed;
   }
 
   @Override
   public int idleBeat(@Nullable Object key) {
-    // todo 对服务端进行空闲状态测试
     return 0;
   }
 
   @Override
   public int getWeight() {
-    // todo 获取服务端权重
-    return weight;
+    return 1;
   }
 
   @SuppressWarnings("deprecation")

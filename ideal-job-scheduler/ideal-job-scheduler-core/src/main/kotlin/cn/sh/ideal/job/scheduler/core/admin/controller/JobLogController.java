@@ -1,4 +1,4 @@
-package cn.sh.ideal.job.scheduler.core.controller;
+package cn.sh.ideal.job.scheduler.core.admin.controller;
 
 /**
  * @author 宋志宗

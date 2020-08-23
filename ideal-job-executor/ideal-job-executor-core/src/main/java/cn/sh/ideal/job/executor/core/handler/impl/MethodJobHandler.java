@@ -31,12 +31,13 @@ public class MethodJobHandler implements IJobHandler {
     this.destroyMethod = destroyMethod;
   }
 
+  @Nullable
   @Override
-  public void execute(@Nonnull String param) throws Exception {
+  public Object execute(@Nonnull String param) throws Exception {
     if (hasParam) {
-      method.invoke(target, param);
+      return method.invoke(target, param);
     } else {
-      method.invoke(target);
+      return method.invoke(target);
     }
   }
 

@@ -1,4 +1,4 @@
-package cn.sh.ideal.job.scheduler.core.entity;
+package cn.sh.ideal.job.scheduler.core.admin.entity;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SQLDelete;

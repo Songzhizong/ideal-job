@@ -1,6 +1,6 @@
-package cn.sh.ideal.job.scheduler.core.repository
+package cn.sh.ideal.job.scheduler.core.admin.repository
 
-import cn.sh.ideal.job.scheduler.core.entity.JobExecutor
+import cn.sh.ideal.job.scheduler.core.admin.entity.JobExecutor
 import org.springframework.data.jpa.repository.JpaRepository
 
 /**

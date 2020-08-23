@@ -1,4 +1,4 @@
-package cn.sh.ideal.job.scheduler.core.service
+package cn.sh.ideal.job.scheduler.core.admin.service
 
 import org.springframework.stereotype.Service
 

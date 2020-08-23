@@ -1,6 +1,7 @@
 package cn.sh.ideal.job.executor.core.handler;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * @author 宋志宗
@@ -8,7 +9,8 @@ import javax.annotation.Nonnull;
  */
 public interface IJobHandler {
 
-  void execute(@Nonnull String param) throws Exception;
+  @Nullable
+  Object execute(@Nonnull String param) throws Exception;
 
   default void init() throws Exception {
     // do something

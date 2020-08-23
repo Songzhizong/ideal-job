@@ -23,7 +23,7 @@ public final class JobThreadFactory {
   }
 
   public static void remove(@Nonnull JobThread jobThread) {
-    jobThread.destroy();
+    jobThread.shutdown();
     String jobId = jobThread.getJobId();
     JOB_THREAD_MAP.remove(jobId);
   }
