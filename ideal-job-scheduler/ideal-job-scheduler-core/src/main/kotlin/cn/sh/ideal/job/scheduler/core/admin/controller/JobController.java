@@ -45,7 +45,6 @@ public class JobController implements JobApi {
   @Override
   @PostMapping("/trigger")
   public Res<Void> trigger(@Nonnull Long jobId, @Nullable String executorParam) {
-    jobService.trigger(jobId, executorParam);
-    return Res.success();
+    return jobService.trigger(jobId, executorParam);
   }
 }

@@ -194,4 +194,9 @@ public class SocketJobExecutor implements JobExecutor {
       }
     }
   }
+
+  @Override
+  public boolean isDestroyed() {
+    return destroyed;
+  }
 }

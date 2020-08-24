@@ -41,11 +41,20 @@ public class SimpleLbFactory<Server extends LbServer> implements LbFactory<Serve
   public LbServerHolder<Server> getServerHolder(
       @Nonnull String serverName,
       @Nullable Function<String, LbServerHolder<Server>> function) {
+    LbServerHolder<Server> serverHolder;
     if (function == null) {
-      return serverHolderMap.computeIfAbsent(serverName, (k) -> new SimpleServerHolder<>());
+      serverHolder = serverHolderMap.computeIfAbsent(serverName, (k) -> new SimpleServerHolder<>(serverName));
     } else {
-      return serverHolderMap.computeIfAbsent(serverName, function);
+      serverHolder = serverHolderMap.computeIfAbsent(serverName, function);
     }
+//    if (serverHolder.isDestroyed()) {
+//      synchronized (serverName) {
+//        if (serverHolder.isDestroyed()) {
+//          serverHolder.recover();
+//        }
+//      }
+//    }
+    return serverHolder;
   }
 
   @Override
@@ -57,6 +66,11 @@ public class SimpleLbFactory<Server extends LbServer> implements LbFactory<Serve
         serverHolder.destroy();
       }
     }
+  }
+
+  @Override
+  public boolean isDestroyed() {
+    return destroyed;
   }
 
   @SuppressWarnings("DuplicateBranchesInSwitch")

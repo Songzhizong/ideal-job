@@ -1,5 +1,6 @@
 package cn.sh.ideal.job.common.loadbalancer;
 
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,10 +14,12 @@ import java.util.concurrent.*;
  */
 public class SimpleServerHolder<Server extends LbServer> implements LbServerHolder<Server> {
   private static final Logger log = LoggerFactory.getLogger(SimpleServerHolder.class);
-  private final ExecutorService executorService;
+  @Getter
+  private final String serverName;
+  private final ExecutorService heartbeatPool;
   private final BlockingQueue<Boolean> refreshReachableServersQueue
       = new ArrayBlockingQueue<>(1);
-
+  private volatile int cycleStrategy = 0;
   /**
    * 所有服务列表
    */
@@ -29,12 +32,19 @@ public class SimpleServerHolder<Server extends LbServer> implements LbServerHold
   private List<Server> reachableServers = Collections.emptyList();
   private volatile boolean destroyed;
 
-  public SimpleServerHolder(int heartbeatIntervalSeconds) {
-    int processors = Runtime.getRuntime().availableProcessors();
-    executorService = new ThreadPoolExecutor(1, processors,
-        60, TimeUnit.SECONDS, new SynchronousQueue<>(),
+
+  public SimpleServerHolder(@Nonnull String serverName) {
+    this(serverName, 10);
+  }
+
+  public SimpleServerHolder(@Nonnull String serverName, int heartbeatIntervalSeconds) {
+    this.serverName = serverName;
+    // 最多两个线程同时进行心跳测试
+    heartbeatPool = new ThreadPoolExecutor(0, 2,
+        60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1),
         r -> new Thread(r, "SimpleServerHolder-pool-" + r.hashCode()),
-        new ThreadPoolExecutor.CallerRunsPolicy());
+        new ThreadPoolExecutor.DiscardOldestPolicy());
+
     new Thread(() -> {
       while (!destroyed) {
         try {
@@ -42,7 +52,7 @@ public class SimpleServerHolder<Server extends LbServer> implements LbServerHold
         } catch (InterruptedException e) {
           e.printStackTrace();
         }
-        executorService.submit(this::heartbeat);
+        heartbeatPool.execute(this::heartbeat);
       }
     }).start();
 
@@ -51,6 +61,7 @@ public class SimpleServerHolder<Server extends LbServer> implements LbServerHold
         try {
           Boolean poll = refreshReachableServersQueue.poll(5, TimeUnit.SECONDS);
           if (poll != null) {
+            log.info("可用服务列表发生变化, 更新数据...");
             List<Server> lbServers = new ArrayList<>(reachableServerMap.values());
             reachableServers = Collections.unmodifiableList(lbServers);
           }
@@ -59,10 +70,6 @@ public class SimpleServerHolder<Server extends LbServer> implements LbServerHold
         }
       }
     }).start();
-  }
-
-  public SimpleServerHolder() {
-    this(10);
   }
 
   @Override
@@ -96,34 +103,28 @@ public class SimpleServerHolder<Server extends LbServer> implements LbServerHold
 
   @Override
   public void markServerReachable(@Nonnull Server server) {
-    synchronized (this) {
-      reachableServerMap.put(server.getInstanceId(), server);
-      refreshReachableServers();
-    }
+    reachableServerMap.put(server.getInstanceId(), server);
+    refreshReachableServers();
   }
 
   @Override
   public void markServerDown(@Nonnull Server server) {
-    synchronized (this) {
-      reachableServerMap.remove(server.getInstanceId());
-      refreshReachableServers();
-    }
+    reachableServerMap.remove(server.getInstanceId());
+    refreshReachableServers();
   }
 
   @Override
-  public void removeServer(@Nonnull Server server) {
+  public synchronized void removeServer(@Nonnull Server server) {
     final String instanceId = server.getInstanceId();
     reachableServerMap.remove(instanceId);
-    synchronized (this) {
-      List<Server> newAllServers = new ArrayList<>(allServers.size());
-      for (Server lbServer : allServers) {
-        if (!instanceId.equals(lbServer.getInstanceId())) {
-          newAllServers.add(lbServer);
-        }
+    List<Server> newAllServers = new ArrayList<>(allServers.size());
+    for (Server lbServer : allServers) {
+      if (!instanceId.equals(lbServer.getInstanceId())) {
+        newAllServers.add(lbServer);
       }
-      this.allServers = newAllServers;
-      refreshReachableServers();
     }
+    this.allServers = newAllServers;
+    refreshReachableServers();
   }
 
   @Nonnull
@@ -135,33 +136,71 @@ public class SimpleServerHolder<Server extends LbServer> implements LbServerHold
   @Nonnull
   @Override
   public List<Server> getAllServers() {
-    return new ArrayList<>(allServers);
+    if (allServers.size() > 0) {
+      return Collections.unmodifiableList(new ArrayList<>(allServers));
+    } else {
+      return Collections.emptyList();
+    }
   }
 
   /**
    * 可用性检测
    */
+  @SuppressWarnings("DuplicatedCode")
   private void heartbeat() {
-    synchronized (this) {
-      for (Server server : allServers) {
-        String instanceId = server.getInstanceId();
-        boolean available;
-        try {
-          available = server.heartbeat();
-        } catch (Exception e) {
-          String message = e.getClass().getSimpleName() + ":" + e.getMessage();
-          log.info("server: {} heartbeat exception: {}", instanceId, message);
-          available = false;
+    synchronized (serverName) {
+      cycleStrategy = cycleStrategy ^ 1;
+      int size = allServers.size();
+      int up = 0;
+      int down = 0;
+      if (cycleStrategy == 0) {
+        for (Server server : allServers) {
+          String instanceId = server.getInstanceId();
+          boolean available;
+          try {
+            available = server.heartbeat();
+          } catch (Exception e) {
+            String message = e.getClass().getSimpleName() + ":" + e.getMessage();
+            log.info("server: {} heartbeat exception: {}", instanceId, message);
+            available = false;
+          }
+          boolean containsInstance = reachableServerMap.containsKey(instanceId);
+          if (available && !containsInstance) {
+            up++;
+            reachableServerMap.put(instanceId, server);
+            refreshReachableServers();
+          } else if (!available && containsInstance) {
+            down++;
+            reachableServerMap.remove(instanceId);
+            refreshReachableServers();
+          }
         }
-        boolean containsInstance = reachableServerMap.containsKey(instanceId);
-        if (available && !containsInstance) {
-          reachableServerMap.put(instanceId, server);
-          refreshReachableServers();
-        } else if (!available && containsInstance) {
-          reachableServerMap.remove(instanceId);
-          refreshReachableServers();
+      } else {
+        for (int i = size - 1; i >= 0; i--) {
+          Server server = allServers.get(i);
+          String instanceId = server.getInstanceId();
+          boolean available;
+          try {
+            available = server.heartbeat();
+          } catch (Exception e) {
+            String message = e.getClass().getSimpleName() + ":" + e.getMessage();
+            log.info("server: {} heartbeat exception: {}", instanceId, message);
+            available = false;
+          }
+          boolean containsInstance = reachableServerMap.containsKey(instanceId);
+          if (available && !containsInstance) {
+            up++;
+            reachableServerMap.put(instanceId, server);
+            refreshReachableServers();
+          } else if (!available && containsInstance) {
+            down++;
+            reachableServerMap.remove(instanceId);
+            refreshReachableServers();
+          }
         }
       }
+      log.debug("对 {} 服务列表执行心跳检测, 当前总服务数: {}, 新标记可达服务数: {}, 不可达服务数: {}, 当前可达服务总数: {}",
+          serverName, size, up, down, reachableServerMap.size());
     }
   }
 
@@ -169,8 +208,13 @@ public class SimpleServerHolder<Server extends LbServer> implements LbServerHold
   public void destroy() {
     if (!destroyed) {
       destroyed = true;
-      executorService.shutdown();
+      heartbeatPool.shutdown();
     }
+  }
+
+  @Override
+  public boolean isDestroyed() {
+    return destroyed;
   }
 
   private void refreshReachableServers() {

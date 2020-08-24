@@ -3,9 +3,12 @@ package cn.sh.ideal.job.scheduler.core.trigger
 import cn.sh.ideal.job.common.executor.JobExecutor
 import cn.sh.ideal.job.common.loadbalancer.LbFactory
 import cn.sh.ideal.job.common.message.payload.ExecuteJobParam
+import cn.sh.ideal.job.common.res.Res
 import cn.sh.ideal.job.scheduler.core.admin.entity.JobTriggerLog
 import cn.sh.ideal.job.scheduler.core.admin.service.JobTriggerLogService
 import org.apache.commons.lang3.StringUtils
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 /**
@@ -15,11 +18,12 @@ import org.springframework.stereotype.Component
 @Component
 class JobTrigger(private val lbFactory: LbFactory<JobExecutor>,
                  private val triggerLogService: JobTriggerLogService) {
+  val log: Logger = LoggerFactory.getLogger(this.javaClass)
 
   /**
    * 触发任务
    */
-  fun trigger(triggerParam: TriggerParam) {
+  fun trigger(triggerParam: TriggerParam): Res<Void> {
     var trigger = true
     val messageList = ArrayList<String>()
 
@@ -30,12 +34,14 @@ class JobTrigger(private val lbFactory: LbFactory<JobExecutor>,
     if (StringUtils.isBlank(executorAppName)) {
       trigger = false
       messageList.add("执行器应用名称为空")
+      log.info("任务: {} 的执行器应用名称为空", jobId)
     }
     val routeStrategy = triggerParam.routeStrategy
     val executorHandler = triggerParam.executorHandler
     if (StringUtils.isBlank(executorHandler)) {
       trigger = false
       messageList.add("执行处理器为空")
+      log.info("任务: {} 的执行处理器为空", jobId)
     }
     val executorParam = triggerParam.executorParam
     val blockStrategy = triggerParam.blockStrategy
@@ -45,14 +51,16 @@ class JobTrigger(private val lbFactory: LbFactory<JobExecutor>,
     val reachableServers = serverHolder.reachableServers
     val chooseServer = if (reachableServers.isEmpty()) {
       trigger = false
-      messageList.add("没有可用的执行器实例")
+      messageList.add("$executorAppName 没有可用的执行器实例")
+      log.info("执行器: {} 当前没有可用的实例", executorAppName)
       null
     } else {
       val loadBalancer = lbFactory.getLoadBalancer(executorAppName, routeStrategy)
       val chooseServer = loadBalancer.chooseServer(jobId, serverHolder)
       if (chooseServer == null) {
         trigger = false
-        messageList.add("选取的执行器实例为空")
+        messageList.add("$executorAppName 选取的执行器实例为空")
+        log.info("执行器: {} 选取实例为空", executorAppName)
       }
       chooseServer
     }
@@ -74,12 +82,15 @@ class JobTrigger(private val lbFactory: LbFactory<JobExecutor>,
     log.executorParam = executorParam
     // log.executorShardingParam
     log.retryCount = retryCount
-    if (trigger) {
+    val res = if (trigger) {
       log.triggerCode = JobTriggerLog.TRIGGER_CODE_SUCCESS
       log.triggerMsg = "success"
-    } else if (messageList.isNotEmpty()) {
+      Res.success<Void>()
+    } else {
       log.triggerCode = JobTriggerLog.TRIGGER_CODE_FAIL
-      log.triggerMsg = "调度失败: " + messageList.joinToString(",")
+      val triggerMessage = "调度失败: " + messageList.joinToString(",")
+      log.triggerMsg = triggerMessage
+      Res.err(triggerMessage)
     }
     triggerLogService.saveLog(log)
     val triggerId = log.triggerId
@@ -97,5 +108,6 @@ class JobTrigger(private val lbFactory: LbFactory<JobExecutor>,
         // 出现异常则调度失败, 需要对调度日志进行调整
       }
     }
+    return res
   }
 }

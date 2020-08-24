@@ -264,6 +264,7 @@ public final class WebSocketRemoteJobExecutor extends Thread implements RemoteJo
     return 1;
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public void destroy() {
     if (destroyed) {

@@ -65,7 +65,7 @@ public final class JobThread extends Thread {
   }
 
   public void addJob(@Nonnull ExecuteJobParam param) {
-    if (!start || destroyed) {
+    if (destroyed) {
       log.error("JobThread已被丢弃, 但仍然收到添加任务请求, jobId: {}", jobId);
       return;
     }
@@ -101,7 +101,7 @@ public final class JobThread extends Thread {
       }
       jobRunning = false;
       ExecuteJobParam jobParam;
-      ExecuteJobCallback callback = null;
+      ExecuteJobCallback endCallback = null;
       RemoteJobExecutor executor = null;
       long executeTime;
       try {
@@ -131,16 +131,19 @@ public final class JobThread extends Thread {
         if (executor == null) {
           log.warn("当前没有可用的RemoteJobExecutor");
         } else {
-          callback = new ExecuteJobCallback();
-          callback.setJobId(jobId);
-          callback.setTriggerId(triggerId);
-
           // 任务开始执行, 发送回调消息
           ExecuteJobCallback runningCallback = new ExecuteJobCallback();
+          runningCallback.initSequence();
           runningCallback.setJobId(jobId);
           runningCallback.setTriggerId(triggerId);
           runningCallback.setHandleStatus(HandleStatusEnum.RUNNING.getCode());
           executor.executeJobCallback(runningCallback);
+
+          // 任务结束回调的序列必须后一步生成, 只有这样才能保证结束回调的序列大于启动回调的序列值
+          endCallback = new ExecuteJobCallback();
+          endCallback.initSequence();
+          endCallback.setJobId(jobId);
+          endCallback.setTriggerId(triggerId);
         }
       } catch (Exception exception) {
         String errMsg = exception.getClass().getSimpleName() + ":" + exception.getMessage();
@@ -151,31 +154,31 @@ public final class JobThread extends Thread {
       executeTime = currentTimeMillis;
       try {
         Object execute = jobHandler.execute(executorParams);
-        if (execute != null && callback != null) {
+        if (execute != null && endCallback != null) {
           String handleMessage = execute.toString();
           if (StringUtils.isNotBlank(handleMessage)) {
-            callback.setHandleMessage(handleMessage);
+            endCallback.setHandleMessage(handleMessage);
           }
         }
       } catch (Exception e) {
         String errMsg = e.getClass().getSimpleName() + ":" + e.getMessage();
         log.info("Job execute exception: {}", errMsg);
-        if (callback != null) {
-          callback.setHandleStatus(HandleStatusEnum.ABNORMAL.getCode());
-          callback.setHandleMessage(errMsg);
+        if (endCallback != null) {
+          endCallback.setHandleStatus(HandleStatusEnum.ABNORMAL.getCode());
+          endCallback.setHandleMessage(errMsg);
         }
       } finally {
         jobRunning = false;
-        if (executor != null && callback != null) {
-          int handleStatus = callback.getHandleStatus();
+        if (executor != null && endCallback != null) {
+          int handleStatus = endCallback.getHandleStatus();
           if (handleStatus == -1) {
-            callback.setHandleStatus(HandleStatusEnum.COMPLETE.getCode());
+            endCallback.setHandleStatus(HandleStatusEnum.COMPLETE.getCode());
           }
-          if (StringUtils.isNotBlank(callback.getHandleMessage())) {
-            callback.setHandleMessage("Success");
+          if (StringUtils.isNotBlank(endCallback.getHandleMessage())) {
+            endCallback.setHandleMessage("Success");
           }
-          callback.setTimeConsuming(currentTimeMillis - executeTime);
-          executor.executeJobCallback(callback);
+          endCallback.setTimeConsuming(currentTimeMillis - executeTime);
+          executor.executeJobCallback(endCallback);
         }
         idleBeatNotice();
       }
