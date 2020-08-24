@@ -23,7 +23,7 @@ public class TriggerParam {
    * 触发类型
    */
   @Nonnull
-  private TriggerTypeEnum triggerType;
+  private TriggerTypeEnum triggerType = TriggerTypeEnum.MANUAL;
   /**
    * 执行器应用名称
    */

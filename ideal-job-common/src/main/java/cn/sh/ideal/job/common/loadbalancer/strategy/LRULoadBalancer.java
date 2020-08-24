@@ -16,7 +16,7 @@ import java.util.concurrent.ConcurrentMap;
  * @author 宋志宗
  * @date 2020/8/19
  */
-public class LRULoadBalancer implements LoadBalancer {
+public class LRULoadBalancer<Server extends LbServer> implements LoadBalancer<Server> {
 
   private final ConcurrentMap<String, Long> defaultLruMap = new ConcurrentHashMap<>();
   private final ConcurrentMap<Object, ConcurrentMap<String, Long>> multiLruMap
@@ -24,8 +24,9 @@ public class LRULoadBalancer implements LoadBalancer {
 
   @Override
   @Nullable
-  public LbServer chooseServer(@Nullable Object key, @Nonnull LbServerHolder serverHolder) {
-    List<LbServer> reachableServers = serverHolder.getReachableServers();
+  public Server chooseServer(@Nullable Object key,
+                             @Nonnull LbServerHolder<Server> serverHolder) {
+    List<Server> reachableServers = serverHolder.getReachableServers();
     if (reachableServers.isEmpty()) {
       return null;
     }
@@ -35,13 +36,13 @@ public class LRULoadBalancer implements LoadBalancer {
     }
 
     final long currentTimeMillis = System.currentTimeMillis();
-    LbServer selected = null;
+    Server selected = null;
     Long maxDifference = null;
     ConcurrentMap<String, Long> lruMap = defaultLruMap;
     if (key != null) {
       multiLruMap.computeIfAbsent(key, (k) -> new ConcurrentHashMap<>());
     }
-    for (LbServer server : reachableServers) {
+    for (Server server : reachableServers) {
       final String instanceId = server.getInstanceId();
       final Long lastSelectTime = lruMap.putIfAbsent(instanceId, 0L);
       assert lastSelectTime != null;

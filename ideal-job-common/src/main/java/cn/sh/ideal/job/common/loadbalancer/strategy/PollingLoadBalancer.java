@@ -18,14 +18,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author 宋志宗
  * @date 2020/8/19
  */
-public class PollingLoadBalancer implements LoadBalancer {
-  private final AtomicInteger defaultCounter = new AtomicInteger(ThreadLocalRandom.current().nextInt(100));
+public class PollingLoadBalancer<Server extends LbServer> implements LoadBalancer<Server> {
+  private final AtomicInteger defaultCounter
+      = new AtomicInteger(ThreadLocalRandom.current().nextInt(100));
   private final ConcurrentMap<Object, AtomicInteger> counterMap = new ConcurrentHashMap<>();
 
   @Override
   @Nullable
-  public LbServer chooseServer(@Nullable Object key, @Nonnull LbServerHolder serverHolder) {
-    List<LbServer> reachableServers = serverHolder.getReachableServers();
+  public Server chooseServer(@Nullable Object key,
+                             @Nonnull LbServerHolder<Server> serverHolder) {
+    List<Server> reachableServers = serverHolder.getReachableServers();
     if (reachableServers.isEmpty()) {
       return null;
     }

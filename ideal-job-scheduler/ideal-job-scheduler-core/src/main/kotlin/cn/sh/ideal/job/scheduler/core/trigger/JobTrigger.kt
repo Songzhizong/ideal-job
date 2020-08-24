@@ -1,6 +1,8 @@
 package cn.sh.ideal.job.scheduler.core.trigger
 
+import cn.sh.ideal.job.common.executor.JobExecutor
 import cn.sh.ideal.job.common.loadbalancer.LbFactory
+import cn.sh.ideal.job.common.message.payload.ExecuteJobParam
 import cn.sh.ideal.job.scheduler.core.admin.entity.JobTriggerLog
 import cn.sh.ideal.job.scheduler.core.admin.service.JobTriggerLogService
 import org.apache.commons.lang3.StringUtils
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Component
  * @date 2020/8/23
  */
 @Component
-class JobTrigger(private val lbFactory: LbFactory,
+class JobTrigger(private val lbFactory: LbFactory<JobExecutor>,
                  private val triggerLogService: JobTriggerLogService) {
 
   /**
@@ -80,7 +82,20 @@ class JobTrigger(private val lbFactory: LbFactory,
       log.triggerMsg = "调度失败: " + messageList.joinToString(",")
     }
     triggerLogService.saveLog(log)
+    val triggerId = log.triggerId
+
     if (trigger) {
+      val jobParam = ExecuteJobParam()
+      jobParam.jobId = jobId.toString()
+      jobParam.triggerId = triggerId
+      jobParam.executorHandler = executorHandler
+      jobParam.executorParams = executorParam
+      jobParam.blockStrategy = blockStrategy.code
+      try {
+        chooseServer!!.executeJob(jobParam)
+      } catch (e: Exception) {
+        // 出现异常则调度失败, 需要对调度日志进行调整
+      }
     }
   }
 }

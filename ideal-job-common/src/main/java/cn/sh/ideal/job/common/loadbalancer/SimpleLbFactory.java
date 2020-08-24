@@ -13,33 +13,36 @@ import java.util.function.Function;
  * @author 宋志宗
  * @date 2020/8/20
  */
-public class SimpleLbFactory implements LbFactory {
-  private final ConcurrentMap<String, LbServerHolder> serverHolderMap = new ConcurrentHashMap<>();
-  private final ConcurrentMap<String, LoadBalancer> loadBalancerMap = new ConcurrentHashMap<>();
+public class SimpleLbFactory<Server extends LbServer> implements LbFactory<Server> {
+  private final ConcurrentMap<String, LbServerHolder<Server>> serverHolderMap
+      = new ConcurrentHashMap<>();
+  private final ConcurrentMap<String, LoadBalancer<Server>> loadBalancerMap
+      = new ConcurrentHashMap<>();
   private volatile boolean destroyed;
 
   @Nullable
   @Override
-  public LbServer chooseServer(@Nonnull String serverName,
-                               @Nonnull LbStrategyEnum strategy,
-                               @Nullable Object key) {
-    final LoadBalancer loadBalancer = getLoadBalancer(serverName, strategy);
-    final LbServerHolder serverHolder = getServerHolder(serverName);
+  public Server chooseServer(@Nonnull String serverName,
+                             @Nonnull LbStrategyEnum strategy,
+                             @Nullable Object key) {
+    final LoadBalancer<Server> loadBalancer = getLoadBalancer(serverName, strategy);
+    final LbServerHolder<Server> serverHolder = getServerHolder(serverName);
     return loadBalancer.chooseServer(key, serverHolder);
   }
 
   @Override
-  public LoadBalancer getLoadBalancer(@Nonnull String serverName,
-                                      @Nonnull LbStrategyEnum strategy) {
+  public LoadBalancer<Server> getLoadBalancer(@Nonnull String serverName,
+                                              @Nonnull LbStrategyEnum strategy) {
     String key = serverName + "-" + strategy.getName();
     return loadBalancerMap.computeIfAbsent(key, (k) -> newLoadBalancer(strategy));
   }
 
   @Override
-  public LbServerHolder getServerHolder(@Nonnull String serverName,
-                                        @Nullable Function<String, LbServerHolder> function) {
+  public LbServerHolder<Server> getServerHolder(
+      @Nonnull String serverName,
+      @Nullable Function<String, LbServerHolder<Server>> function) {
     if (function == null) {
-      return serverHolderMap.computeIfAbsent(serverName, (k) -> new SimpleServerHolder());
+      return serverHolderMap.computeIfAbsent(serverName, (k) -> new SimpleServerHolder<>());
     } else {
       return serverHolderMap.computeIfAbsent(serverName, function);
     }
@@ -49,45 +52,45 @@ public class SimpleLbFactory implements LbFactory {
   public void destroy() {
     if (!destroyed) {
       destroyed = true;
-      Collection<LbServerHolder> serverHolders = serverHolderMap.values();
-      for (LbServerHolder serverHolder : serverHolders) {
+      Collection<LbServerHolder<Server>> serverHolders = serverHolderMap.values();
+      for (LbServerHolder<Server> serverHolder : serverHolders) {
         serverHolder.destroy();
       }
     }
   }
 
   @SuppressWarnings("DuplicateBranchesInSwitch")
-  private LoadBalancer newLoadBalancer(@Nonnull LbStrategyEnum strategy) {
+  private LoadBalancer<Server> newLoadBalancer(@Nonnull LbStrategyEnum strategy) {
     switch (strategy) {
       case BUSY_TRANSFER: {
-        return new BusyTransferLoadBalancer();
+        return new BusyTransferLoadBalancer<>();
       }
       case CONSISTENT_HASH: {
-        return new ConsistentHashLoadBalancer();
+        return new ConsistentHashLoadBalancer<>();
       }
       case FAIL_TRANSFER: {
-        return new FailTransferLoadBalancer();
+        return new FailTransferLoadBalancer<>();
       }
       case LFU: {
-        return new LFULoadBalancer();
+        return new LFULoadBalancer<>();
       }
       case LRU: {
-        return new LRULoadBalancer();
+        return new LRULoadBalancer<>();
       }
       case POLLING: {
-        return new PollingLoadBalancer();
+        return new PollingLoadBalancer<>();
       }
       case RANDOM: {
-        return new RandomLoadBalancer();
+        return new RandomLoadBalancer<>();
       }
       case WEIGHTED_POLLING: {
-        return new WeightedPollingLoadBalancer();
+        return new WeightedPollingLoadBalancer<>();
       }
       case WEIGHTED_RANDOM: {
-        return new WeightedRandomLoadBalancer();
+        return new WeightedRandomLoadBalancer<>();
       }
       default: {
-        return new PollingLoadBalancer();
+        return new PollingLoadBalancer<>();
       }
     }
   }

@@ -21,7 +21,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author 宋志宗
  * @date 2020/8/19
  */
-public class ConsistentHashLoadBalancer implements LoadBalancer {
+public class ConsistentHashLoadBalancer<Server extends LbServer> implements LoadBalancer<Server> {
 
 
   private static long hash(@Nonnull Object key) {
@@ -53,9 +53,10 @@ public class ConsistentHashLoadBalancer implements LoadBalancer {
    */
   @Override
   @Nullable
-  public LbServer chooseServer(@Nullable Object key, @Nonnull LbServerHolder serverHolder) {
+  public Server chooseServer(@Nullable Object key,
+                             @Nonnull LbServerHolder<Server> serverHolder) {
     final int virtualNodeNum = 100;
-    List<LbServer> reachableServers = serverHolder.getReachableServers();
+    List<Server> reachableServers = serverHolder.getReachableServers();
     if (reachableServers.isEmpty()) {
       return null;
     }
@@ -67,8 +68,8 @@ public class ConsistentHashLoadBalancer implements LoadBalancer {
       int random = ThreadLocalRandom.current().nextInt(size);
       return reachableServers.get(random);
     }
-    TreeMap<Long, LbServer> addressRing = new TreeMap<>();
-    for (LbServer server : reachableServers) {
+    TreeMap<Long, Server> addressRing = new TreeMap<>();
+    for (Server server : reachableServers) {
       final String instanceId = server.getInstanceId();
       for (int i = 0; i < virtualNodeNum; i++) {
         long addressHash = hash("SHARD-" + instanceId + "-NODE-" + i);
@@ -76,7 +77,7 @@ public class ConsistentHashLoadBalancer implements LoadBalancer {
       }
     }
     long keyHash = hash(String.valueOf(key));
-    SortedMap<Long, LbServer> lastRing = addressRing.tailMap(keyHash);
+    SortedMap<Long, Server> lastRing = addressRing.tailMap(keyHash);
     if (lastRing.isEmpty()) {
       return addressRing.firstEntry().getValue();
     }

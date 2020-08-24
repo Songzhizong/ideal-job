@@ -2,6 +2,7 @@ package cn.sh.ideal.job.scheduler.core.socket;
 
 import cn.sh.ideal.job.common.executor.JobExecutor;
 import cn.sh.ideal.job.common.message.HeartbeatMessage;
+import cn.sh.ideal.job.common.message.MessageType;
 import cn.sh.ideal.job.common.message.SocketMessage;
 import cn.sh.ideal.job.common.message.payload.ExecuteJobParam;
 import cn.sh.ideal.job.common.message.payload.IdleBeatParam;
@@ -124,6 +125,11 @@ public class SocketJobExecutor implements JobExecutor {
    */
   @Override
   public void executeJob(@Nonnull ExecuteJobParam param) {
+    final String paramString = param.toMessageString();
+    final String executeJobCode = MessageType.EXECUTE_JOB.getCode();
+    final SocketMessage message = new SocketMessage(executeJobCode, paramString);
+    final String messageString = message.toMessageString();
+    sendMessage(messageString);
   }
 
   @Nonnull

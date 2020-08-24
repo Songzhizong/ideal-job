@@ -14,12 +14,13 @@ import java.util.List;
  * @author 宋志宗
  * @date 2020/8/19
  */
-public class FailTransferLoadBalancer implements LoadBalancer {
+public class FailTransferLoadBalancer<Server extends LbServer> implements LoadBalancer<Server> {
 
   @Override
   @Nullable
-  public LbServer chooseServer(@Nullable Object key, @Nonnull LbServerHolder serverHolder) {
-    List<LbServer> reachableServers = serverHolder.getReachableServers();
+  public Server chooseServer(@Nullable Object key,
+                             @Nonnull LbServerHolder<Server> serverHolder) {
+    List<Server> reachableServers = serverHolder.getReachableServers();
     if (reachableServers.isEmpty()) {
       return null;
     }
@@ -27,7 +28,7 @@ public class FailTransferLoadBalancer implements LoadBalancer {
     if (size == 1) {
       return reachableServers.get(0);
     }
-    for (LbServer reachableServer : reachableServers) {
+    for (Server reachableServer : reachableServers) {
       boolean available = reachableServer.heartbeat();
       if (available) {
         return reachableServer;

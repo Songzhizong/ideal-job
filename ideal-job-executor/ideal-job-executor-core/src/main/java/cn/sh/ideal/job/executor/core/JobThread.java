@@ -196,8 +196,8 @@ public final class JobThread extends Thread {
         IdleBeatCallback idleBeatCallback = new IdleBeatCallback();
         idleBeatCallback.setJobId(jobId);
         idleBeatCallback.setIdleLevel(getJobCount());
-        LbServerHolder serverHolder = JobExecutor.getServerHolder();
-        List<LbServer> reachableServers = serverHolder.getReachableServers();
+        LbServerHolder<RemoteJobExecutor> serverHolder = JobExecutor.getServerHolder();
+        List<RemoteJobExecutor> reachableServers = serverHolder.getReachableServers();
         for (LbServer server : reachableServers) {
           RemoteJobExecutor executor = (RemoteJobExecutor) server;
           executor.idleBeatCallback(idleBeatCallback);

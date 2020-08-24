@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author 宋志宗
  * @date 2020/8/19
  */
-public class WeightedPollingLoadBalancer implements LoadBalancer {
+public class WeightedPollingLoadBalancer<Server extends LbServer> implements LoadBalancer<Server> {
   /**
    * <pre>
    *  后端目前的权重，一开始为 0 ~ weight 之间的随机数，之后会动态调整
@@ -35,8 +35,9 @@ public class WeightedPollingLoadBalancer implements LoadBalancer {
 
   @Override
   @Nullable
-  public LbServer chooseServer(@Nullable Object key, @Nonnull LbServerHolder serverHolder) {
-    List<LbServer> reachableServers = serverHolder.getReachableServers();
+  public Server chooseServer(@Nullable Object key,
+                             @Nonnull LbServerHolder<Server> serverHolder) {
+    List<Server> reachableServers = serverHolder.getReachableServers();
     if (reachableServers.isEmpty()) {
       return null;
     }
@@ -51,8 +52,8 @@ public class WeightedPollingLoadBalancer implements LoadBalancer {
           .computeIfAbsent(key, (k) -> new ConcurrentHashMap<>());
     }
     int total = 0;
-    LbServer selected = null;
-    for (LbServer server : reachableServers) {
+    Server selected = null;
+    for (Server server : reachableServers) {
       final String instanceId = server.getInstanceId();
       final int weight = server.checkAndGetWeight();
       total += weight;

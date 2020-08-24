@@ -8,7 +8,7 @@ import javax.annotation.Nonnull;
  */
 public enum TriggerTypeEnum {
   MANUAL(1, "手动"),
-  CRON(2, "手动"),
+  CRON(2, "CRON"),
   ;
   private final int code;
   @Nonnull

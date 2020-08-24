@@ -28,7 +28,7 @@ import java.util.*;
 public class JobExecutor implements Destroyable {
   private static final Logger log = LoggerFactory.getLogger(JobExecutor.class);
   private static final String SCHEDULER_SERVER_NAME = "ideal-job-scheduler";
-  private static final LbFactory lbFactory = new SimpleLbFactory();
+  private static final LbFactory<RemoteJobExecutor> lbFactory = new SimpleLbFactory<>();
   private String accessToken;
   private int weight;
   private String schedulerAddresses;
@@ -63,7 +63,7 @@ public class JobExecutor implements Destroyable {
 
   private void initRemoteExecutors() {
     final String[] addresses = StringUtils.split(schedulerAddresses, ",");
-    List<WebSocketRemoteJobExecutor> remoteExecutors = new ArrayList<>();
+    List<RemoteJobExecutor> remoteExecutors = new ArrayList<>();
     for (String address : addresses) {
       final WebSocketRemoteJobExecutor executor = new WebSocketRemoteJobExecutor();
       executor.setSchedulerAddress(address);
@@ -78,24 +78,24 @@ public class JobExecutor implements Destroyable {
       executor.start();
       remoteExecutors.add(executor);
     }
-    LbServerHolder holder = getServerHolder();
+    LbServerHolder<RemoteJobExecutor> holder = getServerHolder();
     holder.addServers(remoteExecutors, true);
   }
 
   // ---------------------------------- static ~ ~ ~
-  public static LbServerHolder getServerHolder() {
+  public static LbServerHolder<RemoteJobExecutor> getServerHolder() {
     return lbFactory.getServerHolder(SCHEDULER_SERVER_NAME);
   }
 
-  public static LoadBalancer getLoadBalancer() {
+  public static LoadBalancer<RemoteJobExecutor> getLoadBalancer() {
     return lbFactory.getLoadBalancer(SCHEDULER_SERVER_NAME);
   }
 
   @Nullable
   public static RemoteJobExecutor chooseRemoteJobExecutor() {
-    LbServerHolder serverHolder = getServerHolder();
-    LoadBalancer loadBalancer = getLoadBalancer();
-    return (RemoteJobExecutor) loadBalancer.chooseServer(null, serverHolder);
+    LbServerHolder<RemoteJobExecutor> serverHolder = getServerHolder();
+    LoadBalancer<RemoteJobExecutor> loadBalancer = getLoadBalancer();
+    return loadBalancer.chooseServer(null, serverHolder);
   }
 
   public static void executeJob(@Nonnull ExecuteJobParam param) {

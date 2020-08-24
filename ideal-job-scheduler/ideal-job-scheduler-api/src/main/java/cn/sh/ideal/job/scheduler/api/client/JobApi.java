@@ -38,7 +38,7 @@ public interface JobApi {
    * 触发任务
    *
    * @param jobId         任务id
-   * @param executorParam 执行参数
+   * @param executorParam 执行参数, 为<code>null</code>空则使用任务默认配置
    * @return 执行结果
    * @author 宋志宗
    * @date 2020/8/20 4:18 下午

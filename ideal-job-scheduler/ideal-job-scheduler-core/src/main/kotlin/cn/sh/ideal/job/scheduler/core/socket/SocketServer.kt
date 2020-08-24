@@ -1,5 +1,6 @@
 package cn.sh.ideal.job.scheduler.core.socket
 
+import cn.sh.ideal.job.common.executor.JobExecutor
 import cn.sh.ideal.job.common.loadbalancer.LbFactory
 import cn.sh.ideal.job.common.message.MessageType
 import cn.sh.ideal.job.common.message.SocketMessage
@@ -22,7 +23,7 @@ import javax.websocket.server.ServerEndpoint
 class SocketServer {
   companion object {
     private val log: Logger = LoggerFactory.getLogger(SocketServer::class.java)
-    private lateinit var lbFactory: LbFactory
+    private lateinit var lbFactory: LbFactory<JobExecutor>
     private lateinit var properties: JobSchedulerProperties
   }
 
@@ -30,7 +31,7 @@ class SocketServer {
   private lateinit var socketExecutor: SocketJobExecutor
 
   @Autowired
-  fun setLbFactory(lbFactory: LbFactory) {
+  fun setLbFactory(lbFactory: LbFactory<JobExecutor>) {
     Companion.lbFactory = lbFactory
   }
 

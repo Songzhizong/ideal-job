@@ -11,7 +11,7 @@ import java.util.List;
  * @author 宋志宗
  * @date 2020/8/19
  */
-public interface LbServerHolder extends Destroyable {
+public interface LbServerHolder<Server extends LbServer> extends Destroyable {
 
   /**
    * 添加一组服务
@@ -20,7 +20,7 @@ public interface LbServerHolder extends Destroyable {
    * @author 宋志宗
    * @date 2020/8/19 23:40
    */
-  void addServers(@Nonnull List<? extends LbServer> newServers, boolean reachable);
+  void addServers(@Nonnull List<Server> newServers, boolean reachable);
 
   /**
    * 将服务标记为可达
@@ -29,7 +29,7 @@ public interface LbServerHolder extends Destroyable {
    * @author 宋志宗
    * @date 2020/8/19 23:40
    */
-  void markServerReachable(@Nonnull LbServer server);
+  void markServerReachable(@Nonnull Server server);
 
   /**
    * 将服务标记为不可达
@@ -38,7 +38,7 @@ public interface LbServerHolder extends Destroyable {
    * @author 宋志宗
    * @date 2020/8/19 23:40
    */
-  void markServerDown(@Nonnull LbServer server);
+  void markServerDown(@Nonnull Server server);
 
   /**
    * 将服务标记为不可达
@@ -47,7 +47,7 @@ public interface LbServerHolder extends Destroyable {
    * @author 宋志宗
    * @date 2020/8/19 23:40
    */
-  void removeServer(@Nonnull LbServer server);
+  void removeServer(@Nonnull Server server);
 
   /**
    * 获取所有可达的服务
@@ -57,7 +57,7 @@ public interface LbServerHolder extends Destroyable {
    * @date 2020/8/19 23:40
    */
   @Nonnull
-  List<LbServer> getReachableServers();
+  List<Server> getReachableServers();
 
   /**
    * 获取所有服务
@@ -67,5 +67,5 @@ public interface LbServerHolder extends Destroyable {
    * @date 2020/8/19 23:40
    */
   @Nonnull
-  List<LbServer> getAllServers();
+  List<Server> getAllServers();
 }

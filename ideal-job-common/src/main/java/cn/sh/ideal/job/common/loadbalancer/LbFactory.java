@@ -12,7 +12,7 @@ import java.util.function.Function;
  * @author 宋志宗
  * @date 2020/8/20
  */
-public interface LbFactory extends Destroyable {
+public interface LbFactory<Server extends LbServer> extends Destroyable {
 
   /**
    * 选取一个server, 默认为轮询策略
@@ -23,8 +23,8 @@ public interface LbFactory extends Destroyable {
    * @date 2020/8/20 9:59 上午
    */
   @Nullable
-  default LbServer chooseServer(@Nonnull String serverName,
-                                @Nullable Object key) {
+  default Server chooseServer(@Nonnull String serverName,
+                              @Nullable Object key) {
     return chooseServer(serverName, LbStrategyEnum.POLLING, key);
   }
 
@@ -38,9 +38,9 @@ public interface LbFactory extends Destroyable {
    * @date 2020/8/20 9:59 上午
    */
   @Nullable
-  LbServer chooseServer(@Nonnull String serverName,
-                        @Nonnull LbStrategyEnum strategy,
-                        @Nullable Object key);
+  Server chooseServer(@Nonnull String serverName,
+                      @Nonnull LbStrategyEnum strategy,
+                      @Nullable Object key);
 
   /**
    * 获取负载均衡器, 默认为轮询策略
@@ -50,7 +50,7 @@ public interface LbFactory extends Destroyable {
    * @author 宋志宗
    * @date 2020/8/20 9:50 上午
    */
-  default LoadBalancer getLoadBalancer(@Nonnull String serverName) {
+  default LoadBalancer<Server> getLoadBalancer(@Nonnull String serverName) {
     return getLoadBalancer(serverName, LbStrategyEnum.POLLING);
   }
 
@@ -63,8 +63,8 @@ public interface LbFactory extends Destroyable {
    * @author 宋志宗
    * @date 2020/8/20 9:50 上午
    */
-  LoadBalancer getLoadBalancer(@Nonnull String serverName,
-                               @Nonnull LbStrategyEnum strategy);
+  LoadBalancer<Server> getLoadBalancer(@Nonnull String serverName,
+                                       @Nonnull LbStrategyEnum strategy);
 
 
   /**
@@ -75,7 +75,7 @@ public interface LbFactory extends Destroyable {
    * @author 宋志宗
    * @date 2020/8/20 10:27 上午
    */
-  default LbServerHolder getServerHolder(@Nonnull String serverName) {
+  default LbServerHolder<Server> getServerHolder(@Nonnull String serverName) {
     return getServerHolder(serverName, null);
   }
 
@@ -87,6 +87,7 @@ public interface LbFactory extends Destroyable {
    * @author 宋志宗
    * @date 2020/8/20 10:27 上午
    */
-  LbServerHolder getServerHolder(@Nonnull String serverName,
-                                 @Nullable Function<String, LbServerHolder> function);
+  LbServerHolder<Server> getServerHolder(
+      @Nonnull String serverName,
+      @Nullable Function<String, LbServerHolder<Server>> function);
 }

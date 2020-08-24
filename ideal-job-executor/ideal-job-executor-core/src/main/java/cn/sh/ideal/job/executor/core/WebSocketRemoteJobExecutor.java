@@ -264,7 +264,6 @@ public final class WebSocketRemoteJobExecutor extends Thread implements RemoteJo
     return 1;
   }
 
-  @SuppressWarnings("deprecation")
   @Override
   public void destroy() {
     if (destroyed) {
@@ -305,6 +304,5 @@ public final class WebSocketRemoteJobExecutor extends Thread implements RemoteJo
     SocketMessage socketMessage = new SocketMessage(IdleBeatCallback.typeCode, callbackMessage);
     String messageString = socketMessage.toMessageString();
     sendMessage(messageString);
-
   }
 }

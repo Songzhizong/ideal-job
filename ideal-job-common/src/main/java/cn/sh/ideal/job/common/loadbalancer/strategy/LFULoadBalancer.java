@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author 宋志宗
  * @date 2020/8/19
  */
-public class LFULoadBalancer implements LoadBalancer {
+public class LFULoadBalancer<Server extends LbServer> implements LoadBalancer<Server> {
   /**
    * key 为空时使用
    * <p>
@@ -29,8 +29,10 @@ public class LFULoadBalancer implements LoadBalancer {
    * <p>
    * key -> server instanceId -> server 最近选用次数
    */
-  private ConcurrentMap<Object, ConcurrentMap<String, AtomicLong>> multiLfuMap = new ConcurrentHashMap<>();
-  private final ScheduledExecutorService scheduled = Executors.newSingleThreadScheduledExecutor();
+  private ConcurrentMap<Object, ConcurrentMap<String, AtomicLong>> multiLfuMap
+      = new ConcurrentHashMap<>();
+  private final ScheduledExecutorService scheduled
+      = Executors.newSingleThreadScheduledExecutor();
 
   {
     scheduled.scheduleAtFixedRate(() -> {
@@ -41,8 +43,9 @@ public class LFULoadBalancer implements LoadBalancer {
 
   @Override
   @Nullable
-  public LbServer chooseServer(@Nullable Object key, @Nonnull LbServerHolder serverHolder) {
-    List<LbServer> reachableServers = serverHolder.getReachableServers();
+  public Server chooseServer(@Nullable Object key,
+                             @Nonnull LbServerHolder<Server> serverHolder) {
+    List<Server> reachableServers = serverHolder.getReachableServers();
     if (reachableServers.isEmpty()) {
       return null;
     }
@@ -56,10 +59,10 @@ public class LFULoadBalancer implements LoadBalancer {
       lfuMap = multiLfuMap.computeIfAbsent(key, (k) -> new ConcurrentHashMap<>());
     }
 
-    LbServer selected = null;
+    Server selected = null;
     Long minCount = null;
     int bound = size * 10;
-    for (LbServer server : reachableServers) {
+    for (Server server : reachableServers) {
       String instanceId = server.getInstanceId();
       AtomicLong atomicLong = lfuMap.computeIfAbsent(instanceId,
           (k) -> new AtomicLong(ThreadLocalRandom.current().nextLong(bound)));

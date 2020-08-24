@@ -1,5 +1,6 @@
 package cn.sh.ideal.job.scheduler.core.conf;
 
+import cn.sh.ideal.job.common.executor.JobExecutor;
 import cn.sh.ideal.job.common.loadbalancer.LbFactory;
 import cn.sh.ideal.job.common.loadbalancer.SimpleLbFactory;
 import org.springframework.context.annotation.Bean;
@@ -19,7 +20,7 @@ public class JobSchedulerBeanConfig {
   }
 
   @Bean
-  public LbFactory lbFactory() {
-    return new SimpleLbFactory();
+  public LbFactory<JobExecutor> lbFactory() {
+    return new SimpleLbFactory<>();
   }
 }

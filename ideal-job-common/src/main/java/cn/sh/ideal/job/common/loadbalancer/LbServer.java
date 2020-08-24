@@ -48,7 +48,7 @@ public interface LbServer extends Destroyable, Comparable<LbServer> {
   default int checkAndGetWeight() {
     final int weight = getWeight();
     if (weight < 1) {
-      throw new IllegalArgumentException("weight least for 1");
+      throw new IllegalArgumentException("Weight least for 1");
     }
     return weight;
   }

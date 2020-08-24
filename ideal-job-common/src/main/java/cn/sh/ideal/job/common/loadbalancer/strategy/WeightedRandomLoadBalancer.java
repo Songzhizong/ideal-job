@@ -15,12 +15,13 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author 宋志宗
  * @date 2020/8/19
  */
-public class WeightedRandomLoadBalancer implements LoadBalancer {
+public class WeightedRandomLoadBalancer<Server extends LbServer> implements LoadBalancer<Server> {
 
   @Override
   @Nullable
-  public LbServer chooseServer(@Nullable Object key, @Nonnull LbServerHolder serverHolder) {
-    List<LbServer> reachableServers = serverHolder.getReachableServers();
+  public Server chooseServer(@Nullable Object key,
+                             @Nonnull LbServerHolder<Server> serverHolder) {
+    List<Server> reachableServers = serverHolder.getReachableServers();
     if (reachableServers.isEmpty()) {
       return null;
     }
@@ -38,8 +39,8 @@ public class WeightedRandomLoadBalancer implements LoadBalancer {
     }
     int random = ThreadLocalRandom.current().nextInt(1, sum + 1);
     int tmp = 0;
-    LbServer selected = null;
-    for (LbServer server : reachableServers) {
+    Server selected = null;
+    for (Server server : reachableServers) {
       final int weight = server.checkAndGetWeight();
       tmp += weight;
       if (tmp > random) {

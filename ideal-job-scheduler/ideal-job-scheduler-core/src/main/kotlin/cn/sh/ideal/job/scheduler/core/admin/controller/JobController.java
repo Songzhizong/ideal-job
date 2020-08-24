@@ -1,5 +1,6 @@
 package cn.sh.ideal.job.scheduler.core.admin.controller;
 
+import cn.sh.ideal.job.common.constants.DBDefaults;
 import cn.sh.ideal.job.scheduler.core.admin.service.JobService;
 import cn.sh.ideal.job.common.res.Res;
 import cn.sh.ideal.job.scheduler.api.client.JobApi;
@@ -44,6 +45,7 @@ public class JobController implements JobApi {
   @Override
   @PostMapping("/trigger")
   public Res<Void> trigger(@Nonnull Long jobId, @Nullable String executorParam) {
+    jobService.trigger(jobId, executorParam);
     return Res.success();
   }
 }

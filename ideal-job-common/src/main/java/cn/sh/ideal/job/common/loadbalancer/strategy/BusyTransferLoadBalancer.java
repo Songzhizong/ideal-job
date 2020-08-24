@@ -19,7 +19,7 @@ import java.util.List;
  * @author 宋志宗
  * @date 2020/8/19
  */
-public class BusyTransferLoadBalancer implements LoadBalancer {
+public class BusyTransferLoadBalancer<Server extends LbServer> implements LoadBalancer<Server> {
   /**
    * 是否需要选择完全空闲的服务
    */
@@ -37,8 +37,9 @@ public class BusyTransferLoadBalancer implements LoadBalancer {
 
   @Override
   @Nullable
-  public LbServer chooseServer(@Nullable Object key, @Nonnull LbServerHolder serverHolder) {
-    List<LbServer> reachableServers = serverHolder.getReachableServers();
+  public Server chooseServer(@Nullable Object key,
+                             @Nonnull LbServerHolder<Server> serverHolder) {
+    List<Server> reachableServers = serverHolder.getReachableServers();
     if (reachableServers.isEmpty()) {
       return null;
     }
@@ -47,9 +48,9 @@ public class BusyTransferLoadBalancer implements LoadBalancer {
       return reachableServers.get(0);
     }
 
-    LbServer selected = null;
+    Server selected = null;
     Integer minIdleLevel = null;
-    for (LbServer server : reachableServers) {
+    for (Server server : reachableServers) {
       int idleLevel = server.idleBeat(key);
       if (idleLevel < 1) {
         return server;

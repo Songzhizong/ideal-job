@@ -2,14 +2,12 @@ package cn.sh.ideal.job.common.message.payload;
 
 import cn.sh.ideal.job.common.ParseException;
 import cn.sh.ideal.job.common.message.MessageType;
-import cn.sh.ideal.job.common.message.SocketMessage;
 import cn.sh.ideal.job.common.utils.JsonUtils;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.time.LocalDateTime;
 
 /**
  * @author 宋志宗

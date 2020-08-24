@@ -15,12 +15,13 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author 宋志宗
  * @date 2020/8/19
  */
-public class RandomLoadBalancer implements LoadBalancer {
+public class RandomLoadBalancer<Server extends LbServer> implements LoadBalancer<Server> {
 
   @Override
   @Nullable
-  public LbServer chooseServer(@Nullable Object key, @Nonnull LbServerHolder serverHolder) {
-    List<LbServer> reachableServers = serverHolder.getReachableServers();
+  public Server chooseServer(@Nullable Object key,
+                             @Nonnull LbServerHolder<Server> serverHolder) {
+    List<Server> reachableServers = serverHolder.getReachableServers();
     if (reachableServers.isEmpty()) {
       return null;
     }
