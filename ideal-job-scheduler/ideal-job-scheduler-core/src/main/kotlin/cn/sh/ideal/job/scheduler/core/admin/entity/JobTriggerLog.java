@@ -189,7 +189,7 @@ public class JobTriggerLog {
   /**
    * 执行-时间
    */
-  @Column(name = "handle_time")
+  @Column(name = "handle_time", nullable = true)
   @Nullable
   private LocalDateTime handleTime;
 

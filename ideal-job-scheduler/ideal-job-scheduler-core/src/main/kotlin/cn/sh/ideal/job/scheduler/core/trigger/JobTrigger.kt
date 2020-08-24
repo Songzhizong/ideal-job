@@ -2,6 +2,7 @@ package cn.sh.ideal.job.scheduler.core.trigger
 
 import cn.sh.ideal.job.common.loadbalancer.LbFactory
 import cn.sh.ideal.job.scheduler.core.admin.entity.JobTriggerLog
+import cn.sh.ideal.job.scheduler.core.admin.service.JobTriggerLogService
 import org.apache.commons.lang3.StringUtils
 import org.springframework.stereotype.Component
 
@@ -10,8 +11,12 @@ import org.springframework.stereotype.Component
  * @date 2020/8/23
  */
 @Component
-class JobTrigger(private val lbFactory: LbFactory) {
+class JobTrigger(private val lbFactory: LbFactory,
+                 private val triggerLogService: JobTriggerLogService) {
 
+  /**
+   * 触发任务
+   */
   fun trigger(triggerParam: TriggerParam) {
     var trigger = true
     val messageList = ArrayList<String>()
@@ -68,9 +73,14 @@ class JobTrigger(private val lbFactory: LbFactory) {
     // log.executorShardingParam
     log.retryCount = retryCount
     if (trigger) {
+      log.triggerCode = JobTriggerLog.TRIGGER_CODE_SUCCESS
       log.triggerMsg = "success"
     } else if (messageList.isNotEmpty()) {
+      log.triggerCode = JobTriggerLog.TRIGGER_CODE_FAIL
       log.triggerMsg = "调度失败: " + messageList.joinToString(",")
+    }
+    triggerLogService.saveLog(log)
+    if (trigger) {
     }
   }
 }
