@@ -1,7 +1,6 @@
 package cn.sh.ideal.job.common.loadbalancer.strategy;
 
 import cn.sh.ideal.job.common.loadbalancer.LbServer;
-import cn.sh.ideal.job.common.loadbalancer.LbServerHolder;
 import cn.sh.ideal.job.common.loadbalancer.LoadBalancer;
 
 import javax.annotation.Nonnull;
@@ -25,8 +24,7 @@ public class LRULoadBalancer<Server extends LbServer> implements LoadBalancer<Se
   @Override
   @Nullable
   public Server chooseServer(@Nullable Object key,
-                             @Nonnull LbServerHolder<Server> serverHolder) {
-    List<Server> reachableServers = serverHolder.getReachableServers();
+                             @Nonnull List<Server> reachableServers) {
     if (reachableServers.isEmpty()) {
       return null;
     }

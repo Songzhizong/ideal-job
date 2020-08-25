@@ -1,6 +1,7 @@
 package cn.sh.ideal.job.scheduler.core.conf;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
@@ -19,6 +20,9 @@ public class JobSchedulerProperties {
   @Nonnull
   private String accessToken = "";
 
+  @NestedConfigurationProperty
+  private ThreadPoolProperties executeJobCallbackPool = new ThreadPoolProperties();
+
   public int getWeightRegisterSeconds() {
     return weightRegisterSeconds;
   }
@@ -34,5 +38,13 @@ public class JobSchedulerProperties {
 
   public void setAccessToken(@Nonnull String accessToken) {
     this.accessToken = accessToken;
+  }
+
+  public ThreadPoolProperties getExecuteJobCallbackPool() {
+    return executeJobCallbackPool;
+  }
+
+  public void setExecuteJobCallbackPool(ThreadPoolProperties executeJobCallbackPool) {
+    this.executeJobCallbackPool = executeJobCallbackPool;
   }
 }

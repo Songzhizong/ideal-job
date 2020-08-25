@@ -1,7 +1,9 @@
 package cn.sh.ideal.job.scheduler.core.trigger
 
+import cn.sh.ideal.job.common.constants.HandleStatusEnum
 import cn.sh.ideal.job.common.executor.JobExecutor
 import cn.sh.ideal.job.common.loadbalancer.LbFactory
+import cn.sh.ideal.job.common.message.payload.ExecuteJobCallback
 import cn.sh.ideal.job.common.message.payload.ExecuteJobParam
 import cn.sh.ideal.job.common.res.Res
 import cn.sh.ideal.job.scheduler.core.admin.entity.JobTriggerLog
@@ -10,6 +12,9 @@ import org.apache.commons.lang3.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 /**
  * @author 宋志宗
@@ -56,7 +61,7 @@ class JobTrigger(private val lbFactory: LbFactory<JobExecutor>,
       null
     } else {
       val loadBalancer = lbFactory.getLoadBalancer(executorAppName, routeStrategy)
-      val chooseServer = loadBalancer.chooseServer(jobId, serverHolder)
+      val chooseServer = loadBalancer.chooseServer(jobId, reachableServers)
       if (chooseServer == null) {
         trigger = false
         messageList.add("$executorAppName 选取的执行器实例为空")
@@ -109,5 +114,28 @@ class JobTrigger(private val lbFactory: LbFactory<JobExecutor>,
       }
     }
     return res
+  }
+
+  fun triggerCallback(executeJobCallback: ExecuteJobCallback) {
+    val sequence = executeJobCallback.sequence
+//    val jobId = executeJobCallback.jobId
+    val triggerId = executeJobCallback.triggerId
+    val handleStatus = executeJobCallback.handleStatus
+    val handleMessage = executeJobCallback.handleMessage
+    val handleTime = executeJobCallback.handleTime
+//    val timeConsuming = executeJobCallback.timeConsuming
+    val triggerLog = triggerLogService.getLog(triggerId)
+    if (triggerLog == null) {
+      log.warn("调度日志: {} 不存在", triggerId)
+      return
+    }
+    val instant = Instant.ofEpochMilli(handleTime)
+    triggerLog.triggerId = triggerId
+    triggerLog.handleTime = LocalDateTime.ofInstant(instant, ZoneOffset.of("+8"))
+    triggerLog.handleStatus = HandleStatusEnum.valueOfCode(handleStatus)
+    triggerLog.handleMsg = handleMessage
+    triggerLog.handleSequence = sequence
+    triggerLog.updateTime = LocalDateTime.now()
+    triggerLogService.updateWhenTriggerCallback(triggerLog)
   }
 }

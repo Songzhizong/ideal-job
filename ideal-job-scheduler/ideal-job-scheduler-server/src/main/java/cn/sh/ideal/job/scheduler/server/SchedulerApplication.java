@@ -18,8 +18,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableJpaAuditing
 @EnableDiscoveryClient
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = {"cn.sh.ideal"})
-@EntityScan(basePackages = {"cn.sh.ideal"})
+@EnableJpaRepositories(basePackages = {"cn.sh.ideal.job.scheduler.core"})
+@EntityScan(basePackages = {"cn.sh.ideal.job.scheduler.core"})
 @SpringBootApplication(scanBasePackages = "cn.sh.ideal")
 @EnableCaching
 public class SchedulerApplication {

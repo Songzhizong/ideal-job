@@ -66,11 +66,11 @@ public final class ReactorWebSocketRemoteJobExecutor extends Thread implements R
   @Setter
   private String accessToken;
   @Setter
-  private int connectTimeOut = 200;
+  private int connectTimeOutMills = 200;
   @Setter
-  private long writeTimeOut = 200;
+  private long writeTimeOutMills = 200;
   @Setter
-  private long readTimeOut = 20000;
+  private long readTimeOutMills = 120 * 1000;
   private boolean running = false;
   private volatile boolean destroyed = false;
 
@@ -106,7 +106,7 @@ public final class ReactorWebSocketRemoteJobExecutor extends Thread implements R
     String address = schedulerAddress + "/websocket/executor/" +
         appName + "/" + ip + ":" + port;
     final HttpClient httpClient = ReactorUtils
-        .createHttpClient(connectTimeOut, writeTimeOut, readTimeOut);
+        .createHttpClient(connectTimeOutMills, writeTimeOutMills, readTimeOutMills);
     final ReactorNettyWebSocketClient socketClient
         = new ReactorNettyWebSocketClient(httpClient);
     final URI uri;
@@ -174,6 +174,7 @@ public final class ReactorWebSocketRemoteJobExecutor extends Thread implements R
   }
 
   public synchronized void sendMessage(@Nonnull String message) {
+    socketSession.send(Mono.just(socketSession.textMessage(message))).subscribe();
     directProcessor.onNext(message);
   }
 
@@ -247,7 +248,7 @@ public final class ReactorWebSocketRemoteJobExecutor extends Thread implements R
           startSocket();
         }
       } catch (InterruptedException e) {
-        e.printStackTrace();
+        log.debug("{}", e.getMessage());
       }
     }
   }
@@ -265,7 +266,7 @@ public final class ReactorWebSocketRemoteJobExecutor extends Thread implements R
 
   @Override
   public boolean heartbeat() {
-    socketSession.pingMessage(DataBufferFactory::allocateBuffer);
+    socketSession.pingMessage(dataBufferFactory -> dataBufferFactory.allocateBuffer(0));
     return running && !destroyed;
   }
 
@@ -279,6 +280,7 @@ public final class ReactorWebSocketRemoteJobExecutor extends Thread implements R
     return 1;
   }
 
+  @SuppressWarnings({"AliDeprecation", "deprecation", "RedundantSuppression"})
   @Override
   public void destroy() {
     if (destroyed) {

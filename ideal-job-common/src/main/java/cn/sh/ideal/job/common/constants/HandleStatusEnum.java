@@ -13,6 +13,22 @@ public enum HandleStatusEnum {
   ABNORMAL(3, "执行异常"),
   ;
 
+  @SuppressWarnings("DuplicateBranchesInSwitch")
+  public static HandleStatusEnum valueOfCode(int code) {
+    switch (code) {
+      case 0:
+        return WAITING;
+      case 1:
+        return RUNNING;
+      case 2:
+        return COMPLETE;
+      case 3:
+        return ABNORMAL;
+      default:
+        return ABNORMAL;
+    }
+  }
+
   private final int code;
   @Nonnull
   private final String desc;

@@ -1,7 +1,6 @@
 package cn.sh.ideal.job.common.loadbalancer.strategy;
 
 import cn.sh.ideal.job.common.loadbalancer.LbServer;
-import cn.sh.ideal.job.common.loadbalancer.LbServerHolder;
 import cn.sh.ideal.job.common.loadbalancer.LoadBalancer;
 
 import javax.annotation.Nonnull;
@@ -48,15 +47,14 @@ public class ConsistentHashLoadBalancer<Server extends LbServer> implements Load
    * 如果key为null, 则采用随机算法
    *
    * @param key          负载均衡器可以使用该对象来确定返回哪个服务
-   * @param serverHolder 服务工厂, 存储了所有的服务对象
+   * @param reachableServers 可达服务列表
    * @return LbServer
    */
   @Override
   @Nullable
   public Server chooseServer(@Nullable Object key,
-                             @Nonnull LbServerHolder<Server> serverHolder) {
+                             @Nonnull List<Server> reachableServers) {
     final int virtualNodeNum = 100;
-    List<Server> reachableServers = serverHolder.getReachableServers();
     if (reachableServers.isEmpty()) {
       return null;
     }

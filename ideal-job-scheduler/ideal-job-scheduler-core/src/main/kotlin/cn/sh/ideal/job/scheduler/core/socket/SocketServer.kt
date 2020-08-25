@@ -69,7 +69,6 @@ class SocketServer {
 
   @OnMessage
   fun onMessage(message: String) {
-    log.debug("接收到客户端消息: {}", message)
     val socketMessage = try {
       SocketMessage.parseMessage(message)
     } catch (e: Exception) {

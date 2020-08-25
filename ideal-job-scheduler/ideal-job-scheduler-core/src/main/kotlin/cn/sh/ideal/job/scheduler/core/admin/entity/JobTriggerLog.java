@@ -187,10 +187,9 @@ public class JobTriggerLog {
   private String triggerMsg;
 
   /**
-   * 执行-时间
+   * 执行时间
    */
-  @Column(name = "handle_time", nullable = true)
-  @Nullable
+  @Column(name = "handle_time")
   private LocalDateTime handleTime;
 
   /**
@@ -212,6 +211,15 @@ public class JobTriggerLog {
   )
   @Nonnull
   private String handleMsg;
+
+  /**
+   * 失败重试次数
+   */
+  @Column(
+      name = "handle_sequence", nullable = false
+      , columnDefinition = "int(11) comment '失败重试次数'"
+  )
+  private int handleSequence;
 
   /**
    * 创建时间
@@ -239,6 +247,7 @@ public class JobTriggerLog {
     log.triggerMsg = DBDefaults.DEFAULT_STRING_VALUE;
     log.handleStatus = HandleStatusEnum.WAITING;
     log.handleMsg = DBDefaults.DEFAULT_STRING_VALUE;
+    log.handleSequence = 0;
     return log;
   }
 
@@ -375,12 +384,11 @@ public class JobTriggerLog {
     this.triggerMsg = triggerMsg;
   }
 
-  @Nullable
   public LocalDateTime getHandleTime() {
     return handleTime;
   }
 
-  public void setHandleTime(@Nullable LocalDateTime handleTime) {
+  public void setHandleTime(LocalDateTime handleTime) {
     this.handleTime = handleTime;
   }
 
@@ -399,6 +407,14 @@ public class JobTriggerLog {
 
   public void setHandleMsg(@Nonnull String handleMsg) {
     this.handleMsg = handleMsg;
+  }
+
+  public int getHandleSequence() {
+    return handleSequence;
+  }
+
+  public void setHandleSequence(int handleSequence) {
+    this.handleSequence = handleSequence;
   }
 
   public LocalDateTime getCreatedTime() {

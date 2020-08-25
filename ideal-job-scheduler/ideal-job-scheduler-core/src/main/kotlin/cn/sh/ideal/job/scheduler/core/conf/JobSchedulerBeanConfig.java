@@ -7,6 +7,7 @@ import cn.sh.ideal.job.scheduler.core.generator.IDGenerator;
 import cn.sh.ideal.job.scheduler.core.generator.ReactiveSpringRedisSnowFlakeInitializer;
 import cn.sh.ideal.job.scheduler.core.generator.SnowFlake;
 import cn.sh.ideal.job.scheduler.core.generator.SnowFlakeInitializer;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.web.socket.server.standard.ServerEndpointExporter;
+
+import java.util.concurrent.*;
 
 /**
  * @author 宋志宗
@@ -25,9 +28,12 @@ public class JobSchedulerBeanConfig {
   @Value("${spring.application.name}")
   private String applicationName;
 
+  private final JobSchedulerProperties schedulerProperties;
   private final ReactiveStringRedisTemplate reactiveStringRedisTemplate;
 
-  public JobSchedulerBeanConfig(ReactiveStringRedisTemplate reactiveStringRedisTemplate) {
+  public JobSchedulerBeanConfig(JobSchedulerProperties schedulerProperties,
+                                ReactiveStringRedisTemplate reactiveStringRedisTemplate) {
+    this.schedulerProperties = schedulerProperties;
     this.reactiveStringRedisTemplate = reactiveStringRedisTemplate;
   }
 
@@ -55,5 +61,34 @@ public class JobSchedulerBeanConfig {
       log.debug("test SnowFlake generate: " + snowFlake.generate());
     }
     return snowFlake;
+  }
+
+  @Bean
+  public ExecutorService jobCallbackThreadPool() {
+    int processors = Runtime.getRuntime().availableProcessors();
+    ThreadPoolProperties properties = schedulerProperties.getExecuteJobCallbackPool();
+    int corePoolSize = properties.getCorePoolSize();
+    if (corePoolSize < 0) {
+      corePoolSize = processors << 3;
+    }
+    int maximumPoolSize = properties.getMaximumPoolSize();
+    if (maximumPoolSize < 1) {
+      maximumPoolSize = processors << 5;
+    }
+    BlockingQueue<Runnable> workQueue;
+    int workQueueSize = properties.getWorkQueueSize();
+    if (workQueueSize < 1) {
+      workQueue = new SynchronousQueue<>();
+    } else {
+      workQueue = new ArrayBlockingQueue<>(workQueueSize);
+    }
+    ThreadPoolExecutor pool = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
+        60, TimeUnit.SECONDS, workQueue,
+        new ThreadFactoryBuilder().setNameFormat("job-callback-pool-%d").build(),
+        (r, executor) -> {
+          throw new RejectedExecutionException("Task " + r.toString() + " rejected from jobCallbackThreadPool");
+        });
+    pool.allowCoreThreadTimeOut(true);
+    return pool;
   }
 }

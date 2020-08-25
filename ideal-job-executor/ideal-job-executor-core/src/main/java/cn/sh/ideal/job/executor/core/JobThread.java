@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -64,21 +65,34 @@ public final class JobThread extends Thread {
         new ThreadPoolExecutor.DiscardPolicy());
   }
 
-  public void addJob(@Nonnull ExecuteJobParam param) {
+  public void putJob(@Nonnull ExecuteJobParam param) {
     if (destroyed) {
       log.error("JobThread已被丢弃, 但仍然收到添加任务请求, jobId: {}", jobId);
       return;
     }
     int strategy = param.getBlockStrategy();
-    if (strategy == BlockStrategyEnum.DISCARD_LATER.getCode()) {
-      // 丢弃后续调度
-      // todo 执行回调
-      return;
-    } else if (strategy == BlockStrategyEnum.COVER_EARLY.getCode()) {
-      jobQueue.clear();
-      // todo 执行回调
+    if (jobRunning || jobQueue.size() > 0) {
+      if (strategy == BlockStrategyEnum.DISCARD_LATER.getCode()) {
+        // 丢弃后续调度
+        // todo 执行回调
+        return;
+      } else if (strategy == BlockStrategyEnum.COVER_EARLY.getCode()) {
+        // 覆盖掉之前的调度, 清空队列并通知调度器被放弃执行的任务信息列表
+        List<ExecuteJobParam> giveUpJobList = new ArrayList<>();
+        ExecuteJobParam pa;
+        synchronized (jobQueue) {
+          while ((pa = jobQueue.poll()) != null) {
+            giveUpJobList.add(pa);
+          }
+        }
+        // todo 执行回调
+      }
     }
-    jobQueue.offer(param);
+    boolean offer = jobQueue.offer(param);
+    if (!offer) {
+      // todo 任务队列已满, 新的任务未能执行
+      log.info("任务队列已满, 新的任务未能执行");
+    }
   }
 
   @Override
@@ -126,32 +140,32 @@ public final class JobThread extends Thread {
       long triggerId = jobParam.getTriggerId();
       String executorParams = jobParam.getExecutorParams();
 
+      lastExecuteTime = currentTimeMillis;
+      executeTime = currentTimeMillis;
       try {
         executor = JobExecutor.chooseRemoteJobExecutor();
         if (executor == null) {
           log.warn("当前没有可用的RemoteJobExecutor");
         } else {
+          List<ExecuteJobCallback> list = ExecuteJobCallback.create(2);
           // 任务开始执行, 发送回调消息
-          ExecuteJobCallback runningCallback = new ExecuteJobCallback();
-          runningCallback.initSequence();
+          ExecuteJobCallback runningCallback = list.get(0);
           runningCallback.setJobId(jobId);
           runningCallback.setTriggerId(triggerId);
           runningCallback.setHandleStatus(HandleStatusEnum.RUNNING.getCode());
+          runningCallback.setHandleTime(executeTime);
           executor.executeJobCallback(runningCallback);
 
           // 任务结束回调的序列必须后一步生成, 只有这样才能保证结束回调的序列大于启动回调的序列值
-          endCallback = new ExecuteJobCallback();
-          endCallback.initSequence();
+          endCallback = list.get(1);
           endCallback.setJobId(jobId);
           endCallback.setTriggerId(triggerId);
+          endCallback.setHandleTime(executeTime);
         }
       } catch (Exception exception) {
         String errMsg = exception.getClass().getSimpleName() + ":" + exception.getMessage();
         log.info("exception: {}", errMsg);
       }
-
-      lastExecuteTime = currentTimeMillis;
-      executeTime = currentTimeMillis;
       try {
         Object execute = jobHandler.execute(executorParams);
         if (execute != null && endCallback != null) {
@@ -174,7 +188,7 @@ public final class JobThread extends Thread {
           if (handleStatus == -1) {
             endCallback.setHandleStatus(HandleStatusEnum.COMPLETE.getCode());
           }
-          if (StringUtils.isNotBlank(endCallback.getHandleMessage())) {
+          if (StringUtils.isBlank(endCallback.getHandleMessage())) {
             endCallback.setHandleMessage("Success");
           }
           endCallback.setTimeConsuming(currentTimeMillis - executeTime);

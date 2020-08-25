@@ -57,7 +57,7 @@ public class SocketJobExecutor implements JobExecutor {
           try {
             TimeUnit.SECONDS.sleep(1);
           } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.debug("{}", e.getMessage());
           }
         }
       }

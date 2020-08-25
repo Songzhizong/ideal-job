@@ -26,8 +26,8 @@ public class SimpleLbFactory<Server extends LbServer> implements LbFactory<Serve
                              @Nonnull LbStrategyEnum strategy,
                              @Nullable Object key) {
     final LoadBalancer<Server> loadBalancer = getLoadBalancer(serverName, strategy);
-    final LbServerHolder<Server> serverHolder = getServerHolder(serverName);
-    return loadBalancer.chooseServer(key, serverHolder);
+    final LbServerHolder<Server> serverHolder = getServerHolder(serverName, null);
+    return loadBalancer.chooseServer(key, serverHolder.getReachableServers());
   }
 
   @Override
@@ -47,13 +47,6 @@ public class SimpleLbFactory<Server extends LbServer> implements LbFactory<Serve
     } else {
       serverHolder = serverHolderMap.computeIfAbsent(serverName, function);
     }
-//    if (serverHolder.isDestroyed()) {
-//      synchronized (serverName) {
-//        if (serverHolder.isDestroyed()) {
-//          serverHolder.recover();
-//        }
-//      }
-//    }
     return serverHolder;
   }
 

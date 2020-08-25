@@ -1,5 +1,6 @@
 package cn.sh.ideal.job.common.loadbalancer;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,9 +20,31 @@ import java.util.concurrent.*;
  */
 public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHolder<Server> {
   private static final Logger log = LoggerFactory.getLogger(SimpleLbServerHolder.class);
+  private static final int defaultHeartbeatIntervalSeconds = 20;
+  private static ThreadPoolExecutor heartbeatThreadPool;
+  private static volatile boolean RUNNING = false;
+
+  static {
+    int availableProcessors = Runtime.getRuntime().availableProcessors();
+    int corePoolSize = availableProcessors << 2;
+    int maximumPoolSize = availableProcessors << 3;
+    heartbeatThreadPool = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
+        60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(corePoolSize),
+        new ThreadFactoryBuilder().setNameFormat("LbServer-heartbeat-%d").build(),
+        new ThreadPoolExecutor.DiscardPolicy());
+    heartbeatThreadPool.allowCoreThreadTimeOut(true);
+  }
+
+  @SuppressWarnings("unused")
+  public static void setHeartbeatThreadPool(ThreadPoolExecutor threadPool) {
+    if (RUNNING) {
+      throw new UnsupportedOperationException("SimpleLbServerHolder已运行, 请尝试在程序初始化过程中进行此项设置");
+    }
+    SimpleLbServerHolder.heartbeatThreadPool = threadPool;
+  }
+
   @Getter
   private final String serverName;
-  private final ExecutorService heartbeatPool;
   private final BlockingQueue<Boolean> refreshReachableServersQueue
       = new ArrayBlockingQueue<>(1);
   private volatile int cycleStrategy = 1;
@@ -39,39 +62,31 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
 
 
   public SimpleLbServerHolder(@Nonnull String serverName) {
-    this(serverName, 10);
+    this(serverName, defaultHeartbeatIntervalSeconds);
   }
 
   public SimpleLbServerHolder(@Nonnull String serverName, int heartbeatIntervalSeconds) {
+    SimpleLbServerHolder.RUNNING = true;
+    long heartbeatIntervalMills = heartbeatIntervalSeconds * 1000;
     this.serverName = serverName;
-    // 最多两个线程同时进行心跳测试
-    heartbeatPool = new ThreadPoolExecutor(0, 2,
-        60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1),
-        r -> new Thread(r, "SimpleServerHolder-pool-" + r.hashCode()),
-        new ThreadPoolExecutor.DiscardOldestPolicy());
 
     new Thread(() -> {
-      while (!destroyed) {
-        try {
-          TimeUnit.SECONDS.sleep(heartbeatIntervalSeconds);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-        heartbeatPool.execute(this::heartbeat);
-      }
-    }).start();
-
-    new Thread(() -> {
+      long lastHeartbeatTime = System.currentTimeMillis();
       while (!destroyed) {
         try {
           Boolean poll = refreshReachableServersQueue.poll(5, TimeUnit.SECONDS);
+          long currentTimeMillis = System.currentTimeMillis();
+          if (currentTimeMillis - lastHeartbeatTime > heartbeatIntervalMills) {
+            lastHeartbeatTime = currentTimeMillis;
+            heartbeatThreadPool.execute(this::heartbeat);
+          }
           if (poll != null) {
             log.info("可用服务列表发生变化, 更新数据...");
             List<Server> lbServers = new ArrayList<>(reachableServerMap.values());
             reachableServers = Collections.unmodifiableList(lbServers);
           }
         } catch (InterruptedException e) {
-          e.printStackTrace();
+          log.debug("{}", e.getMessage());
         }
       }
     }).start();
@@ -208,16 +223,19 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
         }
       }
     }
-    log.debug("对 {} 服务列表执行心跳检测, 当前总服务数: {}, 新标记可达服务数: {}, 不可达服务数: {}, 当前可达服务总数: {}",
-        serverName, size, up, down, reachableServerMap.size());
-
+    if (up > 0 || down > 0) {
+      log.info("Heartbeat: {} 可达服务列表发生变化, 当前总服务数: {}, 新标记可达服务数: {}, 不可达服务数: {}, 当前可达服务总数: {}",
+          serverName, size, up, down, reachableServerMap.size());
+    } else if (log.isDebugEnabled()) {
+      log.debug("对 {} 服务列表执行心跳检测, 当前总服务数: {}, 新标记可达服务数: {}, 不可达服务数: {}, 当前可达服务总数: {}",
+          serverName, size, up, down, reachableServerMap.size());
+    }
   }
 
   @Override
   public void destroy() {
     if (!destroyed) {
       destroyed = true;
-      heartbeatPool.shutdown();
     }
   }
 

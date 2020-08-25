@@ -57,9 +57,9 @@ public class IdealJobBeanConfig {
         port = serverPort;
       }
     }
-    final long connectTimeOut = properties.getConnectTimeOut().toMillis();
-    final long writeTimeOut = properties.getWriteTimeOut().toMillis();
-    final long readTimeOut = properties.getReadTimeOut().toMillis();
+    final long connectTimeOutMills = properties.getConnectTimeOut().toMillis();
+    final long writeTimeOutMills = properties.getWriteTimeOut().toMillis();
+    final long readTimeOutMills = properties.getReadTimeOut().toMillis();
     if (StringUtils.isBlank(appName)) {
       log.error("ideal.job.app-name 和 spring.application.name 不能同时为空");
       return null;
@@ -75,9 +75,9 @@ public class IdealJobBeanConfig {
     executor.setAppName(appName);
     executor.setIp(ip);
     executor.setPort(port);
-    executor.setConnectTimeOut((int) connectTimeOut);
-    executor.setWriteTimeOut(writeTimeOut);
-    executor.setReadTimeOut(readTimeOut);
+    executor.setConnectTimeOutMills((int) connectTimeOutMills);
+    executor.setWriteTimeOutMills(writeTimeOutMills);
+    executor.setReadTimeOutMills(readTimeOutMills);
     return executor;
   }
 }

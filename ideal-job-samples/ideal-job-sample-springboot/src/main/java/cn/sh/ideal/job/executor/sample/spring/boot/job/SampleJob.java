@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author 宋志宗
@@ -16,10 +19,19 @@ import javax.annotation.Nonnull;
 @JobHandlerBean
 public class SampleJob {
   private static final Logger log = LoggerFactory.getLogger(SampleJob.class);
+  private static final AtomicLong atomicLong = new AtomicLong(0);
+
+  static {
+    Executors.newSingleThreadScheduledExecutor()
+        .scheduleAtFixedRate(() -> {
+          log.info("count: {}", atomicLong.get());
+        }, 10, 10, TimeUnit.SECONDS);
+  }
 
 
   @JobHandler("demoJobHandler")
   public void demoJobHandler(@Nonnull String param) {
-    log.info("execute demoJobHandler, param = {}", param);
+    atomicLong.incrementAndGet();
+//    log.info("execute demoJobHandler, param = {}", param);
   }
 }

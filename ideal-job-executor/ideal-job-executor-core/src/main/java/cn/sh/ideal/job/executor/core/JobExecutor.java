@@ -4,7 +4,6 @@ import cn.sh.ideal.job.common.Destroyable;
 import cn.sh.ideal.job.common.executor.RemoteJobExecutor;
 import cn.sh.ideal.job.common.loadbalancer.LbFactory;
 import cn.sh.ideal.job.common.loadbalancer.LbServerHolder;
-import cn.sh.ideal.job.common.loadbalancer.LoadBalancer;
 import cn.sh.ideal.job.common.loadbalancer.SimpleLbFactory;
 import cn.sh.ideal.job.common.message.payload.ExecuteJobParam;
 import cn.sh.ideal.job.executor.core.handler.IJobHandler;
@@ -35,9 +34,9 @@ public class JobExecutor implements Destroyable {
   private String appName;
   private String ip;
   private int port;
-  private int connectTimeOut = 2000;
-  private long writeTimeOut = 200;
-  private long readTimeOut = 60000;
+  private int connectTimeOutMills = 2000;
+  private long writeTimeOutMills = 200;
+  private long readTimeOutMills = 120 * 1000;
   private volatile boolean destroyed;
   private final List<RemoteJobExecutor> remoteExecutors = new ArrayList<>();
 
@@ -75,9 +74,9 @@ public class JobExecutor implements Destroyable {
       executor.setPort(port);
       executor.setWeight(weight);
       executor.setAccessToken(accessToken);
-      executor.setConnectTimeOut(connectTimeOut);
-      executor.setWriteTimeOut(writeTimeOut);
-      executor.setReadTimeOut(readTimeOut);
+      executor.setConnectTimeOutMills(connectTimeOutMills);
+      executor.setWriteTimeOutMills(writeTimeOutMills);
+      executor.setReadTimeOutMills(readTimeOutMills);
       executor.start();
       remoteExecutors.add(executor);
     }
@@ -95,15 +94,9 @@ public class JobExecutor implements Destroyable {
     return lbFactory.getServerHolder(SCHEDULER_SERVER_NAME);
   }
 
-  public static LoadBalancer<RemoteJobExecutor> getLoadBalancer() {
-    return lbFactory.getLoadBalancer(SCHEDULER_SERVER_NAME);
-  }
-
   @Nullable
   public static RemoteJobExecutor chooseRemoteJobExecutor() {
-    LbServerHolder<RemoteJobExecutor> serverHolder = getServerHolder();
-    LoadBalancer<RemoteJobExecutor> loadBalancer = getLoadBalancer();
-    return loadBalancer.chooseServer(null, serverHolder);
+    return lbFactory.chooseServer(SCHEDULER_SERVER_NAME, null);
   }
 
   public static void executeJob(@Nonnull ExecuteJobParam param) {
@@ -122,7 +115,7 @@ public class JobExecutor implements Destroyable {
       jobThread = new JobThread(jobId, jobHandler);
       JobThreadFactory.register(jobId, jobThread);
     }
-    jobThread.addJob(param);
+    jobThread.putJob(param);
   }
 
   public static void idleBeat(@Nonnull String jobId) {
