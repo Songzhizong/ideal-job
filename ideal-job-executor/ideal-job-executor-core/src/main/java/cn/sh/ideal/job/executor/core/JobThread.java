@@ -31,7 +31,7 @@ public final class JobThread extends Thread {
   private static final long autoIdleBeatNoticeTime = 10 * 1000;
   private static final int jobQueueSize = 1000;
   @SuppressWarnings("PointlessArithmeticExpression")
-  private static final long autoDestroyMills = 1 * 60 * 60 * 1000;
+  private static final long autoDestroyMills = 5 * 60 * 1000;
 
   @Getter
   @Nonnull
@@ -124,11 +124,12 @@ public final class JobThread extends Thread {
           if (deprecated) {
             // 任务已经全部执行完成, 销毁此线程
             shutdown();
-            return;
+            break;
           }
           if (currentTimeMillis - lastExecuteTime > autoDestroyMills) {
             log.info("任务线程空闲时间超时, 注销此任务线程, jobId: {}", jobId);
             JobThreadFactory.remove(this);
+            break;
           }
           continue;
         }

@@ -195,8 +195,8 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
           refreshReachableServers();
         } else if (!available && containsInstance != null) {
           down++;
-          reachableServerMap.remove(instanceId);
-          refreshReachableServers();
+//          reachableServerMap.remove(instanceId);
+//          refreshReachableServers();
         }
       }
     } else {
@@ -218,8 +218,8 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
           refreshReachableServers();
         } else if (!available && containsInstance != null) {
           down++;
-          reachableServerMap.remove(instanceId);
-          refreshReachableServers();
+//          reachableServerMap.remove(instanceId);
+//          refreshReachableServers();
         }
       }
     }

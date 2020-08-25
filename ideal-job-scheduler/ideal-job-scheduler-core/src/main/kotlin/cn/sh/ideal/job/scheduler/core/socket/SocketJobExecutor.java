@@ -108,7 +108,11 @@ public class SocketJobExecutor implements JobExecutor {
    * 发送消息
    */
   public synchronized void sendMessage(@Nonnull String message) {
-    session.getAsyncRemote().sendText(message);
+    try {
+      session.getBasicRemote().sendText(message);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   /**

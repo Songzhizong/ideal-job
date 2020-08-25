@@ -136,7 +136,7 @@ public final class ReactorWebSocketRemoteJobExecutor extends Thread implements R
               });
           final Flux<Void> output = directProcessor.map(session::textMessage)
               .flatMap(message -> session.send(Mono.just(message)));
-          return Flux.zip(input, output).then()
+          return Flux.merge(input, output).then()
               .doFinally(signalType -> {
                 running = false;
                 if (!destroyed) {
@@ -174,7 +174,7 @@ public final class ReactorWebSocketRemoteJobExecutor extends Thread implements R
   }
 
   public synchronized void sendMessage(@Nonnull String message) {
-    socketSession.send(Mono.just(socketSession.textMessage(message))).subscribe();
+//    socketSession.send(Mono.just(socketSession.textMessage(message))).subscribe();
     directProcessor.onNext(message);
   }
 

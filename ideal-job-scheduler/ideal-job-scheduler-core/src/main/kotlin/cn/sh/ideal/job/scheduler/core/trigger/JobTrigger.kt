@@ -70,35 +70,35 @@ class JobTrigger(private val lbFactory: LbFactory<JobExecutor>,
       chooseServer
     }
 
-    val log = JobTriggerLog.createInitialized()
-    log.executorId = executorId
-    log.jobId = jobId
-    log.triggerType = triggerType
+    val triggerLog = JobTriggerLog.createInitialized()
+    triggerLog.executorId = executorId
+    triggerLog.jobId = jobId
+    triggerLog.triggerType = triggerType
     // todo log.schedulerInstance
     if (reachableServers.isNotEmpty()) {
-      log.availableInstances = reachableServers.joinToString(",") { it.instanceId }
+      triggerLog.availableInstances = reachableServers.joinToString(",") { it.instanceId }
     }
     if (chooseServer != null) {
-      log.executeInstances = chooseServer.instanceId
+      triggerLog.executeInstances = chooseServer.instanceId
     }
-    log.routeStrategy = routeStrategy
-    log.blockStrategy = blockStrategy
-    log.executorHandler = executorHandler
-    log.executorParam = executorParam
+    triggerLog.routeStrategy = routeStrategy
+    triggerLog.blockStrategy = blockStrategy
+    triggerLog.executorHandler = executorHandler
+    triggerLog.executorParam = executorParam
     // log.executorShardingParam
-    log.retryCount = retryCount
+    triggerLog.retryCount = retryCount
     val res = if (trigger) {
-      log.triggerCode = JobTriggerLog.TRIGGER_CODE_SUCCESS
-      log.triggerMsg = "success"
+      triggerLog.triggerCode = JobTriggerLog.TRIGGER_CODE_SUCCESS
+      triggerLog.triggerMsg = "success"
       Res.success<Void>()
     } else {
-      log.triggerCode = JobTriggerLog.TRIGGER_CODE_FAIL
+      triggerLog.triggerCode = JobTriggerLog.TRIGGER_CODE_FAIL
       val triggerMessage = "调度失败: " + messageList.joinToString(",")
-      log.triggerMsg = triggerMessage
+      triggerLog.triggerMsg = triggerMessage
       Res.err(triggerMessage)
     }
-    triggerLogService.saveLog(log)
-    val triggerId = log.triggerId
+    triggerLogService.saveLog(triggerLog)
+    val triggerId = triggerLog.triggerId
 
     if (trigger) {
       val jobParam = ExecuteJobParam()
@@ -111,6 +111,7 @@ class JobTrigger(private val lbFactory: LbFactory<JobExecutor>,
         chooseServer!!.executeJob(jobParam)
       } catch (e: Exception) {
         // 出现异常则调度失败, 需要对调度日志进行调整
+        log.info("e: {}", e.message)
       }
     }
     return res
