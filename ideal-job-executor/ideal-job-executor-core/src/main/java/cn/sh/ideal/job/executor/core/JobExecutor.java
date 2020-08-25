@@ -39,6 +39,7 @@ public class JobExecutor implements Destroyable {
   private long writeTimeOut = 200;
   private long readTimeOut = 60000;
   private volatile boolean destroyed;
+  private final List<RemoteJobExecutor> remoteExecutors = new ArrayList<>();
 
   public JobExecutor() {
   }
@@ -57,16 +58,18 @@ public class JobExecutor implements Destroyable {
     if (!destroyed) {
       log.info("JobExecutor destroy.");
       destroyed = true;
+      for (RemoteJobExecutor remoteExecutor : remoteExecutors) {
+        remoteExecutor.destroy();
+      }
     }
   }
 
 
   private void initRemoteExecutors() {
     final String[] addresses = StringUtils.split(schedulerAddresses, ",");
-    List<RemoteJobExecutor> remoteExecutors = new ArrayList<>();
+//    List<RemoteJobExecutor> remoteExecutors = new ArrayList<>();
     for (String address : addresses) {
-      final WebSocketRemoteJobExecutor executor = new WebSocketRemoteJobExecutor();
-      executor.setSchedulerAddress(address);
+      ReactorWebSocketRemoteJobExecutor executor = new ReactorWebSocketRemoteJobExecutor(address);
       executor.setAppName(appName);
       executor.setIp(ip);
       executor.setPort(port);
@@ -80,6 +83,11 @@ public class JobExecutor implements Destroyable {
     }
     LbServerHolder<RemoteJobExecutor> holder = getServerHolder();
     holder.addServers(remoteExecutors, true);
+//    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+//      for (RemoteJobExecutor remoteExecutor : remoteExecutors) {
+//        remoteExecutor.destroy();
+//      }
+//    }));
   }
 
   // ---------------------------------- static ~ ~ ~

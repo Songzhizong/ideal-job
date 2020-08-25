@@ -18,10 +18,10 @@ public enum MessageType {
    * 客户端注册回调
    */
   REGISTER_CALLBACK("registerCallback", "客户端注册回调"),
-  /**
-   * 心跳
-   */
-  HEARTBEAT("heartbeat", "心跳"),
+//  /**
+//   * 心跳
+//   */
+//  HEARTBEAT("heartbeat", "心跳"),
   /**
    * 空闲度
    */

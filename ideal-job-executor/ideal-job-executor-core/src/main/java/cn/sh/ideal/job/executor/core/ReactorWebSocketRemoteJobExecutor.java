@@ -8,10 +8,10 @@ import cn.sh.ideal.job.common.message.payload.*;
 import cn.sh.ideal.job.common.utils.JsonUtils;
 import cn.sh.ideal.job.common.utils.ReactorUtils;
 import io.netty.handler.timeout.ReadTimeoutException;
-import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
@@ -25,43 +25,59 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author 宋志宗
  * @date 2020/8/20
  */
-@Getter
-@Setter
-public final class WebSocketRemoteJobExecutor extends Thread implements RemoteJobExecutor {
-  private static final Logger log = LoggerFactory.getLogger(WebSocketRemoteJobExecutor.class);
+public final class ReactorWebSocketRemoteJobExecutor extends Thread implements RemoteJobExecutor {
+  private static final Logger log = LoggerFactory.getLogger(ReactorWebSocketRemoteJobExecutor.class);
+  private static final AtomicInteger atomicInteger = new AtomicInteger(0);
   private UnicastProcessor<String> directProcessor;
   private Disposable socketDisposable;
   private WebSocketSession socketSession;
+  private final BlockingQueue<Boolean> restartNoticeQueue = new ArrayBlockingQueue<>(1);
+  private final int restartDelay = 10;
 
   /**
    * 调度器程序地址
    */
-  private String schedulerAddress;
+  private final String schedulerAddress;
   /**
    * 应用名称
    */
+  @Setter
   private String appName;
   /**
-   * 调度器ip地址
+   * 当前执行器ip地址
    */
+  @Setter
   private String ip;
   /**
-   * 调度器端口号
+   * 当前执行器端口号
    */
+  @Setter
   private int port;
   private int weight = 1;
+  @Setter
   private String accessToken;
+  @Setter
   private int connectTimeOut = 200;
+  @Setter
   private long writeTimeOut = 200;
+  @Setter
   private long readTimeOut = 20000;
   private boolean running = false;
   private volatile boolean destroyed = false;
+
+  public ReactorWebSocketRemoteJobExecutor(String schedulerAddress) {
+    super("RemoteJobExecutor-" + schedulerAddress + "-" + atomicInteger.getAndIncrement());
+    this.schedulerAddress = schedulerAddress;
+  }
 
   public void setWeight(int weight) {
     this.weight = Math.max(weight, 1);
@@ -114,9 +130,8 @@ public final class WebSocketRemoteJobExecutor extends Thread implements RemoteJo
               .doOnComplete(() -> {
                 running = false;
                 if (!destroyed) {
-                  int delay = 10;
-                  log.info("连接断开, {}秒后尝试重连...", delay);
-                  restartSocket(delay);
+                  log.info("连接断开, {}秒后尝试重连...", restartDelay);
+                  restartSocket();
                 }
               });
           final Flux<Void> output = directProcessor.map(session::textMessage)
@@ -125,9 +140,8 @@ public final class WebSocketRemoteJobExecutor extends Thread implements RemoteJo
               .doFinally(signalType -> {
                 running = false;
                 if (!destroyed) {
-                  int delay = 10;
-                  log.info("连接被关闭, {}秒后尝试重新建立连接...", delay);
-                  restartSocket(delay);
+                  log.info("连接被关闭, {}秒后尝试重新建立连接...", restartDelay);
+                  restartSocket();
                 }
               });
         }).onTerminateDetach()
@@ -144,10 +158,9 @@ public final class WebSocketRemoteJobExecutor extends Thread implements RemoteJo
         .doFinally(signalType -> {
           running = false;
           if (!destroyed) {
-            int delay = 10;
             log.info("WebSocketRemoteJobExecutor terminate, restart after {} seconds, schedulerAddress: {}",
-                delay, schedulerAddress);
-            restartSocket(delay);
+                restartDelay, schedulerAddress);
+            restartSocket();
           } else {
             log.info("WebSocketRemoteJobExecutor terminate, schedulerAddress: {}", schedulerAddress);
           }
@@ -156,18 +169,11 @@ public final class WebSocketRemoteJobExecutor extends Thread implements RemoteJo
     sendMessage(registerMessage);
   }
 
-  public synchronized void restartSocket(int delay) {
-    try {
-      TimeUnit.SECONDS.sleep(delay);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
-    log.info("Restart socket, schedulerAddress: {}", schedulerAddress);
-    startSocket();
+  public void restartSocket() {
+    restartNoticeQueue.offer(true);
   }
 
-  public void sendMessage(@Nonnull String message) {
-    log.debug("Send message to {}, message = {}", schedulerAddress, message);
+  public synchronized void sendMessage(@Nonnull String message) {
     directProcessor.onNext(message);
   }
 
@@ -207,10 +213,6 @@ public final class WebSocketRemoteJobExecutor extends Thread implements RemoteJo
         executeJob(executeJobParam);
         break;
       }
-      case HEARTBEAT: {
-        log.debug("接收到调度器: {} 心跳消息", schedulerAddress);
-        break;
-      }
       case IDLE_BEAT: {
         IdleBeatParam idleBeatParam;
         try {
@@ -226,7 +228,6 @@ public final class WebSocketRemoteJobExecutor extends Thread implements RemoteJo
         break;
       }
       default: {
-
         break;
       }
     }
@@ -234,8 +235,21 @@ public final class WebSocketRemoteJobExecutor extends Thread implements RemoteJo
 
   @Override
   public void run() {
-    Runtime.getRuntime().addShutdownHook(new Thread(this::destroy));
+//    Runtime.getRuntime().addShutdownHook(new Thread(this::destroy));
     startSocket();
+    while (!destroyed) {
+      final Boolean poll;
+      try {
+        poll = restartNoticeQueue.poll(5, TimeUnit.SECONDS);
+        if (poll != null) {
+          TimeUnit.SECONDS.sleep(restartDelay);
+          log.info("Restart socket, schedulerAddress: {}", schedulerAddress);
+          startSocket();
+        }
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
   }
 
   @Override
@@ -251,6 +265,7 @@ public final class WebSocketRemoteJobExecutor extends Thread implements RemoteJo
 
   @Override
   public boolean heartbeat() {
+    socketSession.pingMessage(DataBufferFactory::allocateBuffer);
     return running && !destroyed;
   }
 
@@ -264,7 +279,6 @@ public final class WebSocketRemoteJobExecutor extends Thread implements RemoteJo
     return 1;
   }
 
-  @SuppressWarnings("deprecation")
   @Override
   public void destroy() {
     if (destroyed) {
@@ -289,6 +303,7 @@ public final class WebSocketRemoteJobExecutor extends Thread implements RemoteJo
       String errMsg = exception.getClass().getName() + ":" + exception.getMessage();
       log.info("dispose socket exception: {}", errMsg);
     }
+    this.interrupt();
   }
 
   @Override

@@ -17,13 +17,13 @@ public interface Destroyable {
    * 从销毁状态进行恢复
    */
   default void recover() {
-    throw new NotImplementedException("Destroyable.recover() not implemented");
+    throw new NotImplementedException("Destroyable.recover() is not implemented");
   }
 
   /**
    * @return 是否已销毁
    */
   default boolean isDestroyed() {
-    throw new NotImplementedException("Destroyable.isDestroyed() not implemented");
+    throw new NotImplementedException("Destroyable.isDestroyed() is not implemented");
   }
 }

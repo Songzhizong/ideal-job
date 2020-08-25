@@ -17,6 +17,12 @@
       <artifactId>ideal-job-common</artifactId>
       <version>${ideal-job.version}</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/org.java-websocket/Java-WebSocket -->
+    <dependency>
+      <groupId>org.java-websocket</groupId>
+      <artifactId>Java-WebSocket</artifactId>
+      <version>1.5.1</version>
+    </dependency>
     <!-- spring-webflux -->
     <dependency>
       <groupId>org.springframework</groupId>

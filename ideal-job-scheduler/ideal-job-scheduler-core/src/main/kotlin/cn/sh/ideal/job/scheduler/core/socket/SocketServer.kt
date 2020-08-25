@@ -47,6 +47,7 @@ class SocketServer {
   fun onOpen(session: Session,
              @PathParam("appName") appName: String,
              @PathParam("instanceId") instanceId: String) {
+    session.maxIdleTimeout
     val executor = SocketJobExecutor(appName, instanceId, session)
     val weightRegisterSeconds = properties.weightRegisterSeconds
     executor.setWeightRegisterSeconds(weightRegisterSeconds)

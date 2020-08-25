@@ -1,7 +1,6 @@
 package cn.sh.ideal.job.scheduler.core.socket;
 
 import cn.sh.ideal.job.common.executor.JobExecutor;
-import cn.sh.ideal.job.common.message.HeartbeatMessage;
 import cn.sh.ideal.job.common.message.MessageType;
 import cn.sh.ideal.job.common.message.SocketMessage;
 import cn.sh.ideal.job.common.message.payload.ExecuteJobParam;
@@ -13,6 +12,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.websocket.Session;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -107,13 +107,8 @@ public class SocketJobExecutor implements JobExecutor {
   /**
    * 发送消息
    */
-  public void sendMessage(@Nonnull String message) {
-    try {
-      session.getBasicRemote().sendText(message);
-    } catch (IOException e) {
-      String errMessage = e.getClass().getName() + ":" + e.getMessage();
-      log.info("发送消息异常: {}", errMessage);
-    }
+  public synchronized void sendMessage(@Nonnull String message) {
+    session.getAsyncRemote().sendText(message);
   }
 
   /**
@@ -144,9 +139,9 @@ public class SocketJobExecutor implements JobExecutor {
       return false;
     }
     try {
-      String message = HeartbeatMessage.createInstance().toMessageString();
-      session.getBasicRemote().sendText(message);
-    } catch (IOException e) {
+//      String message = HeartbeatMessage.createInstance().toMessageString();
+      session.getBasicRemote().sendPing(ByteBuffer.allocate(0));
+    } catch (Exception e) {
       String message = e.getClass().getName() + ":" + e.getMessage();
       log.info("发送心跳消息出现异常: {}", message);
       return false;

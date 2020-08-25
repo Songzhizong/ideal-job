@@ -9,17 +9,22 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
+ * <pre>
+ * todo 如果客户端下线后长时间没有上线甚至不再上线,
+ *  对象内的定时任务也不会自动结束, 为了防止资源浪费后续需要针对此情况进行优化
+ * </pre>
+ *
  * @author 宋志宗
  * @date 2020/8/20
  */
-public class SimpleServerHolder<Server extends LbServer> implements LbServerHolder<Server> {
-  private static final Logger log = LoggerFactory.getLogger(SimpleServerHolder.class);
+public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHolder<Server> {
+  private static final Logger log = LoggerFactory.getLogger(SimpleLbServerHolder.class);
   @Getter
   private final String serverName;
   private final ExecutorService heartbeatPool;
   private final BlockingQueue<Boolean> refreshReachableServersQueue
       = new ArrayBlockingQueue<>(1);
-  private volatile int cycleStrategy = 0;
+  private volatile int cycleStrategy = 1;
   /**
    * 所有服务列表
    */
@@ -33,11 +38,11 @@ public class SimpleServerHolder<Server extends LbServer> implements LbServerHold
   private volatile boolean destroyed;
 
 
-  public SimpleServerHolder(@Nonnull String serverName) {
+  public SimpleLbServerHolder(@Nonnull String serverName) {
     this(serverName, 10);
   }
 
-  public SimpleServerHolder(@Nonnull String serverName, int heartbeatIntervalSeconds) {
+  public SimpleLbServerHolder(@Nonnull String serverName, int heartbeatIntervalSeconds) {
     this.serverName = serverName;
     // 最多两个线程同时进行心跳测试
     heartbeatPool = new ThreadPoolExecutor(0, 2,
@@ -148,60 +153,64 @@ public class SimpleServerHolder<Server extends LbServer> implements LbServerHold
    */
   @SuppressWarnings("DuplicatedCode")
   private void heartbeat() {
-    synchronized (serverName) {
+    final List<Server> temp;
+    synchronized (this) {
       cycleStrategy = cycleStrategy ^ 1;
-      int size = allServers.size();
-      int up = 0;
-      int down = 0;
-      if (cycleStrategy == 0) {
-        for (Server server : allServers) {
-          String instanceId = server.getInstanceId();
-          boolean available;
-          try {
-            available = server.heartbeat();
-          } catch (Exception e) {
-            String message = e.getClass().getSimpleName() + ":" + e.getMessage();
-            log.info("server: {} heartbeat exception: {}", instanceId, message);
-            available = false;
-          }
-          boolean containsInstance = reachableServerMap.containsKey(instanceId);
-          if (available && !containsInstance) {
-            up++;
-            reachableServerMap.put(instanceId, server);
-            refreshReachableServers();
-          } else if (!available && containsInstance) {
-            down++;
-            reachableServerMap.remove(instanceId);
-            refreshReachableServers();
-          }
+      // 心跳之前先对allServers进行保护性拷贝, 防止循环心跳过程中allServers列表发生变更导致异常
+      temp = new ArrayList<>(allServers);
+    }
+    int size = temp.size();
+    int up = 0;
+    int down = 0;
+    if (cycleStrategy == 0) {
+      for (Server server : temp) {
+        String instanceId = server.getInstanceId();
+        boolean available;
+        try {
+          available = server.heartbeat();
+        } catch (Exception e) {
+          String message = e.getClass().getSimpleName() + ":" + e.getMessage();
+          log.info("server: {} heartbeat exception: {}", instanceId, message);
+          available = false;
         }
-      } else {
-        for (int i = size - 1; i >= 0; i--) {
-          Server server = allServers.get(i);
-          String instanceId = server.getInstanceId();
-          boolean available;
-          try {
-            available = server.heartbeat();
-          } catch (Exception e) {
-            String message = e.getClass().getSimpleName() + ":" + e.getMessage();
-            log.info("server: {} heartbeat exception: {}", instanceId, message);
-            available = false;
-          }
-          boolean containsInstance = reachableServerMap.containsKey(instanceId);
-          if (available && !containsInstance) {
-            up++;
-            reachableServerMap.put(instanceId, server);
-            refreshReachableServers();
-          } else if (!available && containsInstance) {
-            down++;
-            reachableServerMap.remove(instanceId);
-            refreshReachableServers();
-          }
+        final Server containsInstance = reachableServerMap.get(instanceId);
+        if (available && containsInstance == null) {
+          up++;
+          reachableServerMap.put(instanceId, server);
+          refreshReachableServers();
+        } else if (!available && containsInstance != null) {
+          down++;
+          reachableServerMap.remove(instanceId);
+          refreshReachableServers();
         }
       }
-      log.debug("对 {} 服务列表执行心跳检测, 当前总服务数: {}, 新标记可达服务数: {}, 不可达服务数: {}, 当前可达服务总数: {}",
-          serverName, size, up, down, reachableServerMap.size());
+    } else {
+      for (int i = size - 1; i >= 0; i--) {
+        Server server = temp.get(i);
+        String instanceId = server.getInstanceId();
+        boolean available;
+        try {
+          available = server.heartbeat();
+        } catch (Exception e) {
+          String message = e.getClass().getSimpleName() + ":" + e.getMessage();
+          log.info("server: {} heartbeat exception: {}", instanceId, message);
+          available = false;
+        }
+        final Server containsInstance = reachableServerMap.get(instanceId);
+        if (available && containsInstance == null) {
+          up++;
+          reachableServerMap.put(instanceId, server);
+          refreshReachableServers();
+        } else if (!available && containsInstance != null) {
+          down++;
+          reachableServerMap.remove(instanceId);
+          refreshReachableServers();
+        }
+      }
     }
+    log.debug("对 {} 服务列表执行心跳检测, 当前总服务数: {}, 新标记可达服务数: {}, 不可达服务数: {}, 当前可达服务总数: {}",
+        serverName, size, up, down, reachableServerMap.size());
+
   }
 
   @Override

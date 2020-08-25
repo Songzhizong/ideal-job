@@ -26,11 +26,11 @@ import java.util.Locale;
  */
 public class JsonUtils {
   private static final DateTimeFormatter dateTimeFormatter
-      = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.SIMPLIFIED_CHINESE);
+      = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS", Locale.SIMPLIFIED_CHINESE);
   private static final DateTimeFormatter dateFormatter
       = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.SIMPLIFIED_CHINESE);
   private static final DateTimeFormatter timeFormatter
-      = DateTimeFormatter.ofPattern("HH:mm:ss", Locale.SIMPLIFIED_CHINESE);
+      = DateTimeFormatter.ofPattern("HH:mm:ss.SSS", Locale.SIMPLIFIED_CHINESE);
 
   private static final SimpleModule javaTimeModule = new JavaTimeModule()
       .addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(dateTimeFormatter))

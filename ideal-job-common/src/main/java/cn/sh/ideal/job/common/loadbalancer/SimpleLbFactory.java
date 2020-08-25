@@ -43,7 +43,7 @@ public class SimpleLbFactory<Server extends LbServer> implements LbFactory<Serve
       @Nullable Function<String, LbServerHolder<Server>> function) {
     LbServerHolder<Server> serverHolder;
     if (function == null) {
-      serverHolder = serverHolderMap.computeIfAbsent(serverName, (k) -> new SimpleServerHolder<>(serverName));
+      serverHolder = serverHolderMap.computeIfAbsent(serverName, (k) -> new SimpleLbServerHolder<>(serverName));
     } else {
       serverHolder = serverHolderMap.computeIfAbsent(serverName, function);
     }

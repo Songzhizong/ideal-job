@@ -1,6 +1,5 @@
 package cn.sh.ideal.job.scheduler.core.admin.controller;
 
-import cn.sh.ideal.job.common.constants.DBDefaults;
 import cn.sh.ideal.job.scheduler.core.admin.service.JobService;
 import cn.sh.ideal.job.common.res.Res;
 import cn.sh.ideal.job.scheduler.api.client.JobApi;
