@@ -46,8 +46,8 @@ final class ExecuteJobCallbackMessageHandler(
       log.warn("解析 ExecuteJobCallback 出现异常: {}, payload = {}", errMsg, payload)
       return
     }
+    atomicLong.incrementAndGet()
     jobCallbackThreadPool.execute {
-      atomicLong.incrementAndGet()
       jobTrigger.triggerCallback(executeJobCallback)
     }
   }

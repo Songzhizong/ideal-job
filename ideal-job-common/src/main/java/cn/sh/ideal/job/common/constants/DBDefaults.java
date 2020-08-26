@@ -6,4 +6,5 @@ package cn.sh.ideal.job.common.constants;
  */
 public interface DBDefaults {
   String DEFAULT_STRING_VALUE = "";
+  int DEFAULT_INT_VALUE = -1;
 }

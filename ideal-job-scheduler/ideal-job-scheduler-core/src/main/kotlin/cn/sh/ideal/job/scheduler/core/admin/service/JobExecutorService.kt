@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 @Service
 class JobExecutorService(private val jobExecutorRepository: JobExecutorRepository) {
 
-  fun findById(executorId: Long): JobExecutor? {
+  fun loadById(executorId: Long): JobExecutor? {
     return jobExecutorRepository.findByIdOrNull(executorId)
   }
 

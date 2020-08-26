@@ -69,11 +69,11 @@ public class JobSchedulerBeanConfig {
     ThreadPoolProperties properties = schedulerProperties.getExecuteJobCallbackPool();
     int corePoolSize = properties.getCorePoolSize();
     if (corePoolSize < 0) {
-      corePoolSize = processors << 3;
+      corePoolSize = processors << 1;
     }
     int maximumPoolSize = properties.getMaximumPoolSize();
     if (maximumPoolSize < 1) {
-      maximumPoolSize = processors << 5;
+      maximumPoolSize = processors << 4;
     }
     BlockingQueue<Runnable> workQueue;
     int workQueueSize = properties.getWorkQueueSize();
@@ -86,7 +86,8 @@ public class JobSchedulerBeanConfig {
         60, TimeUnit.SECONDS, workQueue,
         new ThreadFactoryBuilder().setNameFormat("job-callback-pool-%d").build(),
         (r, executor) -> {
-          throw new RejectedExecutionException("Task " + r.toString() + " rejected from jobCallbackThreadPool");
+          throw new RejectedExecutionException("Task " + r.toString() +
+              " rejected from jobCallbackThreadPool");
         });
     pool.allowCoreThreadTimeOut(true);
     return pool;

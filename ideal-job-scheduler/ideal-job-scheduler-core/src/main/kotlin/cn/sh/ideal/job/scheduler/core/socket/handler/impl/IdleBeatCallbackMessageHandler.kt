@@ -1,6 +1,6 @@
 package cn.sh.ideal.job.scheduler.core.socket.handler.impl
 
-import cn.sh.ideal.job.common.ParseException
+import cn.sh.ideal.job.common.exception.ParseException
 import cn.sh.ideal.job.common.message.MessageType
 import cn.sh.ideal.job.common.message.SocketMessage
 import cn.sh.ideal.job.common.message.payload.IdleBeatCallback
@@ -26,7 +26,8 @@ final class IdleBeatCallbackMessageHandler : MessageHandler {
     MessageHandlerFactory.register(MessageType.IDLE_BEAT_CALLBACK, this)
   }
 
-  override fun execute(executor: SocketJobExecutor, socketMessage: SocketMessage) {
+  override fun execute(executor: SocketJobExecutor,
+                       socketMessage: SocketMessage) {
     val payload = socketMessage.payload
     val idleBeatCallback = try {
       IdleBeatCallback.parseMessage(payload)

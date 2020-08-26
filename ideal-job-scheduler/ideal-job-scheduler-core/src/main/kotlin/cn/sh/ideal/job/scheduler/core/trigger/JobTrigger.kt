@@ -5,7 +5,8 @@ import cn.sh.ideal.job.common.executor.JobExecutor
 import cn.sh.ideal.job.common.loadbalancer.LbFactory
 import cn.sh.ideal.job.common.message.payload.ExecuteJobCallback
 import cn.sh.ideal.job.common.message.payload.ExecuteJobParam
-import cn.sh.ideal.job.common.res.Res
+import cn.sh.ideal.job.common.transfer.CommonResMsg
+import cn.sh.ideal.job.common.transfer.Res
 import cn.sh.ideal.job.scheduler.core.admin.entity.JobTriggerLog
 import cn.sh.ideal.job.scheduler.core.admin.service.JobTriggerLogService
 import org.apache.commons.lang3.StringUtils
@@ -52,7 +53,8 @@ class JobTrigger(private val lbFactory: LbFactory<JobExecutor>,
     val blockStrategy = triggerParam.blockStrategy
     val retryCount = triggerParam.retryCount
 
-    val serverHolder = lbFactory.getServerHolder(executorAppName)
+    val serverHolder = lbFactory
+        .getServerHolder(executorAppName)
     val reachableServers = serverHolder.reachableServers
     val chooseServer = if (reachableServers.isEmpty()) {
       trigger = false
@@ -60,8 +62,10 @@ class JobTrigger(private val lbFactory: LbFactory<JobExecutor>,
       log.info("执行器: {} 当前没有可用的实例", executorAppName)
       null
     } else {
-      val loadBalancer = lbFactory.getLoadBalancer(executorAppName, routeStrategy)
-      val chooseServer = loadBalancer.chooseServer(jobId, reachableServers)
+      val loadBalancer = lbFactory
+          .getLoadBalancer(executorAppName, routeStrategy)
+      val chooseServer = loadBalancer
+          .chooseServer(jobId, reachableServers)
       if (chooseServer == null) {
         trigger = false
         messageList.add("$executorAppName 选取的执行器实例为空")
@@ -76,7 +80,8 @@ class JobTrigger(private val lbFactory: LbFactory<JobExecutor>,
     triggerLog.triggerType = triggerType
     // todo log.schedulerInstance
     if (reachableServers.isNotEmpty()) {
-      triggerLog.availableInstances = reachableServers.joinToString(",") { it.instanceId }
+      triggerLog.availableInstances = reachableServers
+          .joinToString(",") { it.instanceId }
     }
     if (chooseServer != null) {
       triggerLog.executeInstances = chooseServer.instanceId
@@ -111,7 +116,13 @@ class JobTrigger(private val lbFactory: LbFactory<JobExecutor>,
         chooseServer!!.executeJob(jobParam)
       } catch (e: Exception) {
         // 出现异常则调度失败, 需要对调度日志进行调整
-        log.info("e: {}", e.message)
+        val errMsg = "${e.javaClass.name}:${e.message}"
+        val triggerMessage = "远程服务调用异常: $errMsg"
+        triggerLog.triggerCode = JobTriggerLog.TRIGGER_CODE_FAIL
+        triggerLog.triggerMsg = triggerMessage
+        log.info(triggerMessage)
+        triggerLogService.saveLog(triggerLog)
+        return Res.err(CommonResMsg.INTERNAL_SERVER_ERROR, errMsg)
       }
     }
     return res

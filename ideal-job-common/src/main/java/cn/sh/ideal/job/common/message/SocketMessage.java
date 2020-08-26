@@ -1,6 +1,6 @@
 package cn.sh.ideal.job.common.message;
 
-import cn.sh.ideal.job.common.ParseException;
+import cn.sh.ideal.job.common.exception.ParseException;
 import cn.sh.ideal.job.common.utils.JsonUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

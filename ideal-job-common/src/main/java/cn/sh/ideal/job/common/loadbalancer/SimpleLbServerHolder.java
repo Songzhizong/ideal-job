@@ -35,7 +35,7 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
     heartbeatThreadPool.allowCoreThreadTimeOut(true);
   }
 
-  @SuppressWarnings("unused")
+  @SuppressWarnings({"unused", "RedundantSuppression"})
   public static void setHeartbeatThreadPool(ThreadPoolExecutor threadPool) {
     if (RUNNING) {
       throw new UnsupportedOperationException("SimpleLbServerHolder已运行, 请尝试在程序初始化过程中进行此项设置");
@@ -218,18 +218,19 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
           refreshReachableServers();
         } else if (!available && containsInstance != null) {
           down++;
-//          reachableServerMap.remove(instanceId);
-//          refreshReachableServers();
+          reachableServerMap.remove(instanceId);
+          refreshReachableServers();
         }
       }
     }
     if (up > 0 || down > 0) {
       log.info("Heartbeat: {} 可达服务列表发生变化, 当前总服务数: {}, 新标记可达服务数: {}, 不可达服务数: {}, 当前可达服务总数: {}",
           serverName, size, up, down, reachableServerMap.size());
-    } else if (log.isDebugEnabled()) {
-      log.debug("对 {} 服务列表执行心跳检测, 当前总服务数: {}, 新标记可达服务数: {}, 不可达服务数: {}, 当前可达服务总数: {}",
-          serverName, size, up, down, reachableServerMap.size());
     }
+//    else if (log.isDebugEnabled()) {
+//      log.debug("对 {} 服务列表执行心跳检测, 当前总服务数: {}, 新标记可达服务数: {}, 不可达服务数: {}, 当前可达服务总数: {}",
+//          serverName, size, up, down, reachableServerMap.size());
+//    }
   }
 
   @Override
@@ -237,11 +238,6 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
     if (!destroyed) {
       destroyed = true;
     }
-  }
-
-  @Override
-  public boolean isDestroyed() {
-    return destroyed;
   }
 
   private void refreshReachableServers() {

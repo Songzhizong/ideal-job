@@ -23,10 +23,13 @@ import java.time.LocalDateTime;
 @Table(
     name = "job_info",
     indexes = {
-        @Index(name = "ck_platform_tenant", columnList = "platform,tenant_id"),
+        @Index(name = "ck_application_tenant", columnList = "application,tenant_id"),
         @Index(name = "executor_id", columnList = "executor_id"),
         @Index(name = "biz_type", columnList = "biz_type"),
+        @Index(name = "custom_tag", columnList = "custom_tag"),
         @Index(name = "business_id", columnList = "business_id"),
+        @Index(name = "executor_handler", columnList = "executor_handler"),
+        @Index(name = "next_trigger_time", columnList = "next_trigger_time"),
     }
 )
 @org.hibernate.annotations.Table(appliesTo = "job_info", comment = "任务信息")
@@ -34,6 +37,8 @@ import java.time.LocalDateTime;
 @Where(clause = "deleted = 0")
 @EntityListeners(AuditingEntityListener.class)
 public class JobInfo {
+  public static final int JOB_START = 1;
+  public static final int JOB_STOP = 0;
   /**
    * 任务Id
    */
@@ -49,6 +54,16 @@ public class JobInfo {
   private Long jobId;
 
   /**
+   * 所属应用
+   */
+  @Column(
+      name = "application", nullable = false, updatable = false, length = 64
+      , columnDefinition = "varchar(64) comment '所属应用'"
+  )
+  @Nonnull
+  private String application;
+
+  /**
    * 租户ID
    */
   @Column(
@@ -59,16 +74,6 @@ public class JobInfo {
   private String tenantId;
 
   /**
-   * 所属平台
-   */
-  @Column(
-      name = "platform", nullable = false, updatable = false, length = 64
-      , columnDefinition = "varchar(64) comment '所属平台'"
-  )
-  @Nonnull
-  private String platform;
-
-  /**
    * 业务分类
    */
   @Column(
@@ -77,6 +82,16 @@ public class JobInfo {
   )
   @Nonnull
   private String bizType;
+
+  /**
+   * 业务方自定义标签
+   */
+  @Column(
+      name = "custom_tag", nullable = false, updatable = false, length = 64
+      , columnDefinition = "varchar(64) comment '业务方自定义标签'"
+  )
+  @Nonnull
+  private String customTag;
 
   /**
    * 业务方Id
@@ -107,14 +122,14 @@ public class JobInfo {
   private String cron;
 
   /**
-   * 任务描述
+   * 任务名称
    */
   @Column(
-      name = "description", nullable = false, length = 200
-      , columnDefinition = "varchar(200) comment '任务描述'"
+      name = "job_name", nullable = false, length = 200
+      , columnDefinition = "varchar(200) comment '任务名称'"
   )
   @Nonnull
-  private String description;
+  private String jobName;
 
   /**
    * 告警邮件地址
@@ -138,11 +153,11 @@ public class JobInfo {
   private LbStrategyEnum routeStrategy;
 
   /**
-   * 执行器任务handler
+   * JobHandler
    */
   @Column(
       name = "executor_handler", nullable = false, length = 128
-      , columnDefinition = "varchar(128) comment '执行器任务handler'"
+      , columnDefinition = "varchar(128) comment 'JobHandler'"
   )
   @Nonnull
   private String executorHandler;
@@ -245,6 +260,15 @@ public class JobInfo {
   }
 
   @Nonnull
+  public String getApplication() {
+    return application;
+  }
+
+  public void setApplication(@Nonnull String platform) {
+    this.application = platform;
+  }
+
+  @Nonnull
   public String getTenantId() {
     return tenantId;
   }
@@ -254,21 +278,21 @@ public class JobInfo {
   }
 
   @Nonnull
-  public String getPlatform() {
-    return platform;
-  }
-
-  public void setPlatform(@Nonnull String platform) {
-    this.platform = platform;
-  }
-
-  @Nonnull
   public String getBizType() {
     return bizType;
   }
 
   public void setBizType(@Nonnull String bizType) {
     this.bizType = bizType;
+  }
+
+  @Nonnull
+  public String getCustomTag() {
+    return customTag;
+  }
+
+  public void setCustomTag(@Nonnull String customTag) {
+    this.customTag = customTag;
   }
 
   @Nonnull
@@ -298,12 +322,12 @@ public class JobInfo {
   }
 
   @Nonnull
-  public String getDescription() {
-    return description;
+  public String getJobName() {
+    return jobName;
   }
 
-  public void setDescription(@Nonnull String description) {
-    this.description = description;
+  public void setJobName(@Nonnull String description) {
+    this.jobName = description;
   }
 
   @Nonnull

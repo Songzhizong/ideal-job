@@ -21,7 +21,6 @@ class JobTriggerLogService(private val jobTriggerLogRepository: JobTriggerLogRep
     return jobTriggerLogRepository.findByIdOrNull(triggerId)
   }
 
-  @Transactional(rollbackFor = [Exception::class])
   fun updateWhenTriggerCallback(triggerLog: JobTriggerLog): Int {
     return jobTriggerLogRepository.updateWhenTriggerCallback(triggerLog)
   }

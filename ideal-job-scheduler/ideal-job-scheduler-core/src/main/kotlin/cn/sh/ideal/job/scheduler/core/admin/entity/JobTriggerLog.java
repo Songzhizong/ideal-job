@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
     name = "job_trigger_log",
     indexes = {
         @Index(name = "job_id", columnList = "job_id"),
-        @Index(name = "update_time", columnList = "update_time"),
+        @Index(name = "created_time", columnList = "created_time"),
     }
 )
 @org.hibernate.annotations.Table(appliesTo = "job_trigger_log", comment = "触发日志")

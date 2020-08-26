@@ -1,7 +1,5 @@
 package cn.sh.ideal.job.common.loadbalancer;
 
-import cn.sh.ideal.job.common.Destroyable;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.function.Function;
@@ -12,7 +10,7 @@ import java.util.function.Function;
  * @author 宋志宗
  * @date 2020/8/20
  */
-public interface LbFactory<Server extends LbServer> extends Destroyable {
+public interface LbFactory<Server extends LbServer> {
 
   /**
    * 选取一个server, 默认为轮询策略
@@ -90,4 +88,9 @@ public interface LbFactory<Server extends LbServer> extends Destroyable {
   LbServerHolder<Server> getServerHolder(
       @Nonnull String serverName,
       @Nullable Function<String, LbServerHolder<Server>> function);
+
+  /**
+   * 销毁对象
+   */
+  void destroy();
 }

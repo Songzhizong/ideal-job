@@ -43,7 +43,8 @@ public final class JobThreadFactory {
    * @date 2020/8/23 12:12
    */
   @Nonnull
-  public static JobThread computeIfAbsent(@Nonnull String jobId, Function<String, JobThread> function) {
+  public static JobThread computeIfAbsent(@Nonnull String jobId,
+                                          Function<String, JobThread> function) {
     return JOB_THREAD_MAP.computeIfAbsent(jobId, k -> {
       JobThread thread = function.apply(jobId);
       if (thread == null) {

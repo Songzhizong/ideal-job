@@ -1,6 +1,6 @@
 package cn.sh.ideal.job.executor.core;
 
-import cn.sh.ideal.job.common.ParseException;
+import cn.sh.ideal.job.common.exception.ParseException;
 import cn.sh.ideal.job.common.executor.RemoteJobExecutor;
 import cn.sh.ideal.job.common.message.MessageType;
 import cn.sh.ideal.job.common.message.SocketMessage;
@@ -11,7 +11,6 @@ import io.netty.handler.timeout.ReadTimeoutException;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.buffer.DataBufferFactory;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
@@ -135,7 +134,12 @@ public final class ReactorWebSocketRemoteJobExecutor extends Thread implements R
                 }
               });
           final Flux<Void> output = directProcessor.map(session::textMessage)
-              .flatMap(message -> session.send(Mono.just(message)));
+              .flatMap(message -> session.send(Mono.just(message)))
+              .doOnError(throwable -> {
+                String message = throwable.getClass().getSimpleName() +
+                    ":" + throwable.getMessage();
+                log.info("发送消息出现异常: {}", message);
+              });
           return Flux.merge(input, output).then()
               .doFinally(signalType -> {
                 running = false;
@@ -144,7 +148,8 @@ public final class ReactorWebSocketRemoteJobExecutor extends Thread implements R
                   restartSocket();
                 }
               });
-        }).onTerminateDetach()
+        })
+        .onTerminateDetach()
         .doOnError(throwable -> {
           if (throwable instanceof ReadTimeoutException) {
             log.error("等待来自调度器: {} 的消息超时, 请检测该调度器的运行状态."
@@ -173,8 +178,7 @@ public final class ReactorWebSocketRemoteJobExecutor extends Thread implements R
     restartNoticeQueue.offer(true);
   }
 
-  public synchronized void sendMessage(@Nonnull String message) {
-//    socketSession.send(Mono.just(socketSession.textMessage(message))).subscribe();
+  public void sendMessage(@Nonnull String message) {
     directProcessor.onNext(message);
   }
 
@@ -248,7 +252,7 @@ public final class ReactorWebSocketRemoteJobExecutor extends Thread implements R
           startSocket();
         }
       } catch (InterruptedException e) {
-        log.debug("{}", e.getMessage());
+        // Interrupted
       }
     }
   }
@@ -291,7 +295,7 @@ public final class ReactorWebSocketRemoteJobExecutor extends Thread implements R
     try {
       directProcessor.dispose();
     } catch (Exception exception) {
-      // non
+      // not care
     }
     try {
       socketSession.close();
