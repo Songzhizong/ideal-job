@@ -5,8 +5,8 @@ import cn.sh.ideal.job.common.executor.JobExecutor
 import cn.sh.ideal.job.common.loadbalancer.LbFactory
 import cn.sh.ideal.job.common.message.payload.ExecuteJobCallback
 import cn.sh.ideal.job.common.message.payload.ExecuteJobParam
-import cn.sh.ideal.job.common.res.CommonResMsg
-import cn.sh.ideal.job.common.res.Res
+import cn.sh.ideal.job.common.transfer.CommonResMsg
+import cn.sh.ideal.job.common.transfer.Res
 import cn.sh.ideal.job.scheduler.core.admin.entity.JobTriggerLog
 import cn.sh.ideal.job.scheduler.core.admin.service.JobTriggerLogService
 import org.apache.commons.lang3.StringUtils

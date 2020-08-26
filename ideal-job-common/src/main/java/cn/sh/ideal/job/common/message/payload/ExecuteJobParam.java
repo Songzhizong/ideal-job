@@ -1,7 +1,7 @@
 package cn.sh.ideal.job.common.message.payload;
 
-import cn.sh.ideal.job.common.ParseException;
 import cn.sh.ideal.job.common.constants.BlockStrategyEnum;
+import cn.sh.ideal.job.common.exception.ParseException;
 import cn.sh.ideal.job.common.message.MessageType;
 import cn.sh.ideal.job.common.utils.JsonUtils;
 import lombok.Getter;

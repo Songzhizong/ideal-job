@@ -1,4 +1,4 @@
-package cn.sh.ideal.job.common.res;
+package cn.sh.ideal.job.common.transfer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -517,7 +517,8 @@ public class Res<T> implements Serializable {
     }
 
     public Res<T> build() {
-      return new Res<>(this.id, this.success, this.code, this.message, this.data, this.page, this.size, this.total, this.totalPages);
+      return new Res<>(this.id, this.success, this.code, this.message,
+          this.data, this.page, this.size, this.total, this.totalPages);
     }
   }
 }

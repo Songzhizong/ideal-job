@@ -1,6 +1,6 @@
 package cn.sh.ideal.job.executor.core;
 
-import cn.sh.ideal.job.common.ParseException;
+import cn.sh.ideal.job.common.exception.ParseException;
 import cn.sh.ideal.job.common.executor.RemoteJobExecutor;
 import cn.sh.ideal.job.common.message.MessageType;
 import cn.sh.ideal.job.common.message.SocketMessage;

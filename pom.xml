@@ -9,7 +9,6 @@
   <packaging>pom</packaging>
   <version>1.0.0</version>
 
-
   <modules>
     <module>ideal-job-common</module>
     <module>ideal-job-executor</module>

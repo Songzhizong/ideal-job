@@ -1,6 +1,6 @@
 package cn.sh.ideal.job.scheduler.core.socket.handler.impl
 
-import cn.sh.ideal.job.common.ParseException
+import cn.sh.ideal.job.common.exception.ParseException
 import cn.sh.ideal.job.common.message.MessageType
 import cn.sh.ideal.job.common.message.SocketMessage
 import cn.sh.ideal.job.common.message.payload.IdleBeatCallback

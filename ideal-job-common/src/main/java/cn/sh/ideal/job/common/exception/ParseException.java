@@ -1,4 +1,4 @@
-package cn.sh.ideal.job.common;
+package cn.sh.ideal.job.common.exception;
 
 /**
  * @author 宋志宗

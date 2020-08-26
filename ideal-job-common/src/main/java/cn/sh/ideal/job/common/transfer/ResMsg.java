@@ -1,4 +1,4 @@
-package cn.sh.ideal.job.common.res;
+package cn.sh.ideal.job.common.transfer;
 
 import javax.annotation.Nonnull;
 
