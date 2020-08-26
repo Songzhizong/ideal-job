@@ -59,17 +59,17 @@ public class CreateJobArgs {
   @Nullable
   private Integer retryCount;
   /**
-   * 任务描述
+   * 任务名称
    */
   @Nullable
-  private String description;
+  private String jobName;
   /**
    * 告警邮件地址
    */
   @Nullable
   private String alarmEmail;
 
-  // ---------------------------- 以下为扩展查询字段, 适用于各种场景的查询需求
+  // ---------------------------- 以下为扩展查询字段, 适用于各种业务场景的查询需求
 
   /**
    * 所属应用, 用于多应用隔离

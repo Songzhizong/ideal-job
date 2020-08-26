@@ -40,6 +40,10 @@ public class Paging {
     return "page=" + page + "&size=" + size;
   }
 
+  public void cleanOrders() {
+    this.orders = null;
+  }
+
   /**
    * 添加升序排序条件
    *
@@ -48,7 +52,7 @@ public class Paging {
   @Nonnull
   public Paging ascBy(@Nonnull String property) {
     if (orders == null) {
-      orders = new ArrayList<>();
+      orders = new ArrayList<>(2);
     }
     orders.add(Order.asc(property));
     return this;
@@ -62,7 +66,7 @@ public class Paging {
   @Nonnull
   public Paging descBy(@Nonnull String property) {
     if (orders == null) {
-      orders = new ArrayList<>();
+      orders = new ArrayList<>(2);
     }
     orders.add(Order.desc(property));
     return this;

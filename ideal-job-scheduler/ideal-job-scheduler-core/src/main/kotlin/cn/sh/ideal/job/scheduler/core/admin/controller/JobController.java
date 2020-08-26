@@ -7,7 +7,7 @@ import cn.sh.ideal.job.scheduler.api.dto.req.UpdateJobArgs;
 import cn.sh.ideal.job.scheduler.api.dto.rsp.JobInfoRsp;
 import cn.sh.ideal.job.scheduler.core.admin.service.JobService;
 import cn.sh.ideal.job.common.transfer.Res;
-import cn.sh.ideal.job.scheduler.api.client.JobApi;
+import cn.sh.ideal.job.scheduler.api.client.JobClient;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,7 +27,7 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping("/job")
-public class JobController implements JobApi {
+public class JobController implements JobClient {
 
   private final JobService jobService;
 
@@ -62,8 +62,9 @@ public class JobController implements JobApi {
   @Nonnull
   @Override
   @PostMapping("/update")
-  public Res<Void> update(@Nonnull UpdateJobArgs updateJobArgs) {
-    return null;
+  public Res<Void> update(@Validated @RequestBody
+                          @Nonnull UpdateJobArgs updateJobArgs) {
+    return jobService.updateJob(updateJobArgs);
   }
 
   /**
@@ -78,7 +79,7 @@ public class JobController implements JobApi {
   @Override
   @PostMapping("/remove")
   public Res<Void> remove(@Nonnull Long jobId) {
-    return null;
+    return jobService.removeJob(jobId);
   }
 
   /**
@@ -95,7 +96,15 @@ public class JobController implements JobApi {
   @PostMapping("/query")
   public Res<List<JobInfoRsp>> query(@RequestBody @Nullable QueryJobArgs args,
                                      @Nullable Paging paging) {
-    return null;
+    if (args == null) {
+      args = new QueryJobArgs();
+    }
+    if (paging == null) {
+      paging = Paging.of(1, 10);
+    }
+    paging.cleanOrders();
+    paging.descBy("jobId");
+    return jobService.query(args, paging);
   }
 
   /**

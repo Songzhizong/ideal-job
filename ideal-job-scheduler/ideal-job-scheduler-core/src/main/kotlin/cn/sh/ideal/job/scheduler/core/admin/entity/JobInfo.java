@@ -23,11 +23,13 @@ import java.time.LocalDateTime;
 @Table(
     name = "job_info",
     indexes = {
-        @Index(name = "ck_application_tenant", columnList = "application,tenant_id"),
+        @Index(name = "application", columnList = "application"),
+        @Index(name = "tenant_id", columnList = "tenant_id"),
         @Index(name = "executor_id", columnList = "executor_id"),
         @Index(name = "biz_type", columnList = "biz_type"),
         @Index(name = "custom_tag", columnList = "custom_tag"),
         @Index(name = "business_id", columnList = "business_id"),
+        @Index(name = "job_name", columnList = "job_name"),
         @Index(name = "executor_handler", columnList = "executor_handler"),
         @Index(name = "next_trigger_time", columnList = "next_trigger_time"),
     }

@@ -13,10 +13,12 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
+ * 任务管理
+ *
  * @author 宋志宗
  * @date 2020/8/20
  */
-public interface JobApi {
+public interface JobClient {
 
   /**
    * 新建任务

@@ -36,29 +36,30 @@ public class SpringPages {
    * @param page     {@link Page}
    * @param function 对{@link Page}中的content进行类型转换
    * @param <S>      {@link Page} 中的原始类型
-   * @param <T>      function的返回类型
+   * @param <R>      function的返回类型
    * @return {@link Res} datas
    */
   @Nonnull
-  public static <S, T> Res<List<T>> page(@Nonnull Page<S> page, @Nonnull Function<S, T> function) {
+  public static <S, R> Res<List<R>> page(@Nonnull Page<S> page,
+                                         @Nonnull Function<S, R> function) {
     List<S> content = page.getContent();
-    List<T> datas = new ArrayList<>();
+    List<R> data = new ArrayList<>();
     for (S s : content) {
-      datas.add(function.apply(s));
+      data.add(function.apply(s));
     }
-    return page(page, datas);
+    return page(page, data);
   }
 
   /**
    * 将{@link Page}转换为带分页相关数据的{@link Res}对象
    *
    * @param page  {@link Page}
-   * @param datas 响应数据
+   * @param dataList 响应数据
    * @param <T>   datas的泛型
-   * @return {@link Res} datas
+   * @return {@link Res} dataList
    */
   @Nonnull
-  public static <T> Res<List<T>> page(@Nonnull Page<?> page, @Nonnull List<T> datas) {
+  public static <T> Res<List<T>> page(@Nonnull Page<?> page, @Nonnull List<T> dataList) {
     long totalElements = page.getTotalElements();
     int totalPages = page.getTotalPages();
     int number = page.getNumber();
@@ -67,7 +68,7 @@ public class SpringPages {
         .success(true)
         .code(CommonResMsg.SUCCESS.code())
         .message(CommonResMsg.SUCCESS.message())
-        .data(datas)
+        .data(dataList)
         // spring的页码从0开始, 我们的从1开始
         .page(number + 1)
         .size(size)

@@ -13,6 +13,8 @@ import javax.annotation.Nonnull;
 @Component
 @ConfigurationProperties("ideal.job")
 public class JobSchedulerProperties {
+  private String lockTable = "job_lock";
+  private String scheduleLockName = "schedule_lock";
   /**
    * 建立连接后等待客户端注册的时间
    */
@@ -22,6 +24,22 @@ public class JobSchedulerProperties {
 
   @NestedConfigurationProperty
   private ThreadPoolProperties executeJobCallbackPool = new ThreadPoolProperties();
+
+  public String getLockTable() {
+    return lockTable;
+  }
+
+  public void setLockTable(String lockTable) {
+    this.lockTable = lockTable;
+  }
+
+  public String getScheduleLockName() {
+    return scheduleLockName;
+  }
+
+  public void setScheduleLockName(String scheduleLockName) {
+    this.scheduleLockName = scheduleLockName;
+  }
 
   public int getWeightRegisterSeconds() {
     return weightRegisterSeconds;
