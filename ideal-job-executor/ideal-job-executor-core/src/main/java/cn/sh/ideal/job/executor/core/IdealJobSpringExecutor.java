@@ -24,7 +24,7 @@ import java.util.Map;
 public final class IdealJobSpringExecutor extends JobExecutor
     implements ApplicationContextAware, SmartInitializingSingleton {
   private static final Logger log = LoggerFactory.getLogger(IdealJobSpringExecutor.class);
-  private static ApplicationContext applicationContext;
+  private ApplicationContext applicationContext;
 
   public IdealJobSpringExecutor() {
     super();
@@ -39,7 +39,7 @@ public final class IdealJobSpringExecutor extends JobExecutor
   @Override
   public void setApplicationContext(@Nonnull ApplicationContext applicationContext)
       throws BeansException {
-    IdealJobSpringExecutor.applicationContext = applicationContext;
+    this.applicationContext = applicationContext;
   }
 
   private void initJobHandler() {
@@ -65,7 +65,8 @@ public final class IdealJobSpringExecutor extends JobExecutor
           if (parameterTypes.length > 1) {
             String className = bean.getClass().getName();
             String methodName = method.getName();
-            log.error("{}#{} 参数列表过长, 支持空入参或者一个String类型入参", className, methodName);
+            log.error("{}#{} 参数列表过长, 支持空入参或者一个String类型入参",
+                className, methodName);
             continue;
           }
           boolean hasParam;
@@ -76,7 +77,8 @@ public final class IdealJobSpringExecutor extends JobExecutor
             if (!firstType.isAssignableFrom(String.class)) {
               String className = bean.getClass().getName();
               String methodName = method.getName();
-              log.error("{}#{} 参数类型不合法, 支持空入参或者一个String类型入参", className, methodName);
+              log.error("{}#{} 参数类型不合法, 支持空入参或者一个String类型入参",
+                  className, methodName);
               continue;
             }
             hasParam = true;
@@ -91,7 +93,8 @@ public final class IdealJobSpringExecutor extends JobExecutor
               initMethod.setAccessible(true);
             } catch (NoSuchMethodException e) {
               String className = bean.getClass().getName();
-              log.error("Class: {} 下找不到名称为: {} 的方法", className, initMethodName);
+              log.error("Class: {} 下找不到名称为: {} 的方法",
+                  className, initMethodName);
             }
           }
           if (StringUtils.isNotBlank(destroyMethodName)) {
@@ -103,7 +106,8 @@ public final class IdealJobSpringExecutor extends JobExecutor
               log.error("Class: {} 下找不到名称为: {} 的方法", className, destroyMethodName);
             }
           }
-          MethodJobHandler jobHandler = new MethodJobHandler(bean, method, hasParam, initMethod, destroyMethod);
+          MethodJobHandler jobHandler
+              = new MethodJobHandler(bean, method, hasParam, initMethod, destroyMethod);
           JobHandlerFactory.register(handlerName, jobHandler);
         }
       }

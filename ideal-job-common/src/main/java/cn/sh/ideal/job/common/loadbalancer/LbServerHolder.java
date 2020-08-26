@@ -1,7 +1,5 @@
 package cn.sh.ideal.job.common.loadbalancer;
 
-import cn.sh.ideal.job.common.Destroyable;
-
 import javax.annotation.Nonnull;
 import java.util.List;
 
@@ -11,7 +9,8 @@ import java.util.List;
  * @author 宋志宗
  * @date 2020/8/19
  */
-public interface LbServerHolder<Server extends LbServer> extends Destroyable {
+@SuppressWarnings({"unused", "RedundantSuppression"})
+public interface LbServerHolder<Server extends LbServer> {
 
   /**
    * 添加一组服务
@@ -68,4 +67,9 @@ public interface LbServerHolder<Server extends LbServer> extends Destroyable {
    */
   @Nonnull
   List<Server> getAllServers();
+
+  /**
+   * 销毁对象
+   */
+  void destroy();
 }

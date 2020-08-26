@@ -23,11 +23,10 @@ public class SampleJob {
 
   static {
     Executors.newSingleThreadScheduledExecutor()
-        .scheduleAtFixedRate(() -> {
-          log.info("count: {}", atomicLong.get());
-        }, 10, 10, TimeUnit.SECONDS);
+        .scheduleAtFixedRate(
+            () -> log.info("count: {}", atomicLong.get()),
+            10, 10, TimeUnit.SECONDS);
   }
-
 
   @JobHandler("demoJobHandler")
   public void demoJobHandler(@Nonnull String param) {

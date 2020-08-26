@@ -24,5 +24,6 @@ interface JobTriggerLogRepository : JpaRepository<JobTriggerLog, Long> {
         and log.handleSequence < :#{#triggerLog.handleSequence}
   """)
   @Modifying
+  @Transactional(rollbackFor = [Exception::class])
   fun updateWhenTriggerCallback(@Param("triggerLog") triggerLog: JobTriggerLog): Int
 }

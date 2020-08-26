@@ -26,7 +26,8 @@ final class IdleBeatCallbackMessageHandler : MessageHandler {
     MessageHandlerFactory.register(MessageType.IDLE_BEAT_CALLBACK, this)
   }
 
-  override fun execute(executor: SocketJobExecutor, socketMessage: SocketMessage) {
+  override fun execute(executor: SocketJobExecutor,
+                       socketMessage: SocketMessage) {
     val payload = socketMessage.payload
     val idleBeatCallback = try {
       IdleBeatCallback.parseMessage(payload)

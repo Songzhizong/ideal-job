@@ -30,7 +30,6 @@ public final class JobThread extends Thread {
   private static final Logger log = LoggerFactory.getLogger(JobThread.class);
   private static final long autoIdleBeatNoticeTime = 10 * 1000;
   private static final int jobQueueSize = 1000;
-  @SuppressWarnings("PointlessArithmeticExpression")
   private static final long autoDestroyMills = 5 * 60 * 1000;
 
   @Getter
@@ -61,8 +60,10 @@ public final class JobThread extends Thread {
     jobQueue = new ArrayBlockingQueue<>(jobQueueSize);
     idleBeatPool = new ThreadPoolExecutor(0, 1,
         60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1),
-        runnable -> new Thread(runnable, "idle-beat-pool-" + jobId + "-" + runnable.hashCode()),
+        runnable -> new Thread(runnable, "idle-beat-pool-" +
+            jobId + "-" + runnable.hashCode()),
         new ThreadPoolExecutor.DiscardPolicy());
+    log.debug("新建任务线程, jobId: {}, jobHandler: {}", jobId, jobHandler.toString());
   }
 
   public void putJob(@Nonnull ExecuteJobParam param) {

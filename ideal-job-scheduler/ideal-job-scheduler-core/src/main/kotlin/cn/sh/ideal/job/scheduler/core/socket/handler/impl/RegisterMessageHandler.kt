@@ -55,7 +55,8 @@ final class RegisterMessageHandler(
             appName, instanceId, registerToken)
         callback.isSuccess = false
         callback.message = "accessToken不合法"
-        val callbackMessage = SocketMessage(RegisterCallback.typeCode, callback.toMessageString())
+        val callbackMessage = SocketMessage(RegisterCallback.typeCode,
+            callback.toMessageString())
         executor.sendMessage(callbackMessage.toMessageString())
         executor.destroy()
         return
@@ -68,7 +69,8 @@ final class RegisterMessageHandler(
         appName, instanceId, payload)
     callback.isSuccess = true
     callback.message = "success"
-    val callbackMessage = SocketMessage(RegisterCallback.typeCode, callback.toMessageString())
+    val callbackMessage = SocketMessage(RegisterCallback.typeCode,
+        callback.toMessageString())
     executor.sendMessage(callbackMessage.toMessageString())
   }
 }

@@ -61,11 +61,6 @@ public class SimpleLbFactory<Server extends LbServer> implements LbFactory<Serve
     }
   }
 
-  @Override
-  public boolean isDestroyed() {
-    return destroyed;
-  }
-
   @SuppressWarnings("DuplicateBranchesInSwitch")
   private LoadBalancer<Server> newLoadBalancer(@Nonnull LbStrategyEnum strategy) {
     switch (strategy) {

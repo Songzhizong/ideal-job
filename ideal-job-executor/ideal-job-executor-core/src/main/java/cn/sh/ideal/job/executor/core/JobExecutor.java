@@ -1,6 +1,5 @@
 package cn.sh.ideal.job.executor.core;
 
-import cn.sh.ideal.job.common.Destroyable;
 import cn.sh.ideal.job.common.executor.RemoteJobExecutor;
 import cn.sh.ideal.job.common.loadbalancer.LbFactory;
 import cn.sh.ideal.job.common.loadbalancer.LbServerHolder;
@@ -24,7 +23,7 @@ import java.util.*;
  */
 @Getter
 @Setter
-public class JobExecutor implements Destroyable {
+public class JobExecutor {
   private static final Logger log = LoggerFactory.getLogger(JobExecutor.class);
   private static final String SCHEDULER_SERVER_NAME = "ideal-job-scheduler";
   private static final LbFactory<RemoteJobExecutor> lbFactory = new SimpleLbFactory<>();
@@ -52,7 +51,6 @@ public class JobExecutor implements Destroyable {
     initRemoteExecutors();
   }
 
-  @Override
   public void destroy() {
     if (!destroyed) {
       log.info("JobExecutor destroy.");
@@ -65,10 +63,12 @@ public class JobExecutor implements Destroyable {
 
 
   private void initRemoteExecutors() {
-    final String[] addresses = StringUtils.split(schedulerAddresses, ",");
+    final String[] addresses = StringUtils
+        .split(schedulerAddresses, ",");
 //    List<RemoteJobExecutor> remoteExecutors = new ArrayList<>();
     for (String address : addresses) {
-      ReactorWebSocketRemoteJobExecutor executor = new ReactorWebSocketRemoteJobExecutor(address);
+      ReactorWebSocketRemoteJobExecutor executor
+          = new ReactorWebSocketRemoteJobExecutor(address);
       executor.setAppName(appName);
       executor.setIp(ip);
       executor.setPort(port);
@@ -107,13 +107,19 @@ public class JobExecutor implements Destroyable {
       log.error("不存在此jobHandler: {}", handlerName);
       return;
     }
-    JobThread jobThread = JobThreadFactory.computeIfAbsent(jobId, k -> new JobThread(jobId, jobHandler));
-    final IJobHandler currentJobHandler = jobThread.getJobHandler();
+    JobThread jobThread = JobThreadFactory
+        .computeIfAbsent(jobId, k -> new JobThread(jobId, jobHandler));
     // 如果JobHandler发生了变更, 则将原有的jobThread弃用并注册新的jobThread
-    if (jobHandler != currentJobHandler) {
-      jobThread.setDeprecated(true);
-      jobThread = new JobThread(jobId, jobHandler);
-      JobThreadFactory.register(jobId, jobThread);
+    if (jobHandler != jobThread.getJobHandler()) {
+      synchronized (jobId) {
+        jobThread = JobThreadFactory
+            .computeIfAbsent(jobId, k -> new JobThread(jobId, jobHandler));
+        if (jobHandler != jobThread.getJobHandler()) {
+          jobThread.setDeprecated(true);
+          jobThread = new JobThread(jobId, jobHandler);
+          JobThreadFactory.register(jobId, jobThread);
+        }
+      }
     }
     jobThread.putJob(param);
   }
