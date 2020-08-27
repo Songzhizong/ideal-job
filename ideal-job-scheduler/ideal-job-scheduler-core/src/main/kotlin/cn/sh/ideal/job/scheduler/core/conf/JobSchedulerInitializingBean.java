@@ -6,31 +6,24 @@ import cn.sh.ideal.job.scheduler.core.trigger.ScheduleTrigger;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.sql.DataSource;
-
 /**
  * @author 宋志宗
  * @date 2020/7/4
  */
 @Configuration
 public class JobSchedulerInitializingBean implements InitializingBean {
-  private final DataSource dataSource;
   private final IDGenerator idGenerator;
-  private final JobSchedulerProperties properties;
+  private final ScheduleTrigger scheduleTrigger;
 
-  public JobSchedulerInitializingBean(DataSource dataSource,
-                                      IDGenerator idGenerator,
-                                      JobSchedulerProperties properties) {
-    this.dataSource = dataSource;
+  public JobSchedulerInitializingBean(IDGenerator idGenerator,
+                                      ScheduleTrigger scheduleTrigger) {
     this.idGenerator = idGenerator;
-    this.properties = properties;
+    this.scheduleTrigger = scheduleTrigger;
   }
 
   @Override
   public void afterPropertiesSet() {
-    ScheduleTrigger.INSTANCE.setDataSource(dataSource);
-    ScheduleTrigger.INSTANCE.setLockTable(properties.getLockTable());
-    ScheduleTrigger.INSTANCE.setScheduleLockName(properties.getScheduleLockName());
     JpaIdentityGenerator.setIdGenerator(idGenerator);
+    scheduleTrigger.start();
   }
 }

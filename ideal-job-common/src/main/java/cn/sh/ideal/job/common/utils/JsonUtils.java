@@ -51,6 +51,10 @@ public class JsonUtils {
       .registerModule(javaTimeModule)
       .findAndRegisterModules();
 
+  public static SimpleModule getJavaTimeModule() {
+    return javaTimeModule;
+  }
+
   public static <T> String toJsonString(T t) {
     return toJsonString(t, false);
   }

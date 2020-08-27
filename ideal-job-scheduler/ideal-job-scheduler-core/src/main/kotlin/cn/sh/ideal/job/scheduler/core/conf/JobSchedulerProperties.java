@@ -25,6 +25,9 @@ public class JobSchedulerProperties {
   @NestedConfigurationProperty
   private ThreadPoolProperties executeJobCallbackPool = new ThreadPoolProperties();
 
+  @NestedConfigurationProperty
+  private ThreadPoolProperties cronJobTriggerPool = new ThreadPoolProperties();
+
   public String getLockTable() {
     return lockTable;
   }
@@ -64,5 +67,13 @@ public class JobSchedulerProperties {
 
   public void setExecuteJobCallbackPool(ThreadPoolProperties executeJobCallbackPool) {
     this.executeJobCallbackPool = executeJobCallbackPool;
+  }
+
+  public ThreadPoolProperties getCronJobTriggerPool() {
+    return cronJobTriggerPool;
+  }
+
+  public void setCronJobTriggerPool(ThreadPoolProperties cronJobTriggerPool) {
+    this.cronJobTriggerPool = cronJobTriggerPool;
   }
 }

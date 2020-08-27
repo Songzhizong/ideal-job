@@ -220,7 +220,7 @@ class JobService(private val jobTrigger: JobTrigger,
           cq.where(*predicates.toTypedArray()).restriction
         }, SpringPages.paging2Pageable(paging)
     )
-    return SpringPages.page(page) { JobInfoConverter.toJobInfoRsp(it) }
+    return SpringPages.toPageRes(page) { JobInfoConverter.toJobInfoRsp(it) }
   }
 
   /**
@@ -315,7 +315,6 @@ class JobService(private val jobTrigger: JobTrigger,
     triggerParam.jobId = jobId
     triggerParam.executorId = executorId
     triggerParam.triggerType = TriggerTypeEnum.MANUAL
-    triggerParam.executorAppName = executor.appName
     triggerParam.executorHandler = jobInfo.executorHandler
     triggerParam.executorParam = executorParam ?: jobInfo.executorParam
     triggerParam.routeStrategy = jobInfo.routeStrategy
@@ -324,14 +323,16 @@ class JobService(private val jobTrigger: JobTrigger,
     return jobTrigger.trigger(triggerParam)
   }
 
-  fun existJobByExecutorId(executorId: Long): Boolean {
-    return jobInfoRepository.existByExecutorId(executorId)
+  fun existsByExecutorId(executorId: Long): Boolean {
+    return jobInfoRepository.existsByExecutorId(executorId)
   }
 
-  fun loadScheduleJob(maxNextTime: Long, count: Int): List<JobInfo> {
-    val pageRequest = PageRequest.of(0, count, Sort.by("jobId").ascending())
+  fun loadScheduleJobs(maxNextTime: Long, count: Int): List<JobInfo> {
+    val sort = Sort.by("jobId").ascending()
+    val pageRequest = PageRequest.of(0, count, sort)
+    val jobStart = JobInfo.JOB_START
     return jobInfoRepository
-        .findAllByJobStatusAndNextTriggerTimeLessThanEqual(JobInfo.JOB_START, maxNextTime, pageRequest)
+        .findAllByJobStatusAndNextTriggerTimeLessThanEqual(jobStart, maxNextTime, pageRequest)
   }
 
   fun batchUpdate(jobInfoList: List<JobInfo>) {

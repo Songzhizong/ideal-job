@@ -25,11 +25,6 @@ public class TriggerParam {
   @Nonnull
   private TriggerTypeEnum triggerType = TriggerTypeEnum.MANUAL;
   /**
-   * 执行器应用名称
-   */
-  @Nonnull
-  private String executorAppName = "";
-  /**
    * 执行器任务handler
    */
   @Nonnull
@@ -77,15 +72,6 @@ public class TriggerParam {
 
   public void setTriggerType(@Nonnull TriggerTypeEnum triggerType) {
     this.triggerType = triggerType;
-  }
-
-  @Nonnull
-  public String getExecutorAppName() {
-    return executorAppName;
-  }
-
-  public void setExecutorAppName(@Nonnull String executorAppName) {
-    this.executorAppName = executorAppName;
   }
 
   @Nonnull

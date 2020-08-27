@@ -15,6 +15,9 @@ import org.apache.commons.lang3.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.CachePut
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import java.util.ArrayList
@@ -26,12 +29,17 @@ import javax.persistence.criteria.Predicate
  */
 @Service
 class JobExecutorService(private val jobExecutorRepository: JobExecutorRepository) {
-  private val log: Logger = LoggerFactory.getLogger(this.javaClass)
+  companion object {
+    private val log: Logger = LoggerFactory.getLogger(JobExecutorService::class.java)
+    private const val cacheName = "ideal:job:cache:executor"
+  }
 
   @Autowired
   private lateinit var jobService: JobService
 
-  fun create(args: CreateExecutorArgs): Long {
+  @Suppress("SpringElInspection")
+  @CachePut(value = [cacheName], key = "#result.executorId")
+  fun create(args: CreateExecutorArgs): JobExecutor {
     val appName = args.appName
     val title = args.title
     val byAppName = jobExecutorRepository.findTopByAppName(appName)
@@ -42,13 +50,14 @@ class JobExecutorService(private val jobExecutorRepository: JobExecutorRepositor
     executor.appName = appName
     executor.title = title
     jobExecutorRepository.save(executor)
-    return executor.executorId
+    return executor
   }
 
-  fun update(args: UpdateExecutorArgs) {
-    val executorId = args.executorId
-    val appName = args.appName
-    val title = args.title
+  @CachePut(value = [cacheName], key = "#updateArgs.executorId")
+  fun update(updateArgs: UpdateExecutorArgs): JobExecutor {
+    val executorId = updateArgs.executorId
+    val appName = updateArgs.appName
+    val title = updateArgs.title
     val byAppName = jobExecutorRepository.findTopByAppName(appName)
     val byAppNameExecutorId = byAppName?.executorId
     if (byAppName != null && byAppNameExecutorId != executorId) {
@@ -63,10 +72,12 @@ class JobExecutorService(private val jobExecutorRepository: JobExecutorRepositor
     executor.appName = appName
     executor.title = title
     jobExecutorRepository.save(executor)
+    return executor
   }
 
+  @CacheEvict(value = [cacheName], key = "#executorId")
   fun delete(executorId: Long) {
-    val existJob = jobService.existJobByExecutorId(executorId)
+    val existJob = jobService.existsByExecutorId(executorId)
     if (existJob) {
       throw VisibleException("该执行器存在定时任务")
     }
@@ -93,9 +104,10 @@ class JobExecutorService(private val jobExecutorRepository: JobExecutorRepositor
           cq.where(*predicates.toTypedArray()).restriction
         }, SpringPages.paging2Pageable(paging)
     )
-    return SpringPages.page(page) { ExecutorConverter.toExecutorInfoRsp(it) }
+    return SpringPages.toPageRes(page) { ExecutorConverter.toExecutorInfoRsp(it) }
   }
 
+  @Cacheable(value = [cacheName], key = "#executorId")
   fun loadById(executorId: Long): JobExecutor? {
     return jobExecutorRepository.findByIdOrNull(executorId)
   }

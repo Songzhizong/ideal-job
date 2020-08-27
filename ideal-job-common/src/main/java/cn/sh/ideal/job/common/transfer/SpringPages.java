@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * @author 宋志宗
  * @date 2020/5/15
  */
-public class SpringPages {
+public final class SpringPages {
 
   /**
    * 将{@link Page}转换为带分页相关数据的{@link Res}对象
@@ -25,9 +25,9 @@ public class SpringPages {
    * @return {@link Res} data中的数据为{@link Page#getContent()}
    */
   @Nonnull
-  public static <T> Res<List<T>> page(@Nonnull Page<T> page) {
+  public static <T> Res<List<T>> toPageRes(@Nonnull Page<T> page) {
     List<T> content = page.getContent();
-    return page(page, content);
+    return toPageRes(page, content);
   }
 
   /**
@@ -40,26 +40,26 @@ public class SpringPages {
    * @return {@link Res} datas
    */
   @Nonnull
-  public static <S, R> Res<List<R>> page(@Nonnull Page<S> page,
-                                         @Nonnull Function<S, R> function) {
+  public static <S, R> Res<List<R>> toPageRes(@Nonnull Page<S> page,
+                                              @Nonnull Function<S, R> function) {
     List<S> content = page.getContent();
     List<R> data = new ArrayList<>();
     for (S s : content) {
       data.add(function.apply(s));
     }
-    return page(page, data);
+    return toPageRes(page, data);
   }
 
   /**
    * 将{@link Page}转换为带分页相关数据的{@link Res}对象
    *
-   * @param page  {@link Page}
+   * @param page     {@link Page}
    * @param dataList 响应数据
-   * @param <T>   datas的泛型
+   * @param <T>      datas的泛型
    * @return {@link Res} dataList
    */
   @Nonnull
-  public static <T> Res<List<T>> page(@Nonnull Page<?> page, @Nonnull List<T> dataList) {
+  public static <T> Res<List<T>> toPageRes(@Nonnull Page<?> page, @Nonnull List<T> dataList) {
     long totalElements = page.getTotalElements();
     int totalPages = page.getTotalPages();
     int number = page.getNumber();

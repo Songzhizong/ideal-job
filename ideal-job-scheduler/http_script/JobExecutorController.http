@@ -1,0 +1,12 @@
+###
+POST http://{{ip}}:{{port}}/executor/create
+Content-Type: application/json
+
+{
+  "appName": "SAMPLE-EXECUTOR-1",
+  "title": "示例执行器"
+}
+
+
+###
+GET http://{{ip}}:{{port}}/executor/loadById/130137745321361408

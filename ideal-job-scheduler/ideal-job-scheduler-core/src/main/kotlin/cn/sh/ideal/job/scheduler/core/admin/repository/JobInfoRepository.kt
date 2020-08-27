@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor
  * @date 2020/8/20
  */
 interface JobInfoRepository : JpaRepository<JobInfo, Long>, JpaSpecificationExecutor<JobInfo> {
-  fun existByExecutorId(executorId: Long): Boolean
+  fun existsByExecutorId(executorId: Long): Boolean
 
   fun findAllByJobStatusAndNextTriggerTimeLessThanEqual(jobStatus: Int,
                                                         maxNextTime: Long,
