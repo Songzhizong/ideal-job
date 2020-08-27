@@ -36,7 +36,7 @@ class ScheduleTrigger(private val dataSource: DataSource,
   private val scheduleLockName = jobSchedulerProperties.scheduleLockName
   private val preReadCount = 500
   private val preReadMills = 5000L
-  private val ringData = ConcurrentHashMap<Int, MutableList<Long>>()
+  private val ringData = ConcurrentHashMap<Int, MutableList<JobInfo>>()
   private var scheduleThread: Thread? = null
   private var ringThread: Thread? = null
 
@@ -46,6 +46,7 @@ class ScheduleTrigger(private val dataSource: DataSource,
   @Volatile
   private var ringThreadToStop = false
 
+  @Suppress("DuplicatedCode")
   fun start() {
     scheduleThread = Thread {
       try {
@@ -66,6 +67,7 @@ class ScheduleTrigger(private val dataSource: DataSource,
         try {
           connection = dataSource.connection
           autoCommit = connection.autoCommit
+          connection.autoCommit = false
           @Suppress("SqlResolve")
           val sql = "select * from $lockTable where lock_name = '$scheduleLockName' for update"
           preparedStatement = connection
@@ -93,19 +95,19 @@ class ScheduleTrigger(private val dataSource: DataSource,
                   if (jobInfo.jobStatus == JobInfo.JOB_START
                       && nowTime + preReadMills > newNextTriggerTime) {
                     val ringSecond = (newNextTriggerTime / 1000 % 60).toInt()
-                    pushTimeRing(ringSecond, jobInfo.jobId)
+                    pushTimeRing(ringSecond, jobInfo)
                     refreshNextValidTime(jobInfo, Date(newNextTriggerTime))
                   }
                 }
                 else -> {
                   val ringSecond = (nextTriggerTime / 1000 % 60).toInt()
-                  pushTimeRing(ringSecond, jobInfo.jobId)
+                  pushTimeRing(ringSecond, jobInfo)
                   refreshNextValidTime(jobInfo, Date(nextTriggerTime))
                 }
               }
             }
             // 更新任务信息
-            jobService.batchUpdate(jobList)
+            jobService.batchUpdateTriggerInfo(jobList)
           }
 
 
@@ -159,7 +161,7 @@ class ScheduleTrigger(private val dataSource: DataSource,
 
     ringThread = Thread {
       try {
-        TimeUnit.MILLISECONDS.sleep(1000 - System.currentTimeMillis() % 1000)
+        TimeUnit.MILLISECONDS.sleep(1000 - (System.currentTimeMillis() % 1000))
       } catch (e: Exception) {
         if (!scheduleThreadToStop) {
           val errMessage = "${e.javaClass.name}:${e.message}"
@@ -167,17 +169,30 @@ class ScheduleTrigger(private val dataSource: DataSource,
         }
       }
       while (!ringThreadToStop) {
-
+        val nowSecond = Calendar.getInstance().get(Calendar.SECOND)
+        for (i in 0..1) {
+          val tmpData = ringData.remove((nowSecond + 60 - i) % 60)
+          tmpData?.onEach { triggerJob(it) }?.clear()
+        }
+        try {
+          TimeUnit.MILLISECONDS.sleep(1000 - (System.currentTimeMillis() % 1000))
+        } catch (e: Exception) {
+          if (!scheduleThreadToStop) {
+            val errMessage = "${e.javaClass.name}:${e.message}"
+            log.error("schedule-trigger-thread exception: {}", errMessage)
+          }
+        }
       }
+      log.info("schedule-trigger-ring-thread stop")
     }
     ringThread!!.isDaemon = true
     ringThread!!.name = "schedule-trigger-ring-thread"
     ringThread!!.start()
   }
 
-  private fun pushTimeRing(ringSecond: Int, jobId: Long) {
+  private fun pushTimeRing(ringSecond: Int, jobInfo: JobInfo) {
     val list = ringData.computeIfAbsent(ringSecond) { ArrayList() }
-    list.add(jobId)
+    list.add(jobInfo)
   }
 
   private fun triggerJob(jobInfo: JobInfo) {
@@ -212,5 +227,70 @@ class ScheduleTrigger(private val dataSource: DataSource,
       jobInfo.lastTriggerTime = 0
       jobInfo.nextTriggerTime = 0
     }
+  }
+
+  @Suppress("DuplicatedCode")
+  fun stop() {
+    if (scheduleThreadToStop || ringThreadToStop) {
+      return
+    }
+    // 1、stop schedule
+    scheduleThreadToStop = true
+    try {
+      TimeUnit.SECONDS.sleep(1)
+    } catch (e: InterruptedException) {
+      val errMessage = "${e.javaClass.name}:${e.message}"
+      log.error("ScheduleTrigger stop exception: {}", errMessage)
+    }
+    if (scheduleThread?.state != Thread.State.TERMINATED) {
+      // interrupt and wait
+      scheduleThread?.interrupt()
+      try {
+        scheduleThread?.join()
+      } catch (e: InterruptedException) {
+        val errMessage = "${e.javaClass.name}:${e.message}"
+        log.error("ScheduleTrigger stop exception: {}", errMessage)
+      }
+    }
+
+    // if has ring data
+
+    // if has ring data
+    var hasRingData = false
+    if (!ringData.isEmpty()) {
+      for (second in ringData.keys) {
+        val tmpData = ringData[second]
+        if (tmpData != null && tmpData.size > 0) {
+          hasRingData = true
+          break
+        }
+      }
+    }
+    if (hasRingData) {
+      try {
+        TimeUnit.SECONDS.sleep(8)
+      } catch (e: InterruptedException) {
+        val errMessage = "${e.javaClass.name}:${e.message}"
+        log.error("ScheduleTrigger stop exception: {}", errMessage)
+      }
+    }
+
+    ringThreadToStop = true
+    try {
+      TimeUnit.SECONDS.sleep(1)
+    } catch (e: InterruptedException) {
+      val errMessage = "${e.javaClass.name}:${e.message}"
+      log.error("ScheduleTrigger stop exception: {}", errMessage)
+    }
+    if (ringThread?.state != Thread.State.TERMINATED) {
+      ringThread?.interrupt()
+      try {
+        ringThread?.join()
+      } catch (e: InterruptedException) {
+        val errMessage = "${e.javaClass.name}:${e.message}"
+        log.error("ScheduleTrigger stop exception: {}", errMessage)
+      }
+    }
+    log.info("ScheduleTrigger stop")
   }
 }

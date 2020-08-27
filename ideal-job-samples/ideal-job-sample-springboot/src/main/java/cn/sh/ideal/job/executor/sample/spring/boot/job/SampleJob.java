@@ -19,18 +19,9 @@ import java.util.concurrent.atomic.AtomicLong;
 @JobHandlerBean
 public class SampleJob {
   private static final Logger log = LoggerFactory.getLogger(SampleJob.class);
-  private static final AtomicLong atomicLong = new AtomicLong(0);
-
-  static {
-    Executors.newSingleThreadScheduledExecutor()
-        .scheduleAtFixedRate(
-            () -> log.info("count: {}", atomicLong.get()),
-            10, 10, TimeUnit.SECONDS);
-  }
 
   @JobHandler("demoJobHandler")
   public void demoJobHandler(@Nonnull String param) {
-    atomicLong.incrementAndGet();
-//    log.info("execute demoJobHandler, param = {}", param);
+    log.info("execute demoJobHandler, param = {}", param);
   }
 }

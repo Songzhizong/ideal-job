@@ -11,9 +11,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.atomic.AtomicLong
 
 /**
  * 注册信息处理
@@ -26,14 +23,9 @@ final class ExecuteJobCallbackMessageHandler(
     private val jobCallbackThreadPool: ExecutorService,
     private val jobTrigger: JobTrigger) : MessageHandler {
   private val log: Logger = LoggerFactory.getLogger(this.javaClass)
-  private val atomicLong = AtomicLong(0)
 
   init {
     MessageHandlerFactory.register(MessageType.EXECUTE_JOB_CALLBACK, this)
-    Executors.newSingleThreadScheduledExecutor()
-        .scheduleAtFixedRate({
-          log.info("callback count: {}", atomicLong.get())
-        }, 10, 10, TimeUnit.SECONDS)
   }
 
   override fun execute(executor: SocketJobExecutor, socketMessage: SocketMessage) {
@@ -46,7 +38,6 @@ final class ExecuteJobCallbackMessageHandler(
       log.warn("解析 ExecuteJobCallback 出现异常: {}, payload = {}", errMsg, payload)
       return
     }
-    atomicLong.incrementAndGet()
     jobCallbackThreadPool.execute {
       jobTrigger.triggerCallback(executeJobCallback)
     }

@@ -97,6 +97,7 @@ public final class JobInfoConverter {
     } else {
       jobInfo.setBlockStrategy(BlockStrategyEnum.SERIAL);
     }
+    jobInfo.setChildJobId(DBDefaults.DEFAULT_STRING_VALUE);
     final Integer retryCount = createJobArgs.getRetryCount();
     if (retryCount == null || retryCount < 1) {
       jobInfo.setRetryCount(DBDefaults.DEFAULT_INT_VALUE);

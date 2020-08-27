@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 /**
  * 加权随机策略
@@ -27,10 +28,11 @@ public class WeightedRandomLoadBalancer<Server extends LbServer> implements Load
     if (size == 1) {
       return reachableServers.get(0);
     }
-
+    // 为了保障随机均匀, 将权重放大一定的倍数
+    final int multiple = 10;
     int sum = 0;
     for (LbServer server : reachableServers) {
-      sum += server.checkAndGetWeight();
+      sum += server.checkAndGetWeight() * multiple;
     }
     if (sum == 0) {
       return null;
@@ -40,9 +42,10 @@ public class WeightedRandomLoadBalancer<Server extends LbServer> implements Load
     Server selected = null;
     for (Server server : reachableServers) {
       final int weight = server.checkAndGetWeight();
-      tmp += weight;
-      if (tmp > random) {
+      tmp += weight * multiple;
+      if (tmp >= random) {
         selected = server;
+        break;
       }
     }
     return selected;

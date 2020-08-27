@@ -146,13 +146,12 @@ class JobTrigger(private val lbFactory: LbFactory<JobExecutor>,
     val handleStatus = executeJobCallback.handleStatus
     val handleMessage = executeJobCallback.handleMessage
     val handleTime = executeJobCallback.handleTime
-//    val timeConsuming = executeJobCallback.timeConsuming
-    val triggerLog = triggerLogService.getLog(triggerId)
-    if (triggerLog == null) {
-      log.warn("调度日志: {} 不存在", triggerId)
-      return
-    }
+
     val instant = Instant.ofEpochMilli(handleTime)
+    // cn.sh.ideal.job.scheduler.core.admin.repository.JobTriggerLogRepository.updateWhenTriggerCallback
+    // triggerLog 设置参数务必和上述方法中的参数一致
+    // 收到执行回调直接更新日志中变化的部分即可
+    val triggerLog = JobTriggerLog()
     triggerLog.triggerId = triggerId
     triggerLog.handleTime = LocalDateTime.ofInstant(instant, ZoneOffset.of("+8"))
     triggerLog.handleStatus = HandleStatusEnum.valueOfCode(handleStatus)

@@ -14,6 +14,7 @@ import cn.sh.ideal.job.scheduler.api.dto.req.UpdateJobArgs
 import cn.sh.ideal.job.scheduler.api.dto.rsp.JobInfoRsp
 import cn.sh.ideal.job.scheduler.core.admin.entity.JobInfo
 import cn.sh.ideal.job.scheduler.core.admin.repository.JobInfoRepository
+import cn.sh.ideal.job.scheduler.core.admin.repository.JobInfoRepositoryCustom
 import cn.sh.ideal.job.scheduler.core.converter.JobInfoConverter
 import cn.sh.ideal.job.scheduler.core.trigger.JobTrigger
 import cn.sh.ideal.job.scheduler.core.trigger.TriggerParam
@@ -35,10 +36,13 @@ import javax.persistence.criteria.Predicate
  */
 @Suppress("DuplicatedCode")
 @Service
-class JobService(private val jobTrigger: JobTrigger,
-                 private val jobInfoRepository: JobInfoRepository) {
+class JobService(private val jobInfoRepository: JobInfoRepository,
+                 private val jobInfoRepositoryCustom: JobInfoRepositoryCustom) {
   private val log: Logger = LoggerFactory.getLogger(this.javaClass)
   private val preReadMs = 5000L
+
+  @Autowired
+  private lateinit var jobTrigger: JobTrigger
 
   @Autowired
   private lateinit var jobExecutorService: JobExecutorService
@@ -306,11 +310,6 @@ class JobService(private val jobTrigger: JobTrigger,
       return Res.err(CommonResMsg.NOT_FOUND, "任务不存在")
     }
     val executorId = jobInfo.executorId
-    val executor = jobExecutorService.loadById(executorId)
-    if (executor == null) {
-      log.error("任务: {} 所对应的调度器信息不存在", jobId)
-      return Res.err(CommonResMsg.NOT_FOUND, "调度器信息不存在")
-    }
     val triggerParam = TriggerParam()
     triggerParam.jobId = jobId
     triggerParam.executorId = executorId
@@ -335,7 +334,7 @@ class JobService(private val jobTrigger: JobTrigger,
         .findAllByJobStatusAndNextTriggerTimeLessThanEqual(jobStart, maxNextTime, pageRequest)
   }
 
-  fun batchUpdate(jobInfoList: List<JobInfo>) {
-
+  fun batchUpdateTriggerInfo(jobInfoList: List<JobInfo>) {
+    jobInfoRepositoryCustom.batchUpdateTriggerInfo(jobInfoList)
   }
 }

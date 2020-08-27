@@ -61,7 +61,7 @@ public class WeightedPollingLoadBalancer<Server extends LbServer> implements Loa
       currentWeight.addAndGet(weight);
       if (selected == null) {
         selected = server;
-      } else if (selected.compareTo(server) < 0) {
+      } else if (currentWeight.get() > currentWeightMap.get(selected.getInstanceId()).get()) {
         selected = server;
       }
     }

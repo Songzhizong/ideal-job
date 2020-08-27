@@ -3,7 +3,7 @@ POST http://{{ip}}:{{port}}/executor/create
 Content-Type: application/json
 
 {
-  "appName": "SAMPLE-EXECUTOR-1",
+  "appName": "SAMPLE-EXECUTOR",
   "title": "示例执行器"
 }
 

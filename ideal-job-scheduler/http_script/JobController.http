@@ -1,4 +1,62 @@
+### 新建任务
+POST http://{{ip}}:{{port}}/job/create
+Content-Type: application/json
+
+{
+  "autoStart": true,
+  "executorId": 130282956815073280,
+  "executorHandler": "demoJobHandler",
+  "executorParam": "test",
+  "routeStrategy": "CONSISTENT_HASH",
+  "blockStrategy": "SERIAL",
+  "cron": "0/10 * * * * ?",
+  "retryCount": 0,
+  "jobName": "test",
+  "alarmEmail": "",
+  "application": "",
+  "tenantId": "",
+  "bizType": "",
+  "customTag": "",
+  "businessId": ""
+}
+
 ###
+POST http://{{ip}}:{{port}}/job/update
+Content-Type: application/json
+
+{
+  "jobId": 130301268919844864,
+  "executorId": 130282956815073280,
+  "executorHandler": "demoJobHandler",
+  "executorParam": "demoJobHandler",
+  "routeStrategy": "WEIGHTED_RANDOM",
+  "blockStrategy": "SERIAL",
+  "cron": "0/1 * * * * ?",
+  "retryCount": 0,
+  "jobName": "",
+  "alarmEmail": ""
+}
+
+###
+POST http://{{ip}}:{{port}}/job/remove
+Content-Type: application/x-www-form-urlencoded
+
+jobId=130288013237288960
+
+###
+POST http://{{ip}}:{{port}}/job/start
+Content-Type: application/x-www-form-urlencoded
+
+jobId=130301268919844864
+
+###
+POST http://{{ip}}:{{port}}/job/stop
+Content-Type: application/x-www-form-urlencoded
+
+jobId=130301268919844864
+
+
+### 触发任务
 POST http://{{ip}}:{{port}}/job/trigger
 Content-Type: application/x-www-form-urlencoded
 

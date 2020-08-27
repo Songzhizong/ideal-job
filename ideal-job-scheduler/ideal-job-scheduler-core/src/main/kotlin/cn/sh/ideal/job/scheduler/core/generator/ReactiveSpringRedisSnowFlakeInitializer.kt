@@ -20,7 +20,7 @@ class ReactiveSpringRedisSnowFlakeInitializer(
     /**
      * 注册到redis的machineId过期时间,秒
      */
-    expireSeconds: Long,
+    private val expireSeconds: Long,
     /**
      * 注册到redis的machineId自动续期间隔,秒
      */
@@ -55,6 +55,7 @@ class ReactiveSpringRedisSnowFlakeInitializer(
           .setIfAbsent(prefix + machineId, "machineId", expire).block()
           ?: false
       if (success) {
+        log.info("SnowFlake register success: applicationName = {}, machineId = {}", applicationName, machineId)
         SnowFlake.machineId = machineId
         break
       }
@@ -85,12 +86,13 @@ class ReactiveSpringRedisSnowFlakeInitializer(
     if (automaticallyRenewal) {
       return
     }
+    log.info("SnowFlake start automatically renewed, renewed cycle = {}s, expire = {}s",
+        renewalIntervalSeconds, expireSeconds)
     if (executorService == null) {
       executorService = Executors.newSingleThreadScheduledExecutor()
     }
     executorService!!.scheduleAtFixedRate({
       val key = prefix + machineId
-      log.debug("SnowFlake automatically renewed: {} ...", key)
       stringRedisTemplate.expire(key, expire)
           .doOnError {
             log.warn("SnowFlake automatically renewed exception: {}", it.message)
