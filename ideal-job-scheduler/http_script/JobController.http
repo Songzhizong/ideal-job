@@ -4,7 +4,7 @@ Content-Type: application/json
 
 {
   "autoStart": true,
-  "executorId": 130282956815073280,
+  "executorId": 130477906718629888,
   "executorHandler": "demoJobHandler",
   "executorParam": "test",
   "routeStrategy": "CONSISTENT_HASH",
@@ -41,23 +41,23 @@ Content-Type: application/json
 POST http://{{ip}}:{{port}}/job/remove
 Content-Type: application/x-www-form-urlencoded
 
-jobId=130288013237288960
+jobId=130479163176919040
 
 ###
 POST http://{{ip}}:{{port}}/job/start
 Content-Type: application/x-www-form-urlencoded
 
-jobId=130301268919844864
+jobId=130478053187919872
 
 ###
 POST http://{{ip}}:{{port}}/job/stop
 Content-Type: application/x-www-form-urlencoded
 
-jobId=130301268919844864
+jobId=130478053187919872
 
 
 ### 触发任务
 POST http://{{ip}}:{{port}}/job/trigger
 Content-Type: application/x-www-form-urlencoded
 
-jobId=1
+executorParam=sadsaasdfds&jobId=130479384879439872

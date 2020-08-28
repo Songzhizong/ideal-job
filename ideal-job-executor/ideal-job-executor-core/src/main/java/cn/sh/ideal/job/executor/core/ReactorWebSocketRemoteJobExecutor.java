@@ -70,7 +70,7 @@ public final class ReactorWebSocketRemoteJobExecutor extends Thread implements R
   private long writeTimeOutMills = 200;
   @Setter
   private long readTimeOutMills = 120 * 1000;
-  private boolean running = false;
+  private volatile boolean running = false;
   private volatile boolean destroyed = false;
 
   public ReactorWebSocketRemoteJobExecutor(String schedulerAddress) {
@@ -92,7 +92,7 @@ public final class ReactorWebSocketRemoteJobExecutor extends Thread implements R
     return JsonUtils.toJsonString(message);
   }
 
-  public synchronized void startSocket() {
+  private synchronized void startSocket() {
     if (destroyed) {
       log.info("WebSocketRemoteJobExecutor is destroyed, schedulerAddress: {}", schedulerAddress);
       return;
@@ -174,11 +174,11 @@ public final class ReactorWebSocketRemoteJobExecutor extends Thread implements R
     sendMessage(registerMessage);
   }
 
-  public void restartSocket() {
+  private void restartSocket() {
     restartNoticeQueue.offer(true);
   }
 
-  public void sendMessage(@Nonnull String message) {
+  private void sendMessage(@Nonnull String message) {
     directProcessor.onNext(message);
   }
 

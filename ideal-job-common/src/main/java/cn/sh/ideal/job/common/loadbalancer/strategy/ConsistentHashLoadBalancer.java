@@ -47,27 +47,27 @@ public class ConsistentHashLoadBalancer<Server extends LbServer> implements Load
    * 如果key为null, 则采用随机算法
    *
    * @param key          负载均衡器可以使用该对象来确定返回哪个服务
-   * @param reachableServers 可达服务列表
+   * @param servers 可达服务列表
    * @return LbServer
    */
   @Override
   @Nullable
   public Server chooseServer(@Nullable Object key,
-                             @Nonnull List<Server> reachableServers) {
+                             @Nonnull List<Server> servers) {
     final int virtualNodeNum = 100;
-    if (reachableServers.isEmpty()) {
+    if (servers.isEmpty()) {
       return null;
     }
-    int size = reachableServers.size();
+    int size = servers.size();
     if (size == 1) {
-      return reachableServers.get(0);
+      return servers.get(0);
     }
     if (key == null) {
       int random = ThreadLocalRandom.current().nextInt(size);
-      return reachableServers.get(random);
+      return servers.get(random);
     }
     TreeMap<Long, Server> addressRing = new TreeMap<>();
-    for (Server server : reachableServers) {
+    for (Server server : servers) {
       final String instanceId = server.getInstanceId();
       for (int i = 0; i < virtualNodeNum; i++) {
         long addressHash = hash("SHARD-" + instanceId + "-NODE-" + i);

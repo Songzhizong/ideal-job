@@ -18,15 +18,15 @@ public class FailTransferLoadBalancer<Server extends LbServer> implements LoadBa
   @Override
   @Nullable
   public Server chooseServer(@Nullable Object key,
-                             @Nonnull List<Server> reachableServers) {
-    if (reachableServers.isEmpty()) {
+                             @Nonnull List<Server> servers) {
+    if (servers.isEmpty()) {
       return null;
     }
-    int size = reachableServers.size();
+    int size = servers.size();
     if (size == 1) {
-      return reachableServers.get(0);
+      return servers.get(0);
     }
-    for (Server reachableServer : reachableServers) {
+    for (Server reachableServer : servers) {
       boolean available = reachableServer.heartbeat();
       if (available) {
         return reachableServer;

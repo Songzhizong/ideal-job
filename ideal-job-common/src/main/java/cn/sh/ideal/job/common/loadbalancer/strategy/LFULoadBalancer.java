@@ -43,13 +43,13 @@ public class LFULoadBalancer<Server extends LbServer> implements LoadBalancer<Se
   @Override
   @Nullable
   public Server chooseServer(@Nullable Object key,
-                             @Nonnull List<Server> reachableServers) {
-    if (reachableServers.isEmpty()) {
+                             @Nonnull List<Server> servers) {
+    if (servers.isEmpty()) {
       return null;
     }
-    int size = reachableServers.size();
+    int size = servers.size();
     if (size == 1) {
-      return reachableServers.get(0);
+      return servers.get(0);
     }
 
     ConcurrentMap<String, AtomicLong> lfuMap = defaultLfuMap;
@@ -60,7 +60,7 @@ public class LFULoadBalancer<Server extends LbServer> implements LoadBalancer<Se
     Server selected = null;
     Long minCount = null;
     int bound = size * 10;
-    for (Server server : reachableServers) {
+    for (Server server : servers) {
       String instanceId = server.getInstanceId();
       AtomicLong atomicLong = lfuMap.computeIfAbsent(instanceId,
           (k) -> new AtomicLong(ThreadLocalRandom.current().nextLong(bound)));

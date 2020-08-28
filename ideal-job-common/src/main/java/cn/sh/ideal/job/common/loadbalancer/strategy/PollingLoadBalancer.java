@@ -25,13 +25,13 @@ public class PollingLoadBalancer<Server extends LbServer> implements LoadBalance
   @Override
   @Nullable
   public Server chooseServer(@Nullable Object key,
-                             @Nonnull List<Server> reachableServers) {
-    if (reachableServers.isEmpty()) {
+                             @Nonnull List<Server> servers) {
+    if (servers.isEmpty()) {
       return null;
     }
-    int size = reachableServers.size();
+    int size = servers.size();
     if (size == 1) {
-      return reachableServers.get(0);
+      return servers.get(0);
     }
     AtomicInteger counter = defaultCounter;
     if (key != null) {
@@ -39,6 +39,6 @@ public class PollingLoadBalancer<Server extends LbServer> implements LoadBalance
           (k) -> new AtomicInteger(ThreadLocalRandom.current().nextInt(100)));
     }
     int abs = Math.abs(counter.incrementAndGet());
-    return reachableServers.get(abs % size);
+    return servers.get(abs % size);
   }
 }

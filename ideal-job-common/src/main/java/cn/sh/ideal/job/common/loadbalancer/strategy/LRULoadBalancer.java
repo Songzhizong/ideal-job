@@ -24,13 +24,13 @@ public class LRULoadBalancer<Server extends LbServer> implements LoadBalancer<Se
   @Override
   @Nullable
   public Server chooseServer(@Nullable Object key,
-                             @Nonnull List<Server> reachableServers) {
-    if (reachableServers.isEmpty()) {
+                             @Nonnull List<Server> servers) {
+    if (servers.isEmpty()) {
       return null;
     }
-    int size = reachableServers.size();
+    int size = servers.size();
     if (size == 1) {
-      return reachableServers.get(0);
+      return servers.get(0);
     }
 
     final long currentTimeMillis = System.currentTimeMillis();
@@ -40,7 +40,7 @@ public class LRULoadBalancer<Server extends LbServer> implements LoadBalancer<Se
     if (key != null) {
       multiLruMap.computeIfAbsent(key, (k) -> new ConcurrentHashMap<>());
     }
-    for (Server server : reachableServers) {
+    for (Server server : servers) {
       final String instanceId = server.getInstanceId();
       final Long lastSelectTime = lruMap.putIfAbsent(instanceId, 0L);
       assert lastSelectTime != null;

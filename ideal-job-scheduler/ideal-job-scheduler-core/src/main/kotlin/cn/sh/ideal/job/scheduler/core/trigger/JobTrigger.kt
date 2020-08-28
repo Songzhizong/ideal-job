@@ -10,6 +10,7 @@ import cn.sh.ideal.job.common.transfer.Res
 import cn.sh.ideal.job.scheduler.core.admin.entity.JobTriggerLog
 import cn.sh.ideal.job.scheduler.core.admin.service.JobExecutorService
 import cn.sh.ideal.job.scheduler.core.admin.service.JobTriggerLogService
+import cn.sh.ideal.job.scheduler.core.conf.JobSchedulerConfig
 import org.apache.commons.lang3.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -25,7 +26,8 @@ import java.time.ZoneOffset
 @Component
 class JobTrigger(private val lbFactory: LbFactory<JobExecutor>,
                  private val jobExecutorService: JobExecutorService,
-                 private val triggerLogService: JobTriggerLogService) {
+                 private val triggerLogService: JobTriggerLogService,
+                 private val jobSchedulerConfig: JobSchedulerConfig) {
   val log: Logger = LoggerFactory.getLogger(this.javaClass)
 
   /**
@@ -89,7 +91,7 @@ class JobTrigger(private val lbFactory: LbFactory<JobExecutor>,
     triggerLog.executorId = executorId
     triggerLog.jobId = jobId
     triggerLog.triggerType = triggerType
-    // todo log.schedulerInstance
+    triggerLog.schedulerInstance = jobSchedulerConfig.ipPort
     if (reachableServers.isNotEmpty()) {
       triggerLog.availableInstances = reachableServers
           .joinToString(",") { it.instanceId }

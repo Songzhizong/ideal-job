@@ -16,21 +16,23 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.TimeUnit
 import javax.sql.DataSource
 import kotlin.collections.ArrayList
+import kotlin.concurrent.thread
 
 /**
+ * 定时调度器
+ *
  * @author 宋志宗
  * @date 2020/8/27
  */
 @Component
-class ScheduleTrigger(private val dataSource: DataSource,
-                      private val jobService: JobService,
-                      private val jobTrigger: JobTrigger,
-                      private val cronJobThreadPool: ExecutorService,
-                      jobSchedulerProperties: JobSchedulerProperties) {
+class TimingSchedule(private val dataSource: DataSource,
+                     private val jobService: JobService,
+                     private val jobTrigger: JobTrigger,
+                     private val cronJobThreadPool: ExecutorService,
+                     jobSchedulerProperties: JobSchedulerProperties) {
   companion object {
-    val log: Logger = LoggerFactory.getLogger(ScheduleTrigger::class.java)
+    val log: Logger = LoggerFactory.getLogger(TimingSchedule::class.java)
   }
-
 
   private val lockTable = jobSchedulerProperties.lockTable
   private val scheduleLockName = jobSchedulerProperties.scheduleLockName
@@ -48,7 +50,7 @@ class ScheduleTrigger(private val dataSource: DataSource,
 
   @Suppress("DuplicatedCode")
   fun start() {
-    scheduleThread = Thread {
+    scheduleThread = thread(start = true, isDaemon = true, name = "schedule-trigger-thread") {
       try {
         TimeUnit.MILLISECONDS.sleep(5000 - System.currentTimeMillis() % 1000)
       } catch (e: Exception) {
@@ -61,19 +63,7 @@ class ScheduleTrigger(private val dataSource: DataSource,
         // Scan Job
         val start = System.currentTimeMillis()
         var preReadSuc = true
-        var connection: Connection? = null
-        var autoCommit = false
-        var preparedStatement: PreparedStatement? = null
-        try {
-          connection = dataSource.connection
-          autoCommit = connection.autoCommit
-          connection.autoCommit = false
-          @Suppress("SqlResolve")
-          val sql = "select * from $lockTable where lock_name = '$scheduleLockName' for update"
-          preparedStatement = connection
-              .prepareStatement(sql)
-          preparedStatement.execute()
-
+        dbLock {
           // 1、pre read
           val nowTime = System.currentTimeMillis()
           val jobList = jobService
@@ -109,39 +99,11 @@ class ScheduleTrigger(private val dataSource: DataSource,
             // 更新任务信息
             jobService.batchUpdateTriggerInfo(jobList)
           }
-
-
-        } catch (e: Exception) {
-          if (!scheduleThreadToStop) {
-            val errMessage = "${e.javaClass.name}:${e.message}"
-            log.error("schedule-trigger-thread exception: {}", errMessage)
-          }
-        } finally {
-          try {
-            preparedStatement?.close()
-          } catch (e: Exception) {
-            e.printStackTrace()
-          }
-          if (connection != null) {
-            try {
-              connection.commit()
-            } catch (e: Exception) {
-              e.printStackTrace()
-            }
-            try {
-              connection.autoCommit = autoCommit
-            } catch (e: Exception) {
-              e.printStackTrace()
-            }
-            try {
-              connection.close()
-            } catch (e: Exception) {
-              e.printStackTrace()
-            }
-          }
         }
+
         val cost = System.currentTimeMillis() - start
         if (cost < 1000) {
+          // 如果未来preReadMills秒都没有数据, 那就休眠最多preReadMills秒, 反之最多休眠1秒
           val sleepMills = (if (preReadSuc) 1000 else preReadMills) - (System.currentTimeMillis() % 1000)
           try {
             TimeUnit.MILLISECONDS.sleep(sleepMills)
@@ -155,11 +117,7 @@ class ScheduleTrigger(private val dataSource: DataSource,
       }
       log.info("schedule-trigger-thread stop")
     }
-    scheduleThread!!.isDaemon = true
-    scheduleThread!!.name = "schedule-trigger-thread"
-    scheduleThread!!.start()
-
-    ringThread = Thread {
+    ringThread = thread(start = true, isDaemon = true, name = "schedule-trigger-ring-thread") {
       try {
         TimeUnit.MILLISECONDS.sleep(1000 - (System.currentTimeMillis() % 1000))
       } catch (e: Exception) {
@@ -185,9 +143,49 @@ class ScheduleTrigger(private val dataSource: DataSource,
       }
       log.info("schedule-trigger-ring-thread stop")
     }
-    ringThread!!.isDaemon = true
-    ringThread!!.name = "schedule-trigger-ring-thread"
-    ringThread!!.start()
+  }
+
+  private inline fun dbLock(block: () -> Unit) {
+    var connection: Connection? = null
+    var tempAutoCommit = false
+    var preparedStatement: PreparedStatement? = null
+    try {
+      connection = dataSource.connection
+      tempAutoCommit = connection.autoCommit
+      connection.autoCommit = false
+      @Suppress("SqlResolve")
+      val sql = "select * from $lockTable where lock_name = '$scheduleLockName' for update"
+      preparedStatement = connection
+          .prepareStatement(sql)
+      preparedStatement.execute()
+      block.invoke()
+    } catch (e: Exception) {
+      val errMessage = "${e.javaClass.name}:${e.message}"
+      log.warn("schedule-trigger-thread exception: {}", errMessage)
+    } finally {
+      try {
+        preparedStatement?.close()
+      } catch (e: Exception) {
+        e.printStackTrace()
+      }
+      if (connection != null) {
+        try {
+          connection.commit()
+        } catch (e: Exception) {
+          e.printStackTrace()
+        }
+        try {
+          connection.autoCommit = tempAutoCommit
+        } catch (e: Exception) {
+          e.printStackTrace()
+        }
+        try {
+          connection.close()
+        } catch (e: Exception) {
+          e.printStackTrace()
+        }
+      }
+    }
   }
 
   private fun pushTimeRing(ringSecond: Int, jobInfo: JobInfo) {
@@ -240,7 +238,7 @@ class ScheduleTrigger(private val dataSource: DataSource,
       TimeUnit.SECONDS.sleep(1)
     } catch (e: InterruptedException) {
       val errMessage = "${e.javaClass.name}:${e.message}"
-      log.error("ScheduleTrigger stop exception: {}", errMessage)
+      log.error("TimingSchedule stop exception: {}", errMessage)
     }
     if (scheduleThread?.state != Thread.State.TERMINATED) {
       // interrupt and wait
@@ -249,7 +247,7 @@ class ScheduleTrigger(private val dataSource: DataSource,
         scheduleThread?.join()
       } catch (e: InterruptedException) {
         val errMessage = "${e.javaClass.name}:${e.message}"
-        log.error("ScheduleTrigger stop exception: {}", errMessage)
+        log.error("TimingSchedule stop exception: {}", errMessage)
       }
     }
 
@@ -271,7 +269,7 @@ class ScheduleTrigger(private val dataSource: DataSource,
         TimeUnit.SECONDS.sleep(8)
       } catch (e: InterruptedException) {
         val errMessage = "${e.javaClass.name}:${e.message}"
-        log.error("ScheduleTrigger stop exception: {}", errMessage)
+        log.error("TimingSchedule stop exception: {}", errMessage)
       }
     }
 
@@ -280,7 +278,7 @@ class ScheduleTrigger(private val dataSource: DataSource,
       TimeUnit.SECONDS.sleep(1)
     } catch (e: InterruptedException) {
       val errMessage = "${e.javaClass.name}:${e.message}"
-      log.error("ScheduleTrigger stop exception: {}", errMessage)
+      log.error("TimingSchedule stop exception: {}", errMessage)
     }
     if (ringThread?.state != Thread.State.TERMINATED) {
       ringThread?.interrupt()
@@ -288,9 +286,9 @@ class ScheduleTrigger(private val dataSource: DataSource,
         ringThread?.join()
       } catch (e: InterruptedException) {
         val errMessage = "${e.javaClass.name}:${e.message}"
-        log.error("ScheduleTrigger stop exception: {}", errMessage)
+        log.error("TimingSchedule stop exception: {}", errMessage)
       }
     }
-    log.info("ScheduleTrigger stop")
+    log.info("TimingSchedule stop")
   }
 }

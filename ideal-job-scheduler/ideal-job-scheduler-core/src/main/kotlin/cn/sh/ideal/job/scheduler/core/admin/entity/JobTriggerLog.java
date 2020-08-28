@@ -11,7 +11,6 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -21,6 +20,7 @@ import java.time.LocalDateTime;
  * @author 宋志宗
  * @date 2020/8/20
  */
+@SuppressWarnings("unused")
 @Entity
 @Table(
     name = "job_trigger_log",

@@ -35,13 +35,13 @@ public class WeightedPollingLoadBalancer<Server extends LbServer> implements Loa
   @Override
   @Nullable
   public Server chooseServer(@Nullable Object key,
-                             @Nonnull List<Server> reachableServers) {
-    if (reachableServers.isEmpty()) {
+                             @Nonnull List<Server> servers) {
+    if (servers.isEmpty()) {
       return null;
     }
-    int size = reachableServers.size();
+    int size = servers.size();
     if (size == 1) {
-      return reachableServers.get(0);
+      return servers.get(0);
     }
 
     ConcurrentMap<String, AtomicInteger> currentWeightMap = defaultCurrentWeightMap;
@@ -51,9 +51,12 @@ public class WeightedPollingLoadBalancer<Server extends LbServer> implements Loa
     }
     int total = 0;
     Server selected = null;
-    for (Server server : reachableServers) {
+    for (Server server : servers) {
       final String instanceId = server.getInstanceId();
-      final int weight = server.checkAndGetWeight();
+      final int weight = server.getWeight();
+      if (weight < 1) {
+        throw new IllegalArgumentException("Weight least for 1");
+      }
       total += weight;
       final AtomicInteger currentWeight = currentWeightMap
           .computeIfAbsent(instanceId,

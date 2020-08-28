@@ -81,7 +81,7 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
             heartbeatThreadPool.execute(this::heartbeat);
           }
           if (poll != null) {
-            log.info("可用服务列表发生变化, 更新数据...");
+            log.debug("可用服务列表发生变化, 更新数据...");
             List<Server> lbServers = new ArrayList<>(reachableServerMap.values());
             reachableServers = Collections.unmodifiableList(lbServers);
           }
@@ -177,6 +177,7 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
     int size = temp.size();
     int up = 0;
     int down = 0;
+    final int reachableServeSize = reachableServerMap.size();
     if (cycleStrategy == 0) {
       for (Server server : temp) {
         String instanceId = server.getInstanceId();
@@ -225,7 +226,7 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
     }
     if (up > 0 || down > 0) {
       log.info("Heartbeat: {} 可达服务列表发生变化, 当前总服务数: {}, 新标记可达服务数: {}, 不可达服务数: {}, 当前可达服务总数: {}",
-          serverName, size, up, down, reachableServerMap.size());
+          serverName, size, up, down, reachableServeSize + up - down);
     }
 //    else if (log.isDebugEnabled()) {
 //      log.debug("对 {} 服务列表执行心跳检测, 当前总服务数: {}, 新标记可达服务数: {}, 不可达服务数: {}, 当前可达服务总数: {}",

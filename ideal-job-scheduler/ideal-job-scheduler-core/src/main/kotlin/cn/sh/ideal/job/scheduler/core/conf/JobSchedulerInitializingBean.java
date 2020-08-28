@@ -2,7 +2,7 @@ package cn.sh.ideal.job.scheduler.core.conf;
 
 import cn.sh.ideal.job.scheduler.core.generator.IDGenerator;
 import cn.sh.ideal.job.scheduler.core.generator.JpaIdentityGenerator;
-import cn.sh.ideal.job.scheduler.core.trigger.ScheduleTrigger;
+import cn.sh.ideal.job.scheduler.core.trigger.TimingSchedule;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Configuration;
@@ -14,22 +14,22 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class JobSchedulerInitializingBean implements InitializingBean, DisposableBean {
   private final IDGenerator idGenerator;
-  private final ScheduleTrigger scheduleTrigger;
+  private final TimingSchedule timingSchedule;
 
   public JobSchedulerInitializingBean(IDGenerator idGenerator,
-                                      ScheduleTrigger scheduleTrigger) {
+                                      TimingSchedule timingSchedule) {
     this.idGenerator = idGenerator;
-    this.scheduleTrigger = scheduleTrigger;
+    this.timingSchedule = timingSchedule;
   }
 
   @Override
   public void afterPropertiesSet() {
     JpaIdentityGenerator.setIdGenerator(idGenerator);
-    scheduleTrigger.start();
+    timingSchedule.start();
   }
 
   @Override
   public void destroy() {
-    scheduleTrigger.stop();
+    timingSchedule.stop();
   }
 }

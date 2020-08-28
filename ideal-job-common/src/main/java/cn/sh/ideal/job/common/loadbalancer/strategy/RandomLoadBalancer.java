@@ -19,15 +19,15 @@ public class RandomLoadBalancer<Server extends LbServer> implements LoadBalancer
   @Override
   @Nullable
   public Server chooseServer(@Nullable Object key,
-                             @Nonnull List<Server> reachableServers) {
-    if (reachableServers.isEmpty()) {
+                             @Nonnull List<Server> servers) {
+    if (servers.isEmpty()) {
       return null;
     }
-    int size = reachableServers.size();
+    int size = servers.size();
     if (size == 1) {
-      return reachableServers.get(0);
+      return servers.get(0);
     }
     int random = ThreadLocalRandom.current().nextInt(size);
-    return reachableServers.get(random);
+    return servers.get(random);
   }
 }

@@ -7,13 +7,32 @@ import javax.annotation.Nonnull;
  * @date 2020/8/23
  */
 public enum HandleStatusEnum {
+  /**
+   * 等待执行
+   */
   WAITING(0, "等待执行"),
+  /**
+   * 执行中
+   */
   RUNNING(1, "执行中"),
+  /**
+   * 执行完成
+   */
   COMPLETE(2, "执行完成"),
+  /**
+   * 执行异常
+   */
   ABNORMAL(3, "执行异常"),
+  /**
+   * 丢弃
+   */
+  DISCARD(4, "丢弃"),
+  /**
+   * 未知
+   */
+  UNKNOWN(-1, "未知"),
   ;
 
-  @SuppressWarnings("DuplicateBranchesInSwitch")
   public static HandleStatusEnum valueOfCode(int code) {
     switch (code) {
       case 0:
@@ -24,8 +43,10 @@ public enum HandleStatusEnum {
         return COMPLETE;
       case 3:
         return ABNORMAL;
+      case 4:
+        return DISCARD;
       default:
-        return ABNORMAL;
+        return UNKNOWN;
     }
   }
 

@@ -16,4 +16,3 @@ ideal:
   job:
     access-token: 'dfjakflkj;lj'
     scheduler-addresses: ws://127.0.0.1:8804
-    weight:

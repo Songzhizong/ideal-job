@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
  * @author 宋志宗
  * @date 2020/8/20
  */
+@SuppressWarnings("unused")
 @Entity
 @Table(
     name = "job_info",

@@ -7,7 +7,7 @@
   <groupId>cn.sh.ideal</groupId>
   <artifactId>ideal-job</artifactId>
   <packaging>pom</packaging>
-  <version>1.0.0</version>
+  <version>0.0.1</version>
 
   <modules>
     <module>ideal-job-common</module>
@@ -21,7 +21,7 @@
     <java.version>1.8</java.version>
     <kotlin.version>1.3.72</kotlin.version>
 
-    <ideal-job.version>1.0.0</ideal-job.version>
+    <ideal-job.version>0.0.1</ideal-job.version>
 
     <reactor-bom.version>Dysprosium-SR11</reactor-bom.version>
     <spring.boot.version>2.3.3.RELEASE</spring.boot.version>

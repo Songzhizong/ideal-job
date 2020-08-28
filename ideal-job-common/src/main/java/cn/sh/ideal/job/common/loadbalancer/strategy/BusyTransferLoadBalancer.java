@@ -37,18 +37,18 @@ public class BusyTransferLoadBalancer<Server extends LbServer> implements LoadBa
   @Override
   @Nullable
   public Server chooseServer(@Nullable Object key,
-                             @Nonnull List<Server> reachableServers) {
-    if (reachableServers.isEmpty()) {
+                             @Nonnull List<Server> servers) {
+    if (servers.isEmpty()) {
       return null;
     }
-    int size = reachableServers.size();
+    int size = servers.size();
     if (size == 1) {
-      return reachableServers.get(0);
+      return servers.get(0);
     }
 
     Server selected = null;
     Integer minIdleLevel = null;
-    for (Server server : reachableServers) {
+    for (Server server : servers) {
       int idleLevel = server.idleBeat(key);
       if (idleLevel < 1) {
         return server;

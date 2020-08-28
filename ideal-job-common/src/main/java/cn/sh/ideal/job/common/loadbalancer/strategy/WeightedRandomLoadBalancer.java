@@ -7,7 +7,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 /**
  * 加权随机策略
@@ -20,34 +19,47 @@ public class WeightedRandomLoadBalancer<Server extends LbServer> implements Load
   @Override
   @Nullable
   public Server chooseServer(@Nullable Object key,
-                             @Nonnull List<Server> reachableServers) {
-    if (reachableServers.isEmpty()) {
+                             @Nonnull List<Server> servers) {
+    if (servers.isEmpty()) {
       return null;
     }
-    int size = reachableServers.size();
+    final int size = servers.size();
     if (size == 1) {
-      return reachableServers.get(0);
+      return servers.get(0);
     }
     // 为了保障随机均匀, 将权重放大一定的倍数
     final int multiple = 10;
     int sum = 0;
-    for (LbServer server : reachableServers) {
-      sum += server.checkAndGetWeight() * multiple;
+    for (LbServer server : servers) {
+      final int weight = server.getWeight();
+      if (weight < 1) {
+        throw new IllegalArgumentException("Weight least for 1");
+      }
+      sum += weight * multiple;
     }
     if (sum == 0) {
       return null;
     }
-    int random = ThreadLocalRandom.current().nextInt(1, sum + 1);
+    final int random = ThreadLocalRandom.current().nextInt(sum) + 1;
     int tmp = 0;
-    Server selected = null;
-    for (Server server : reachableServers) {
-      final int weight = server.checkAndGetWeight();
+    for (Server server : servers) {
+      final int weight = server.getWeight();
+      if (weight < 1) {
+        throw new IllegalArgumentException("Weight least for 1");
+      }
       tmp += weight * multiple;
       if (tmp >= random) {
-        selected = server;
-        break;
+        return server;
       }
     }
-    return selected;
+    // 不可能运行到这里的, 如果有那肯定是电脑的问题
+    String message = "加权随机算法运算错误: sum=" + sum + ", random=" + random + ", tmp=" + tmp;
+    throw new WeightedRandomError(message);
+  }
+
+  public static class WeightedRandomError extends Error {
+    public WeightedRandomError(String message) {
+      super(message);
+    }
   }
 }

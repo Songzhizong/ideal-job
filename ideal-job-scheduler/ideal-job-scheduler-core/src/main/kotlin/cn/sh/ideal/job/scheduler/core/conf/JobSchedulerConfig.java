@@ -3,12 +3,13 @@ package cn.sh.ideal.job.scheduler.core.conf;
 import cn.sh.ideal.job.common.executor.JobExecutor;
 import cn.sh.ideal.job.common.loadbalancer.LbFactory;
 import cn.sh.ideal.job.common.loadbalancer.SimpleLbFactory;
+import cn.sh.ideal.job.common.utils.IpUtil;
 import cn.sh.ideal.job.common.utils.JsonUtils;
 import cn.sh.ideal.job.scheduler.core.generator.IDGenerator;
 import cn.sh.ideal.job.scheduler.core.generator.ReactiveSpringRedisSnowFlakeInitializer;
 import cn.sh.ideal.job.scheduler.core.generator.SnowFlake;
 import cn.sh.ideal.job.scheduler.core.generator.SnowFlakeInitializer;
-import cn.sh.ideal.job.scheduler.core.trigger.ScheduleTrigger;
+import cn.sh.ideal.job.scheduler.core.trigger.TimingSchedule;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +18,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.context.WebServerApplicationContext;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,18 +41,50 @@ import java.util.concurrent.*;
  * @date 2020/8/20
  */
 @Configuration
-public class JobSchedulerBeanConfig {
-  private static final Logger log = LoggerFactory.getLogger(JobSchedulerBeanConfig.class);
+public class JobSchedulerConfig {
+  private static final Logger log = LoggerFactory.getLogger(JobSchedulerConfig.class);
   @Value("${spring.application.name}")
   private String applicationName;
 
+  private String ip = null;
+  private int port = -1;
+  private String ipPort = null;
+  private final WebServerApplicationContext context;
   private final JobSchedulerProperties schedulerProperties;
   private final ReactiveStringRedisTemplate reactiveStringRedisTemplate;
 
-  public JobSchedulerBeanConfig(JobSchedulerProperties schedulerProperties,
-                                ReactiveStringRedisTemplate reactiveStringRedisTemplate) {
+  public JobSchedulerConfig(WebServerApplicationContext context,
+                            JobSchedulerProperties schedulerProperties,
+                            ReactiveStringRedisTemplate reactiveStringRedisTemplate) {
+    this.context = context;
     this.schedulerProperties = schedulerProperties;
     this.reactiveStringRedisTemplate = reactiveStringRedisTemplate;
+  }
+
+  public String getIp() {
+    if (ip != null) {
+      return ip;
+    }
+    ip = IpUtil.getIp();
+    return ip;
+  }
+
+  public int getPort() {
+    if (port > 1) {
+      return port;
+    }
+    port = context.getWebServer().getPort();
+    return port;
+  }
+
+  public String getIpPort() {
+    if (ipPort != null) {
+      return ipPort;
+    }
+    final String ip = getIp();
+    final int port = getPort();
+    ipPort = ip + ":" + port;
+    return ipPort;
   }
 
   @Bean
@@ -135,7 +169,7 @@ public class JobSchedulerBeanConfig {
         new ThreadFactoryBuilder().setNameFormat("cron-job-pool-%d").build(),
         (runnable, executor) -> {
           if (!executor.isShutdown()) {
-            final Logger log = ScheduleTrigger.Companion.getLog();
+            final Logger log = TimingSchedule.Companion.getLog();
             log.error("cron-job-pool 无法接受新任务 已在调用线程执行, corePoolSize={}, maximumPoolSize={}, workQueueSize={}",
                 finalCorePoolSize, finalMaximumPoolSize, workQueueSize);
             runnable.run();

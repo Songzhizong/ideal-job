@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
  * @author 宋志宗
  * @date 2020/8/19
  */
-public interface LbServer extends Comparable<LbServer> {
+public interface LbServer {
 
   /**
    * @return 唯一ID
@@ -26,29 +26,25 @@ public interface LbServer extends Comparable<LbServer> {
 
   /**
    * 空闲度测试
-   * <p>忙碌转移策略需要调用该方法</p>
+   * <p>如果需要使用忙碌转移策略, 请实现该方法</p>
    *
    * @param key 服务可以使用该对象针对处理
    * @return 空闲级别, 数字越小代表空闲程度越高, 小于1的值表示完全空闲
    */
-  int idleBeat(@Nullable Object key);
-
-  /**
-   * @return 权重, 用于加权算法, 至少为1
-   */
-  default int getWeight() {
-    return 1;
+  default int idleBeat(@Nullable Object key) {
+    final String className = this.getClass().getName();
+    throw new NotImplementedException(className + " not implemented idleBeat");
   }
 
   /**
+   * 获取权重
+   * <p>如果需要使用加权策略, 请实现该方法</p>
+   *
    * @return 权重, 用于加权算法, 至少为1
    */
-  default int checkAndGetWeight() {
-    final int weight = getWeight();
-    if (weight < 1) {
-      throw new IllegalArgumentException("Weight least for 1");
-    }
-    return weight;
+  default int getWeight() {
+    final String className = this.getClass().getName();
+    throw new NotImplementedException(className + " not implemented getWeight");
   }
 
   /**
@@ -56,8 +52,8 @@ public interface LbServer extends Comparable<LbServer> {
    */
   void destroy();
 
-  @Override
-  default int compareTo(@Nonnull LbServer o) {
-    return this.getWeight() - o.getWeight();
-  }
+//  @Override
+//  default int compareTo(@Nonnull LbServer o) {
+//    return this.getWeight() - o.getWeight();
+//  }
 }
