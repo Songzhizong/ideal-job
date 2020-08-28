@@ -99,6 +99,20 @@ public class JobExecutor {
     return lbFactory.chooseServer(SCHEDULER_SERVER_NAME, null);
   }
 
+  @Nullable
+  public static RemoteJobExecutor chooseRemoteJobExecutor(int retry) {
+    if (retry < 1) {
+      return chooseRemoteJobExecutor();
+    }
+    RemoteJobExecutor remoteJobExecutor = null;
+    int i = -1;
+    while (remoteJobExecutor == null || i < retry) {
+      i++;
+      remoteJobExecutor = chooseRemoteJobExecutor();
+    }
+    return remoteJobExecutor;
+  }
+
   public static void executeJob(@Nonnull ExecuteJobParam param) {
     final String jobId = param.getJobId();
     final String handlerName = param.getExecutorHandler();

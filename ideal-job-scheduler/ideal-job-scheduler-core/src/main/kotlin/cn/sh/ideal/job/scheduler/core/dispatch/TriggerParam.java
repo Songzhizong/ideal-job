@@ -1,4 +1,4 @@
-package cn.sh.ideal.job.scheduler.core.trigger;
+package cn.sh.ideal.job.scheduler.core.dispatch;
 
 import cn.sh.ideal.job.common.constants.BlockStrategyEnum;
 import cn.sh.ideal.job.common.constants.TriggerTypeEnum;

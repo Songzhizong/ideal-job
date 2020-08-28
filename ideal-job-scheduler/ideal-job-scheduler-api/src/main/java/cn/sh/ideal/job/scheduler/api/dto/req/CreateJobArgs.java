@@ -1,13 +1,15 @@
 package cn.sh.ideal.job.scheduler.api.dto.req;
 
 import cn.sh.ideal.job.common.constants.BlockStrategyEnum;
-import cn.sh.ideal.job.common.loadbalancer.LbStrategyEnum;
+import cn.sh.ideal.job.common.constants.ExecuteTypeEnum;
+import cn.sh.ideal.job.common.constants.RouteStrategyEnum;
+import cn.sh.ideal.job.scheduler.api.pojo.HttpScript;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.validation.constraints.NotBlank;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -29,12 +31,18 @@ public class CreateJobArgs {
   @NotNull(message = "所属执行器id不能为空")
   private Long executorId;
   /**
+   * 执行模式
+   */
+  @Nonnull
+  @NotNull(message = "执行模式不能为空")
+  private ExecuteTypeEnum executeType;
+  /**
    * JobHandler
    */
   @Nullable
   private String executorHandler;
   /**
-   * 执行参数
+   * 执行参数, 执行模式为http script时无效
    */
   @Nullable
   private String executorParam;
@@ -42,7 +50,7 @@ public class CreateJobArgs {
    * 路由策略,默认轮询
    */
   @Nullable
-  private LbStrategyEnum routeStrategy;
+  private RouteStrategyEnum routeStrategy;
   /**
    * 阻塞策略, 默认串行执行
    */
@@ -68,6 +76,12 @@ public class CreateJobArgs {
    */
   @Nullable
   private String alarmEmail;
+  /**
+   * 执行模式为http script时有效
+   */
+  @Valid
+  @Nullable
+  private HttpScript httpScript;
 
   // ---------------------------- 以下为扩展查询字段, 适用于各种业务场景的查询需求
 

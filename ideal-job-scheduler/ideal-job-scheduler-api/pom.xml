@@ -17,6 +17,10 @@
       <artifactId>ideal-job-common</artifactId>
       <version>${ideal-job.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webflux</artifactId>
+    </dependency>
     <!-- validation-api -->
     <dependency>
       <groupId>javax.validation</groupId>

@@ -9,7 +9,7 @@ import cn.sh.ideal.job.scheduler.core.generator.IDGenerator;
 import cn.sh.ideal.job.scheduler.core.generator.ReactiveSpringRedisSnowFlakeInitializer;
 import cn.sh.ideal.job.scheduler.core.generator.SnowFlake;
 import cn.sh.ideal.job.scheduler.core.generator.SnowFlakeInitializer;
-import cn.sh.ideal.job.scheduler.core.trigger.TimingSchedule;
+import cn.sh.ideal.job.scheduler.core.dispatch.TimingSchedule;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;

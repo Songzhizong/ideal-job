@@ -1,10 +1,6 @@
 package cn.sh.ideal.job.scheduler.core.admin.entity;
 
-import cn.sh.ideal.job.common.constants.BlockStrategyEnum;
-import cn.sh.ideal.job.common.constants.DBDefaults;
-import cn.sh.ideal.job.common.constants.HandleStatusEnum;
-import cn.sh.ideal.job.common.constants.TriggerTypeEnum;
-import cn.sh.ideal.job.common.loadbalancer.LbStrategyEnum;
+import cn.sh.ideal.job.common.constants.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -56,6 +52,17 @@ public class JobTriggerLog {
   )
   @Nonnull
   private Long executorId;
+
+  /**
+   * 执行模式
+   */
+  @Enumerated(EnumType.STRING)
+  @Column(
+      name = "execute_type", nullable = false, length = 32
+      , columnDefinition = "varchar(32) comment '执行模式'"
+  )
+  @Nonnull
+  private ExecuteTypeEnum executeType;
 
   /**
    * 任务Id
@@ -116,7 +123,7 @@ public class JobTriggerLog {
       , columnDefinition = "varchar(32) comment '执行器路由策略'"
   )
   @Nonnull
-  private LbStrategyEnum routeStrategy;
+  private RouteStrategyEnum routeStrategy;
 
   /**
    * 阻塞处理策略
@@ -270,6 +277,15 @@ public class JobTriggerLog {
   }
 
   @Nonnull
+  public ExecuteTypeEnum getExecuteType() {
+    return executeType;
+  }
+
+  public void setExecuteType(@Nonnull ExecuteTypeEnum executeType) {
+    this.executeType = executeType;
+  }
+
+  @Nonnull
   public Long getJobId() {
     return jobId;
   }
@@ -315,11 +331,11 @@ public class JobTriggerLog {
   }
 
   @Nonnull
-  public LbStrategyEnum getRouteStrategy() {
+  public RouteStrategyEnum getRouteStrategy() {
     return routeStrategy;
   }
 
-  public void setRouteStrategy(@Nonnull LbStrategyEnum routeStrategy) {
+  public void setRouteStrategy(@Nonnull RouteStrategyEnum routeStrategy) {
     this.routeStrategy = routeStrategy;
   }
 

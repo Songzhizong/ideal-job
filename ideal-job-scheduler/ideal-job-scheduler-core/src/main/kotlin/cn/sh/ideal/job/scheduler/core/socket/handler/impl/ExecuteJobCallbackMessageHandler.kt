@@ -6,7 +6,7 @@ import cn.sh.ideal.job.common.message.payload.ExecuteJobCallback
 import cn.sh.ideal.job.scheduler.core.socket.SocketJobExecutor
 import cn.sh.ideal.job.scheduler.core.socket.handler.MessageHandler
 import cn.sh.ideal.job.scheduler.core.socket.handler.MessageHandlerFactory
-import cn.sh.ideal.job.scheduler.core.trigger.JobTrigger
+import cn.sh.ideal.job.scheduler.core.dispatch.JobDispatch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutorService
 @Component("executeJobCallbackMessageHandler")
 final class ExecuteJobCallbackMessageHandler(
     private val jobCallbackThreadPool: ExecutorService,
-    private val jobTrigger: JobTrigger) : MessageHandler {
+    private val jobDispatch: JobDispatch) : MessageHandler {
   private val log: Logger = LoggerFactory.getLogger(this.javaClass)
 
   init {
@@ -39,7 +39,7 @@ final class ExecuteJobCallbackMessageHandler(
       return
     }
     jobCallbackThreadPool.execute {
-      jobTrigger.triggerCallback(executeJobCallback)
+      jobDispatch.dispatchCallback(executeJobCallback)
     }
   }
 }

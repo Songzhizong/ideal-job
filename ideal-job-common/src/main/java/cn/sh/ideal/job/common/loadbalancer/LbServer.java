@@ -50,7 +50,9 @@ public interface LbServer {
   /**
    * 销毁对象
    */
-  void destroy();
+  default void destroy() {
+    // non
+  }
 
 //  @Override
 //  default int compareTo(@Nonnull LbServer o) {

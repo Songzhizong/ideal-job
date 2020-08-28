@@ -75,7 +75,7 @@ public final class JobThread extends Thread {
     if (jobRunning || jobQueue.size() > 0) {
       if (strategy == BlockStrategyEnum.DISCARD_LATER.getCode()) {
         // 丢弃后续调度
-        // todo 执行回调
+        discardJobNotice(param, "任务已在进行中");
         return;
       } else if (strategy == BlockStrategyEnum.COVER_EARLY.getCode()) {
         // 覆盖掉之前的调度, 清空队列并通知调度器被放弃执行的任务信息列表
@@ -86,14 +86,32 @@ public final class JobThread extends Thread {
             giveUpJobList.add(pa);
           }
         }
-        // todo 执行回调
+        for (ExecuteJobParam jobParam : giveUpJobList) {
+          discardJobNotice(jobParam, "被新的调度覆盖");
+        }
       }
     }
     boolean offer = jobQueue.offer(param);
     if (!offer) {
-      // todo 任务队列已满, 新的任务未能执行
+      discardJobNotice(param, "任务队列已满, 新的任务未能执行");
       log.info("任务队列已满, 新的任务未能执行");
     }
+  }
+
+  private void discardJobNotice(ExecuteJobParam jobParam, String handleMessage) {
+    final ExecuteJobCallback callback = ExecuteJobCallback.create(1).get(0);
+    callback.setJobId(jobParam.getJobId());
+    callback.setTriggerId(jobParam.getTriggerId());
+    callback.setHandleStatus(HandleStatusEnum.DISCARD.getCode());
+    callback.setHandleMessage(handleMessage);
+    callback.setHandleTime(0);
+    callback.setTimeConsuming(0);
+    final RemoteJobExecutor executor = JobExecutor.chooseRemoteJobExecutor(1);
+    if (executor == null) {
+      log.warn("当前没有可用的RemoteJobExecutor");
+      return;
+    }
+    executor.executeJobCallback(callback);
   }
 
   @Override

@@ -2,8 +2,7 @@ package cn.sh.ideal.job.scheduler.core.conf;
 
 import cn.sh.ideal.job.scheduler.core.generator.IDGenerator;
 import cn.sh.ideal.job.scheduler.core.generator.JpaIdentityGenerator;
-import cn.sh.ideal.job.scheduler.core.trigger.TimingSchedule;
-import org.springframework.beans.factory.DisposableBean;
+import cn.sh.ideal.job.scheduler.core.dispatch.TimingSchedule;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Configuration;
 

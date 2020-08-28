@@ -2,7 +2,7 @@ package cn.sh.ideal.job.scheduler.core.converter;
 
 import cn.sh.ideal.job.common.constants.BlockStrategyEnum;
 import cn.sh.ideal.job.common.constants.DBDefaults;
-import cn.sh.ideal.job.common.loadbalancer.LbStrategyEnum;
+import cn.sh.ideal.job.common.constants.RouteStrategyEnum;
 import cn.sh.ideal.job.scheduler.api.dto.req.CreateJobArgs;
 import cn.sh.ideal.job.scheduler.api.dto.rsp.JobInfoRsp;
 import cn.sh.ideal.job.scheduler.core.admin.entity.JobInfo;
@@ -55,6 +55,7 @@ public final class JobInfoConverter {
       jobInfo.setBusinessId(DBDefaults.DEFAULT_STRING_VALUE);
     }
     jobInfo.setExecutorId(createJobArgs.getExecutorId());
+    jobInfo.setExecuteType(createJobArgs.getExecuteType());
     final String cron = createJobArgs.getCron();
     if (StringUtils.isNotBlank(cron)) {
       jobInfo.setCron(cron);
@@ -73,11 +74,11 @@ public final class JobInfoConverter {
     } else {
       jobInfo.setAlarmEmail(DBDefaults.DEFAULT_STRING_VALUE);
     }
-    final LbStrategyEnum routeStrategy = createJobArgs.getRouteStrategy();
+    final RouteStrategyEnum routeStrategy = createJobArgs.getRouteStrategy();
     if (routeStrategy != null) {
       jobInfo.setRouteStrategy(routeStrategy);
     } else {
-      jobInfo.setRouteStrategy(LbStrategyEnum.POLLING);
+      jobInfo.setRouteStrategy(RouteStrategyEnum.POLLING);
     }
     final String executorHandler = createJobArgs.getExecutorHandler();
     if (executorHandler != null) {

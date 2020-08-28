@@ -1,4 +1,4 @@
-package cn.sh.ideal.job.scheduler.core.trigger
+package cn.sh.ideal.job.scheduler.core.dispatch
 
 import cn.sh.ideal.job.common.constants.TriggerTypeEnum
 import cn.sh.ideal.job.scheduler.core.admin.entity.JobInfo
@@ -32,7 +32,7 @@ import kotlin.concurrent.thread
 class TimingSchedule(
     private val dataSource: DataSource,
     private val jobService: JobService,
-    private val jobTrigger: JobTrigger,
+    private val jobDispatch: JobDispatch,
     private val cronJobThreadPool: ExecutorService,
     jobSchedulerProperties: JobSchedulerProperties) : ServletContextListener {
   companion object {
@@ -204,22 +204,12 @@ class TimingSchedule(
   }
 
   private fun triggerJob(jobInfo: JobInfo) {
-    val jobId = jobInfo.jobId
-    val triggerParam = TriggerParam()
-    triggerParam.jobId = jobId
-    triggerParam.executorId = jobInfo.executorId
-    triggerParam.triggerType = TriggerTypeEnum.CRON
-    triggerParam.executorHandler = jobInfo.executorHandler
-    triggerParam.executorParam = jobInfo.executorParam
-    triggerParam.routeStrategy = jobInfo.routeStrategy
-    triggerParam.blockStrategy = jobInfo.blockStrategy
-    triggerParam.retryCount = jobInfo.retryCount
     cronJobThreadPool.execute {
       try {
-        jobTrigger.trigger(triggerParam)
+        jobDispatch.dispatch(jobInfo, TriggerTypeEnum.MANUAL, null)
       } catch (e: Exception) {
         val errMsg = "${e.javaClass.name}:${e.message}"
-        log.info("任务调度出现异常, jobId={}, message: {}", jobId, errMsg)
+        log.info("任务调度出现异常, jobId={}, message: {}", jobInfo.jobId, errMsg)
       }
     }
   }
