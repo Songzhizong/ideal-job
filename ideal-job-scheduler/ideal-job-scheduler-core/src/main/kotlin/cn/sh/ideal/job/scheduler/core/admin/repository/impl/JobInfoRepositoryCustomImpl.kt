@@ -1,6 +1,7 @@
-package cn.sh.ideal.job.scheduler.core.admin.repository
+package cn.sh.ideal.job.scheduler.core.admin.repository.impl
 
 import cn.sh.ideal.job.scheduler.core.admin.entity.JobInfo
+import cn.sh.ideal.job.scheduler.core.admin.repository.JobInfoRepositoryCustom
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
 import java.time.LocalDateTime

@@ -105,9 +105,4 @@ public class JobExecutorController implements ExecutorClient {
     paging.descBy("executorId");
     return service.query(args, paging);
   }
-
-  @GetMapping("/loadById/{executorId}")
-  public JobExecutor loadById(@PathVariable("executorId") Long executorId) {
-    return service.loadById(executorId);
-  }
 }

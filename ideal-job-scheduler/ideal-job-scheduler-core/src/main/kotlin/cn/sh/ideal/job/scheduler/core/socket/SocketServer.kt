@@ -59,6 +59,7 @@ class SocketServer {
 
   @OnClose
   fun onClose() {
+
     val appName = socketExecutor.appName
     val instanceId = socketExecutor.instanceId
     val serverHolder = lbFactory.getServerHolder(appName)

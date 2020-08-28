@@ -36,8 +36,7 @@ import javax.persistence.criteria.Predicate
  */
 @Suppress("DuplicatedCode")
 @Service
-class JobService(private val jobInfoRepository: JobInfoRepository,
-                 private val jobInfoRepositoryCustom: JobInfoRepositoryCustom) {
+class JobService(private val jobInfoRepository: JobInfoRepository) {
   private val log: Logger = LoggerFactory.getLogger(this.javaClass)
   private val preReadMs = 5000L
 
@@ -335,6 +334,6 @@ class JobService(private val jobInfoRepository: JobInfoRepository,
   }
 
   fun batchUpdateTriggerInfo(jobInfoList: List<JobInfo>) {
-    jobInfoRepositoryCustom.batchUpdateTriggerInfo(jobInfoList)
+    jobInfoRepository.batchUpdateTriggerInfo(jobInfoList)
   }
 }

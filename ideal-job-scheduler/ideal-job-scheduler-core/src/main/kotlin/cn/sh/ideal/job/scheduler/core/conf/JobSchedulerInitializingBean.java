@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
  * @date 2020/7/4
  */
 @Configuration
-public class JobSchedulerInitializingBean implements InitializingBean, DisposableBean {
+public class JobSchedulerInitializingBean implements InitializingBean {
   private final IDGenerator idGenerator;
   private final TimingSchedule timingSchedule;
 
@@ -28,7 +28,6 @@ public class JobSchedulerInitializingBean implements InitializingBean, Disposabl
     timingSchedule.start();
   }
 
-  @Override
   public void destroy() {
     timingSchedule.stop();
   }

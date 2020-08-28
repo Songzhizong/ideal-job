@@ -14,6 +14,9 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.TimeUnit
+import javax.servlet.ServletContextEvent
+import javax.servlet.ServletContextListener
+import javax.servlet.annotation.WebListener
 import javax.sql.DataSource
 import kotlin.collections.ArrayList
 import kotlin.concurrent.thread
@@ -25,11 +28,13 @@ import kotlin.concurrent.thread
  * @date 2020/8/27
  */
 @Component
-class TimingSchedule(private val dataSource: DataSource,
-                     private val jobService: JobService,
-                     private val jobTrigger: JobTrigger,
-                     private val cronJobThreadPool: ExecutorService,
-                     jobSchedulerProperties: JobSchedulerProperties) {
+@WebListener
+class TimingSchedule(
+    private val dataSource: DataSource,
+    private val jobService: JobService,
+    private val jobTrigger: JobTrigger,
+    private val cronJobThreadPool: ExecutorService,
+    jobSchedulerProperties: JobSchedulerProperties) : ServletContextListener {
   companion object {
     val log: Logger = LoggerFactory.getLogger(TimingSchedule::class.java)
   }
@@ -47,6 +52,11 @@ class TimingSchedule(private val dataSource: DataSource,
 
   @Volatile
   private var ringThreadToStop = false
+
+  // web容器销毁前先销毁定时调度器, 防止websocket连接先一步断开导致时间轮的消息没能发送出去
+  override fun contextDestroyed(sce: ServletContextEvent) {
+    stop()
+  }
 
   @Suppress("DuplicatedCode")
   fun start() {
