@@ -128,7 +128,7 @@ public final class JobInfoConverter {
     jobInfoRsp.setCron(jobInfo.getCron());
     jobInfoRsp.setJobName(jobInfo.getJobName());
     jobInfoRsp.setAlarmEmail(jobInfo.getAlarmEmail());
-    jobInfoRsp.setRouteStrategy(jobInfo.getRouteStrategy().getCode());
+    jobInfoRsp.setRouteStrategy(jobInfo.getRouteStrategy().name());
     jobInfoRsp.setExecutorHandler(jobInfo.getExecutorHandler());
     jobInfoRsp.setExecutorParam(jobInfo.getExecutorParam());
     jobInfoRsp.setBlockStrategy(jobInfo.getBlockStrategy().getCode());

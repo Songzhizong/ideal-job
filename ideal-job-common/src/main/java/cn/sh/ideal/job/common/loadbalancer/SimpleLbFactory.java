@@ -30,13 +30,15 @@ public class SimpleLbFactory<Server extends LbServer> implements LbFactory<Serve
     return loadBalancer.chooseServer(key, serverHolder.getReachableServers());
   }
 
+  @Nonnull
   @Override
   public LoadBalancer<Server> getLoadBalancer(@Nonnull String serverName,
                                               @Nonnull LbStrategyEnum strategy) {
-    String key = serverName + "-" + strategy.getName();
+    String key = serverName + "-" + strategy.name();
     return loadBalancerMap.computeIfAbsent(key, (k) -> newLoadBalancer(strategy));
   }
 
+  @Nonnull
   @Override
   public LbServerHolder<Server> getServerHolder(
       @Nonnull String serverName,

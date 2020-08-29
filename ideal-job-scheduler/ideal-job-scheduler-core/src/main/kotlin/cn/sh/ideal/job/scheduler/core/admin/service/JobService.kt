@@ -1,12 +1,11 @@
 package cn.sh.ideal.job.scheduler.core.admin.service
 
 import cn.sh.ideal.job.common.constants.*
-import cn.sh.ideal.job.common.loadbalancer.LbStrategyEnum
+import cn.sh.ideal.job.common.exception.VisibleException
 import cn.sh.ideal.job.common.transfer.CommonResMsg
 import cn.sh.ideal.job.common.transfer.Paging
 import cn.sh.ideal.job.common.transfer.Res
 import cn.sh.ideal.job.common.transfer.SpringPages
-import cn.sh.ideal.job.common.utils.JsonUtils
 import cn.sh.ideal.job.scheduler.api.dto.req.CreateJobArgs
 import cn.sh.ideal.job.scheduler.api.dto.req.QueryJobArgs
 import cn.sh.ideal.job.scheduler.api.dto.req.UpdateJobArgs
@@ -61,15 +60,6 @@ class JobService(private val jobInfoRepository: JobInfoRepository) {
       return Res.err(CommonResMsg.NOT_FOUND, "执行器不存在")
     }
     val jobInfo = JobInfoConverter.fromCreateJobArgs(createJobArgs)
-    if (createJobArgs.executeType == ExecuteTypeEnum.HTTP_SCRIPT
-        || createJobArgs.executeType == ExecuteTypeEnum.LB_HTTP_SCRIPT) {
-      val httpScript = createJobArgs.httpScript
-      if (httpScript == null) {
-        log.info("新建任务失败, httpScript为空")
-        return Res.err("httpScript不能为空")
-      }
-      jobInfo.executorParam = JsonUtils.toJsonString(httpScript)
-    }
     if (autoStart && cron.isNotBlank()) {
       val validExpression = CronExpression.isValidExpression(cron)
       if (!validExpression) {
@@ -308,13 +298,13 @@ class JobService(private val jobInfoRepository: JobInfoRepository) {
    * @author 宋志宗
    * @date 2020/8/24 8:46 下午
    */
-  fun trigger(jobId: Long, executorParam: String?): Res<Void> {
+  fun trigger(jobId: Long, executorParam: String?) {
     val jobInfo = jobInfoRepository.findByIdOrNull(jobId)
     if (jobInfo == null) {
       log.info("任务: {} 不存在", jobId)
-      return Res.err(CommonResMsg.NOT_FOUND, "任务不存在")
+      throw VisibleException(CommonResMsg.NOT_FOUND, "任务不存在")
     }
-    return jobDispatch.dispatch(jobInfo, TriggerTypeEnum.MANUAL, executorParam)
+    jobDispatch.dispatch(jobInfo, TriggerTypeEnum.MANUAL, executorParam)
   }
 
   fun existsByExecutorId(executorId: Long): Boolean {

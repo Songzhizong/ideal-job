@@ -17,11 +17,12 @@ import java.time.LocalDateTime;
  * @author 宋志宗
  * @date 2020/8/20
  */
+@SuppressWarnings("unused")
 @Entity
 @Table(
     name = "job_executor",
     indexes = {
-        @Index(name = "uk_app_name", columnList = "app_name", unique = true),
+        @Index(name = "uk_app_name", columnList = "appName", unique = true),
         @Index(name = "title", columnList = "title"),
     }
 )
@@ -34,59 +35,48 @@ public class JobExecutor {
    * 执行器Id
    */
   @Id
+  @Nonnull
   @GeneratedValue(strategy = GenerationType.AUTO, generator = "job_executor_generator")
   @GenericGenerator(name = "job_executor_generator",
       strategy = "cn.sh.ideal.job.scheduler.core.generator.JpaIdentityGenerator",
       parameters = {@org.hibernate.annotations.Parameter(name = "biz", value = "job_executor")})
-  @Column(name = "executor_id", nullable = false, updatable = false
-      , columnDefinition = "bigint(20) comment '执行器Id'"
-  )
-  @Nonnull
+  @Column(nullable = false, updatable = false)
   private Long executorId;
 
   /**
    * 执行器AppName
    */
-  @Column(
-      name = "app_name", nullable = false, length = 64
-      , columnDefinition = "varchar(64) comment '执行器AppName'"
-  )
   @Nonnull
+  @Column(nullable = false, length = 64)
   private String appName;
 
   /**
    * 执行器名称
    */
-  @Column(
-      name = "title", nullable = false, length = 32
-      , columnDefinition = "varchar(32) comment '执行器名称'"
-  )
   @Nonnull
+  @Column(nullable = false, length = 32)
   private String title;
 
   /**
    * 创建时间
    */
-  @CreatedDate
-  @Column(name = "created_time", nullable = false, updatable = false)
   @Nonnull
+  @CreatedDate
+  @Column(nullable = false, updatable = false)
   private LocalDateTime createdTime;
 
   /**
    * 更新时间
    */
-  @LastModifiedDate
-  @Column(name = "update_time", nullable = false)
   @Nonnull
+  @LastModifiedDate
+  @Column(nullable = false)
   private LocalDateTime updateTime;
 
   /**
    * 删除状态:0未删除,1删除
    */
-  @Column(
-      name = "deleted", nullable = false
-      , columnDefinition = "int(11) comment '删除状态:0未删除,1删除'"
-  )
+  @Column(nullable = false)
   private int deleted;
 
   @Nonnull

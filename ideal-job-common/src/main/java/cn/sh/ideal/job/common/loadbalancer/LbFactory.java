@@ -48,6 +48,7 @@ public interface LbFactory<Server extends LbServer> {
    * @author 宋志宗
    * @date 2020/8/20 9:50 上午
    */
+  @Nonnull
   default LoadBalancer<Server> getLoadBalancer(@Nonnull String serverName) {
     return getLoadBalancer(serverName, LbStrategyEnum.POLLING);
   }
@@ -61,6 +62,7 @@ public interface LbFactory<Server extends LbServer> {
    * @author 宋志宗
    * @date 2020/8/20 9:50 上午
    */
+  @Nonnull
   LoadBalancer<Server> getLoadBalancer(@Nonnull String serverName,
                                        @Nonnull LbStrategyEnum strategy);
 
@@ -73,6 +75,7 @@ public interface LbFactory<Server extends LbServer> {
    * @author 宋志宗
    * @date 2020/8/20 10:27 上午
    */
+  @Nonnull
   default LbServerHolder<Server> getServerHolder(@Nonnull String serverName) {
     return getServerHolder(serverName, null);
   }
@@ -85,6 +88,7 @@ public interface LbFactory<Server extends LbServer> {
    * @author 宋志宗
    * @date 2020/8/20 10:27 上午
    */
+  @Nonnull
   LbServerHolder<Server> getServerHolder(
       @Nonnull String serverName,
       @Nullable Function<String, LbServerHolder<Server>> function);

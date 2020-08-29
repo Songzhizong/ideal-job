@@ -40,7 +40,6 @@ class TimingSchedule(
   }
 
   private val lockTable = jobSchedulerProperties.lockTable
-  private val scheduleLockName = jobSchedulerProperties.scheduleLockName
   private val preReadCount = 500
   private val preReadMills = 5000L
   private val ringData = ConcurrentHashMap<Int, MutableList<JobInfo>>()
@@ -164,7 +163,7 @@ class TimingSchedule(
       tempAutoCommit = connection.autoCommit
       connection.autoCommit = false
       @Suppress("SqlResolve")
-      val sql = "select * from $lockTable where lock_name = '$scheduleLockName' for update"
+      val sql = "select * from $lockTable where lock_name = 'schedule_lock' for update"
       preparedStatement = connection
           .prepareStatement(sql)
       preparedStatement.execute()
@@ -206,7 +205,7 @@ class TimingSchedule(
   private fun triggerJob(jobInfo: JobInfo) {
     cronJobThreadPool.execute {
       try {
-        jobDispatch.dispatch(jobInfo, TriggerTypeEnum.MANUAL, null)
+        jobDispatch.dispatch(jobInfo, TriggerTypeEnum.CRON, null)
       } catch (e: Exception) {
         val errMsg = "${e.javaClass.name}:${e.message}"
         log.info("任务调度出现异常, jobId={}, message: {}", jobInfo.jobId, errMsg)

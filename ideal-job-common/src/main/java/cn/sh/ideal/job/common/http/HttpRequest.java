@@ -1,6 +1,5 @@
-package cn.sh.ideal.job.scheduler.api.pojo;
+package cn.sh.ideal.job.common.http;
 
-import cn.sh.ideal.job.scheduler.api.constant.HttpMethod;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpHeaders;
@@ -16,7 +15,7 @@ import javax.validation.constraints.NotNull;
  */
 @Getter
 @Setter
-public class HttpScript {
+public class HttpRequest {
   /**
    * 请求方法
    */
@@ -30,6 +29,11 @@ public class HttpScript {
   @Nonnull
   @NotBlank(message = "请求地址不能为空")
   private String url;
+  /**
+   * Query string
+   */
+  @Nullable
+  private String queryString;
   /**
    * 请求头
    */

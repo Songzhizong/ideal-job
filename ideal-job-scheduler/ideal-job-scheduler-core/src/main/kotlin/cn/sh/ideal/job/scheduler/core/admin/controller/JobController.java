@@ -150,6 +150,7 @@ public class JobController implements JobClient {
   @Override
   @PostMapping("/trigger")
   public Res<Void> trigger(@Nonnull Long jobId, @Nullable String executorParam) {
-    return jobService.trigger(jobId, executorParam);
+    jobService.trigger(jobId, executorParam);
+    return Res.success();
   }
 }

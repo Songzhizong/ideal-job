@@ -65,7 +65,7 @@ public class JobInfoRsp {
   /**
    * 执行器路由策略
    */
-  private int routeStrategy;
+  private String routeStrategy;
   /**
    * JobHandler
    */

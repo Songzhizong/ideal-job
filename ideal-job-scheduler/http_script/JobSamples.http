@@ -1,0 +1,13 @@
+### http script
+POST http://{{ip}}:{{port}}/job/create
+Content-Type: application/json
+
+{
+  "autoStart": true,
+  "executorId": 131041968867246080,
+  "executeType": "HTTP_SCRIPT",
+  "executorParam": "GET https://www.baidu.com/",
+  "routeStrategy": "RANDOM",
+  "blockStrategy": "SERIAL",
+  "cron": "0/10 * * * * ?"
+}

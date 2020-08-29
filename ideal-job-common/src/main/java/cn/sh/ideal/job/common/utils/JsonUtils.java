@@ -56,20 +56,24 @@ public class JsonUtils {
   }
 
   public static <T> String toJsonString(T t) {
-    return toJsonString(t, false);
+    return toJsonString(t, false, false);
   }
 
   public static <T> String toJsonStringIgnoreNull(T t) {
-    return toJsonString(t, true);
+    return toJsonString(t, true, false);
   }
 
-  public static <T> String toJsonString(T t, boolean ignoreNull) {
+  public static <T> String toJsonString(T t, boolean ignoreNull, boolean pretty) {
     ObjectMapper writer = JsonUtils.mapper;
     if (ignoreNull) {
       writer = JsonUtils.ignoreNullMapper;
     }
     try {
-      return writer.writeValueAsString(t);
+      if (pretty) {
+        return writer.writerWithDefaultPrettyPrinter().writeValueAsString(t);
+      } else {
+        return writer.writeValueAsString(t);
+      }
     } catch (JsonProcessingException e) {
       throw new RuntimeException(e);
     }
