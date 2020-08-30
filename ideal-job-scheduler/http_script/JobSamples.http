@@ -6,7 +6,7 @@ Content-Type: application/json
   "autoStart": true,
   "executorId": 131360599572480000,
   "executeType": "HTTP_SCRIPT",
-  "executeParam": "GET https://www.baidu.com/",
+  "executeParam": "POST http://127.0.0.1:8804/executor/query?page=1&size=10\nContent-Type: application/json\n\n{\n  \"appName\": \"SAMPLE-EXECUTOR\"\n}",
   "routeStrategy": "RANDOM",
   "blockStrategy": "SERIAL",
   "cron": "0/10 * * * * ?"
