@@ -8,8 +8,8 @@ import cn.sh.ideal.job.common.executor.TaskExecutor
 import cn.sh.ideal.job.common.loadbalancer.LbFactory
 import cn.sh.ideal.job.common.message.payload.TaskParam
 import cn.sh.ideal.job.common.transfer.CommonResMsg
-import cn.sh.ideal.job.scheduler.core.admin.entity.JobInfo
 import cn.sh.ideal.job.scheduler.core.admin.entity.JobInstance
+import cn.sh.ideal.job.scheduler.core.admin.entity.vo.DispatchJobView
 import cn.sh.ideal.job.scheduler.core.admin.service.JobExecutorService
 import cn.sh.ideal.job.scheduler.core.admin.service.JobInstanceService
 import cn.sh.ideal.job.scheduler.core.dispatch.handler.ExecuteHandler
@@ -35,22 +35,22 @@ final class JobHandlerExecuteHandler(
   }
 
   override fun execute(instance: JobInstance,
-                       jobInfo: JobInfo,
+                       jobView: DispatchJobView,
                        triggerType: TriggerTypeEnum,
                        customExecuteParam: String?) {
-    val jobId = jobInfo.jobId
-    val chooseExecutors = chooseServers(jobInfo, jobId)
+    val jobId = jobView.jobId
+    val chooseExecutors = chooseServers(jobView, jobId)
     val instanceId = instance.instanceId
-    val executeParam = customExecuteParam ?: jobInfo.executeParam
+    val executeParam = customExecuteParam ?: jobView.executeParam
 
     if (chooseExecutors.size == 1) {
       val jobExecutor = chooseExecutors[0]
       val jobParam = TaskParam()
       jobParam.jobId = jobId.toString()
       jobParam.instanceId = instanceId
-      jobParam.executorHandler = jobInfo.executorHandler
+      jobParam.executorHandler = jobView.executorHandler
       jobParam.executeParam = executeParam
-      jobParam.blockStrategy = jobInfo.blockStrategy.name
+      jobParam.blockStrategy = jobView.blockStrategy.name
 
       instance.executorInstance = jobExecutor.instanceId
       try {
@@ -65,20 +65,20 @@ final class JobHandlerExecuteHandler(
         val jobInstance = JobInstance.createInitialized()
         jobInstance.parentId = instanceId
         jobInstance.jobId = jobId
-        jobInstance.executorId = jobInfo.executorId
+        jobInstance.executorId = jobView.executorId
         jobInstance.triggerType = triggerType
         jobInstance.schedulerInstance = instance.schedulerInstance
         jobInstance.executorInstance = executor.instanceId
-        jobInstance.executorHandler = jobInfo.executorHandler
+        jobInstance.executorHandler = jobView.executorHandler
         jobInstance.executeParam = executeParam
         instanceService.saveInstance(jobInstance)
 
         val jobParam = TaskParam()
         jobParam.jobId = jobId.toString()
         jobParam.instanceId = jobInstance.instanceId
-        jobParam.executorHandler = jobInfo.executorHandler
+        jobParam.executorHandler = jobView.executorHandler
         jobParam.executeParam = executeParam
-        jobParam.blockStrategy = jobInfo.blockStrategy.name
+        jobParam.blockStrategy = jobView.blockStrategy.name
         try {
           executor.execute(jobParam)
         } catch (e: Exception) {
@@ -97,8 +97,8 @@ final class JobHandlerExecuteHandler(
    * @author 宋志宗
    * @date 2020/8/29 22:00
    */
-  private fun chooseServers(jobInfo: JobInfo, jobId: Long): List<TaskExecutor> {
-    val executorId = jobInfo.executorId
+  private fun chooseServers(jobView: DispatchJobView, jobId: Long): List<TaskExecutor> {
+    val executorId = jobView.executorId
     val executor = jobExecutorService.loadById(executorId)
     if (executor == null) {
       log.info("任务: {} 调度失败, 执行器: {} 不存在", jobId, executorId)
@@ -111,7 +111,7 @@ final class JobHandlerExecuteHandler(
       throw VisibleException("执行器应用名称为空")
     }
 
-    if (StringUtils.isBlank(jobInfo.executorHandler)) {
+    if (StringUtils.isBlank(jobView.executorHandler)) {
       log.info("任务: {} 的执行处理器为空", jobId)
       throw VisibleException("executorHandler为空")
     }
@@ -122,7 +122,7 @@ final class JobHandlerExecuteHandler(
       log.info("执行器: {} 当前没有可用的实例", executorAppName)
       throw VisibleException("执行器当前没有可用的实例")
     }
-    val routeStrategy = jobInfo.routeStrategy
+    val routeStrategy = jobView.routeStrategy
     return if (routeStrategy == RouteStrategyEnum.BROADCAST) {
       reachableServers
     } else {

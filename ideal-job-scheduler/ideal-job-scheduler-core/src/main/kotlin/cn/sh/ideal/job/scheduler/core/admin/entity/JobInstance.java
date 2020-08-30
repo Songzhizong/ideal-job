@@ -19,13 +19,14 @@ import java.time.LocalDateTime;
 @SuppressWarnings("unused")
 @Entity
 @Table(
-    name = "job_instance",
+    name = "ideal_job_instance",
     indexes = {
         @Index(name = "parent_id", columnList = "parentId"),
         @Index(name = "job_id", columnList = "jobId"),
         @Index(name = "created_time", columnList = "createdTime"),
     }
 )
+@org.hibernate.annotations.Table(appliesTo = "ideal_job_instance", comment = "任务实例")
 @EntityListeners(AuditingEntityListener.class)
 public class JobInstance {
   public static final int STATUS_FAIL = 0;
@@ -88,8 +89,9 @@ public class JobInstance {
   /**
    * 执行参数
    */
+  @Lob
   @Nonnull
-  @Column(nullable = false, length = 4096)
+  @Column(nullable = false)
   private String executeParam;
 
   // -------------------------- 调度信息
@@ -97,7 +99,7 @@ public class JobInstance {
    * 本次执行地址
    */
   @Nonnull
-  @Column(nullable = false, length = 32)
+  @Column(nullable = false, length = 128)
   private String executorInstance;
 
   /**
@@ -109,9 +111,8 @@ public class JobInstance {
   /**
    * 调度信息
    */
-  @Lob
   @Nonnull
-  @Column(nullable = false)
+  @Column(nullable = false, length = 200)
   private String dispatchMsg;
 
   // -------------------------- 执行信息
@@ -138,8 +139,9 @@ public class JobInstance {
   /**
    * 执行信息
    */
+  @Lob
   @Nonnull
-  @Column(nullable = false, length = 10000)
+  @Column(nullable = false)
   private String result;
 
   /**

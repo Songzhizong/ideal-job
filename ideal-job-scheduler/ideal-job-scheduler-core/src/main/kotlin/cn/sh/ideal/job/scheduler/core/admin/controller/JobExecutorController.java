@@ -95,6 +95,7 @@ public class JobExecutorController implements ExecutorClient {
   @PostMapping("/query")
   public Res<List<ExecutorInfoRsp>> query(@RequestBody @Nullable QueryExecutorArgs args,
                                           @Nullable Paging paging) {
+    
     if (args == null) {
       args = new QueryExecutorArgs();
     }

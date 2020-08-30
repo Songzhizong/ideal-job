@@ -110,7 +110,6 @@ public class JobExecutor {
   private void initRemoteExecutors() {
     final String[] addresses = StringUtils
         .split(schedulerAddresses, ",");
-//    List<RemoteJobExecutor> remoteExecutors = new ArrayList<>();
     for (String address : addresses) {
       ReactorWebSocketRemoteTaskExecutor executor
           = new ReactorWebSocketRemoteTaskExecutor(address);

@@ -1,6 +1,6 @@
 package cn.sh.ideal.job.scheduler.core.admin.repository;
 
-import cn.sh.ideal.job.scheduler.core.admin.entity.JobInfo;
+import cn.sh.ideal.job.scheduler.core.admin.entity.vo.DispatchJobView;
 
 import java.util.Collection;
 
@@ -9,5 +9,5 @@ import java.util.Collection;
  * @date 2020/8/27
  */
 public interface JobInfoRepositoryCustom {
-  void batchUpdateTriggerInfo(Collection<JobInfo> jobInfos);
+  void batchUpdateTriggerInfo(Collection<DispatchJobView> jobInfos);
 }

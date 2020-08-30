@@ -8,30 +8,14 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /**
- * 忙碌转移
- * <pre>
- *   选择一个空闲度最高的服务返回.
- *   如果{@link BusyTransferLoadBalancer#completelyIdle}为true则选择一个完全空闲的服务,
- *   没有完全空闲的服务则返回null
- * </pre>
+ * 忙碌转移,选择一个空闲度最高的服务返回
  *
  * @author 宋志宗
  * @date 2020/8/19
  */
 public class BusyTransferLoadBalancer<Server extends LbServer> implements LoadBalancer<Server> {
-  /**
-   * 是否需要选择完全空闲的服务
-   */
-  private boolean completelyIdle = false;
 
   public BusyTransferLoadBalancer() {
-  }
-
-  /**
-   * @param completelyIdle 是否需要选择完全空闲的服务
-   */
-  public BusyTransferLoadBalancer(boolean completelyIdle) {
-    this.completelyIdle = completelyIdle;
   }
 
   @Override
@@ -58,9 +42,6 @@ public class BusyTransferLoadBalancer<Server extends LbServer> implements LoadBa
         selected = server;
       }
     }
-    if (!completelyIdle) {
-      return selected;
-    }
-    return null;
+    return selected;
   }
 }

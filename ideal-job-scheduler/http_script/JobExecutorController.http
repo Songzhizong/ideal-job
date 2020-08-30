@@ -9,4 +9,9 @@ Content-Type: application/json
 
 
 ###
-GET http://{{ip}}:{{port}}/executor/loadById/130137745321361408
+POST  http://{{ip}}:{{port}}/executor/query?page=1&size=10
+Content-Type: application/json
+
+{
+  "appName": "SAMPLE-EXECUTOR"
+}

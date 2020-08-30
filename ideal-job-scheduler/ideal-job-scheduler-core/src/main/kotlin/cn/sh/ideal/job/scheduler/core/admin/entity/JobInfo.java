@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
 @SuppressWarnings("unused")
 @Entity
 @Table(
-    name = "job_info",
+    name = "ideal_job_info",
     indexes = {
         @Index(name = "application", columnList = "application"),
         @Index(name = "tenant_id", columnList = "tenantId"),
@@ -36,8 +36,8 @@ import java.time.LocalDateTime;
         @Index(name = "next_trigger_time", columnList = "nextTriggerTime"),
     }
 )
-@org.hibernate.annotations.Table(appliesTo = "job_info", comment = "任务信息")
-@SQLDelete(sql = "update job_info set deleted = 1 where job_id = ?")
+@org.hibernate.annotations.Table(appliesTo = "ideal_job_info", comment = "任务信息")
+@SQLDelete(sql = "update ideal_job_info set deleted = 1 where job_id = ?")
 @Where(clause = "deleted = 0")
 @EntityListeners(AuditingEntityListener.class)
 public class JobInfo {
@@ -108,9 +108,9 @@ public class JobInfo {
   /**
    * 执行参数
    */
-//  @Lob
+  @Lob
   @Nonnull
-  @Column(nullable = false, length = 8000)
+  @Column(nullable = false)
   private String executeParam;
 
   /**
@@ -126,13 +126,6 @@ public class JobInfo {
    */
   @Column(nullable = false)
   private int retryCount;
-
-  /**
-   * 子任务ID，多个逗号分隔
-   */
-  @Nonnull
-  @Column(nullable = false, length = 32)
-  private String childJobId;
 
   /**
    * 任务状态：0-停止，1-运行
@@ -170,6 +163,7 @@ public class JobInfo {
   private String tenantId;
 
   /**
+   * `
    * 业务分类
    */
   @Nonnull
@@ -309,15 +303,6 @@ public class JobInfo {
 
   public void setRetryCount(int retryCount) {
     this.retryCount = retryCount;
-  }
-
-  @Nonnull
-  public String getChildJobId() {
-    return childJobId;
-  }
-
-  public void setChildJobId(@Nonnull String childJobId) {
-    this.childJobId = childJobId;
   }
 
   public int getJobStatus() {

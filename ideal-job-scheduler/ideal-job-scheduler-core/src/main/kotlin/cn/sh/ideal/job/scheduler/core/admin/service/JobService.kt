@@ -11,6 +11,7 @@ import cn.sh.ideal.job.scheduler.api.dto.req.QueryJobArgs
 import cn.sh.ideal.job.scheduler.api.dto.req.UpdateJobArgs
 import cn.sh.ideal.job.scheduler.api.dto.rsp.JobInfoRsp
 import cn.sh.ideal.job.scheduler.core.admin.entity.JobInfo
+import cn.sh.ideal.job.scheduler.core.admin.entity.vo.DispatchJobView
 import cn.sh.ideal.job.scheduler.core.admin.repository.JobInfoRepository
 import cn.sh.ideal.job.scheduler.core.converter.JobInfoConverter
 import cn.sh.ideal.job.scheduler.core.dispatch.JobDispatch
@@ -299,27 +300,26 @@ class JobService(private val jobInfoRepository: JobInfoRepository) {
    * @date 2020/8/24 8:46 下午
    */
   fun trigger(jobId: Long, customExecuteParam: String?) {
-    val jobInfo = jobInfoRepository.findByIdOrNull(jobId)
-    if (jobInfo == null) {
+    val dispatchJobView = jobInfoRepository.findDispatchJobViewById(jobId)
+    if (dispatchJobView == null) {
       log.info("任务: {} 不存在", jobId)
       throw VisibleException(CommonResMsg.NOT_FOUND, "任务不存在")
     }
-    jobDispatch.dispatch(jobInfo, TriggerTypeEnum.MANUAL, customExecuteParam)
+    jobDispatch.dispatch(dispatchJobView, TriggerTypeEnum.MANUAL, customExecuteParam)
   }
 
   fun existsByExecutorId(executorId: Long): Boolean {
     return jobInfoRepository.existsByExecutorId(executorId)
   }
 
-  fun loadScheduleJobs(maxNextTime: Long, count: Int): List<JobInfo> {
+  fun loadScheduleJobViews(maxNextTime: Long, count: Int): List<DispatchJobView> {
     val sort = Sort.by("jobId").ascending()
     val pageRequest = PageRequest.of(0, count, sort)
     val jobStart = JobInfo.JOB_START
-    return jobInfoRepository
-        .findAllByJobStatusAndNextTriggerTimeLessThanEqual(jobStart, maxNextTime, pageRequest)
+    return jobInfoRepository.loadScheduleJobViews(jobStart, maxNextTime, pageRequest)
   }
 
-  fun batchUpdateTriggerInfo(jobInfoList: List<JobInfo>) {
+  fun batchUpdateTriggerInfo(jobInfoList: List<DispatchJobView>) {
     jobInfoRepository.batchUpdateTriggerInfo(jobInfoList)
   }
 }

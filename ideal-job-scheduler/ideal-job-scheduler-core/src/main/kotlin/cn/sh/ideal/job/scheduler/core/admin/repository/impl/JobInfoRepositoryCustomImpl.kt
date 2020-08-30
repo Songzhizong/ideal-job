@@ -1,10 +1,10 @@
 package cn.sh.ideal.job.scheduler.core.admin.repository.impl
 
-import cn.sh.ideal.job.scheduler.core.admin.entity.JobInfo
+import cn.sh.ideal.job.common.utils.DateTimes
+import cn.sh.ideal.job.scheduler.core.admin.entity.vo.DispatchJobView
 import cn.sh.ideal.job.scheduler.core.admin.repository.JobInfoRepositoryCustom
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
-import java.time.LocalDateTime
 
 /**
  * @author 宋志宗
@@ -13,16 +13,16 @@ import java.time.LocalDateTime
 @Repository
 class JobInfoRepositoryCustomImpl(private val jdbcTemplate: JdbcTemplate) : JobInfoRepositoryCustom {
 
-  override fun batchUpdateTriggerInfo(jobInfos: Collection<JobInfo>) {
+  override fun batchUpdateTriggerInfo(jobInfos: Collection<DispatchJobView>) {
     val sql = """
-      update job_info
+      update ideal_job_info
       set job_status        = ?,
           last_trigger_time = ?,
           next_trigger_time = ?,
           update_time       = ?
       where job_id = ?
     """
-    val now = LocalDateTime.now()
+    val now = DateTimes.now()
     val argsList = jobInfos.map {
       arrayOf(it.jobStatus, it.lastTriggerTime, it.nextTriggerTime, now, it.jobId)
     }

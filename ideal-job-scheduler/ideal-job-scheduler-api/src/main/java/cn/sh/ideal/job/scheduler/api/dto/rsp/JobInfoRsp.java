@@ -86,11 +86,6 @@ public class JobInfoRsp {
    */
   private int retryCount;
   /**
-   * 子任务ID，多个逗号分隔
-   */
-  @Nonnull
-  private String childJobId;
-  /**
    * 任务状态：0-停止，1-运行
    */
   private int jobStatus;

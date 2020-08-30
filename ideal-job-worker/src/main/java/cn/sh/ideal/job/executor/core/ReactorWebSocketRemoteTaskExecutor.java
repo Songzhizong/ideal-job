@@ -240,6 +240,7 @@ public final class ReactorWebSocketRemoteTaskExecutor extends Thread implements 
 
   @Override
   public void run() {
+    this.setDaemon(true);
 //    Runtime.getRuntime().addShutdownHook(new Thread(this::destroy));
     startSocket();
     while (!destroyed) {

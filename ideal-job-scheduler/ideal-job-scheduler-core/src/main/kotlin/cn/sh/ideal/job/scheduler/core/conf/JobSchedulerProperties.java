@@ -13,8 +13,10 @@ import javax.annotation.Nonnull;
 @Component
 @ConfigurationProperties("ideal.job")
 public class JobSchedulerProperties {
-  @Nonnull
-  private String lockTable = "job_lock";
+  /**
+   * 任务实例保存天数
+   */
+  private int jobInstanceStorageDay = 30;
   /**
    * 建立连接后等待客户端注册的时间
    */
@@ -28,21 +30,20 @@ public class JobSchedulerProperties {
   @NestedConfigurationProperty
   private ThreadPoolProperties cronJobTriggerPool = new ThreadPoolProperties();
 
+  public int getJobInstanceStorageDay() {
+    return jobInstanceStorageDay;
+  }
+
+  public void setJobInstanceStorageDay(int jobInstanceStorageDay) {
+    this.jobInstanceStorageDay = jobInstanceStorageDay;
+  }
+
   public int getWeightRegisterSeconds() {
     return weightRegisterSeconds;
   }
 
   public void setWeightRegisterSeconds(int weightRegisterSeconds) {
     this.weightRegisterSeconds = weightRegisterSeconds;
-  }
-
-  @Nonnull
-  public String getLockTable() {
-    return lockTable;
-  }
-
-  public void setLockTable(@Nonnull String lockTable) {
-    this.lockTable = lockTable;
   }
 
   @Nonnull

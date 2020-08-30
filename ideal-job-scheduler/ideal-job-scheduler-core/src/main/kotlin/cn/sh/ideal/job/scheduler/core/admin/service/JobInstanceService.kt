@@ -4,6 +4,7 @@ import cn.sh.ideal.job.scheduler.core.admin.entity.JobInstance
 import cn.sh.ideal.job.scheduler.core.admin.repository.JobInstanceRepository
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 /**
  * @author 宋志宗
@@ -11,9 +12,14 @@ import org.springframework.stereotype.Service
  */
 @Service
 class JobInstanceService(private val jobInstanceRepository: JobInstanceRepository) {
+  private val maxResultLength = 10000
 
 
   fun saveInstance(instance: JobInstance): JobInstance {
+    val result = instance.result
+    if (result.length > maxResultLength) {
+      instance.result = instance.result.substring(0, maxResultLength - 3).plus("...")
+    }
     return jobInstanceRepository.save(instance)
   }
 
@@ -28,6 +34,10 @@ class JobInstanceService(private val jobInstanceRepository: JobInstanceRepositor
 
   fun updateWhenTriggerCallback(instance: JobInstance): Int {
     return jobInstanceRepository.updateWhenTriggerCallback(instance)
+  }
+
+  fun deleteAllByCreatedTimeLessThan(time: LocalDateTime): Int {
+    return jobInstanceRepository.deleteAllByCreatedTimeLessThan(time)
   }
 
   fun flush() {

@@ -2,11 +2,12 @@ package cn.sh.ideal.job.scheduler.core.dispatch
 
 import cn.sh.ideal.job.common.constants.TriggerTypeEnum
 import cn.sh.ideal.job.scheduler.core.admin.entity.JobInfo
+import cn.sh.ideal.job.scheduler.core.admin.entity.vo.DispatchJobView
 import cn.sh.ideal.job.scheduler.core.admin.service.JobService
-import cn.sh.ideal.job.scheduler.core.conf.JobSchedulerProperties
 import cn.sh.ideal.job.scheduler.core.utils.CronExpression
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Component
 import java.sql.Connection
 import java.sql.PreparedStatement
@@ -33,16 +34,14 @@ class TimingSchedule(
     private val dataSource: DataSource,
     private val jobService: JobService,
     private val jobDispatch: JobDispatch,
-    private val cronJobThreadPool: ExecutorService,
-    jobSchedulerProperties: JobSchedulerProperties) : ServletContextListener {
+    private val cronJobThreadPool: ExecutorService) : ServletContextListener, InitializingBean {
   companion object {
     val log: Logger = LoggerFactory.getLogger(TimingSchedule::class.java)
   }
 
-  private val lockTable = jobSchedulerProperties.lockTable
   private val preReadCount = 500
   private val preReadMills = 5000L
-  private val ringData = ConcurrentHashMap<Int, MutableList<JobInfo>>()
+  private val ringData = ConcurrentHashMap<Int, MutableList<DispatchJobView>>()
   private var scheduleThread: Thread? = null
   private var ringThread: Thread? = null
 
@@ -75,38 +74,38 @@ class TimingSchedule(
         dbLock {
           // 1、pre read
           val nowTime = System.currentTimeMillis()
-          val jobList = jobService
-              .loadScheduleJobs(nowTime + preReadMills, preReadCount)
-          if (jobList.isEmpty()) {
+          val jobViews = jobService
+              .loadScheduleJobViews(nowTime + preReadMills, preReadCount)
+          if (jobViews.isEmpty()) {
             preReadSuc = false
           } else {
-            for (jobInfo in jobList) {
-              val nextTriggerTime = jobInfo.nextTriggerTime
+            for (jobView in jobViews) {
+              val nextTriggerTime = jobView.nextTriggerTime
               when {
                 nowTime > nextTriggerTime + preReadMills -> {
-                  log.warn("过期任务: {}", jobInfo.jobId)
-                  refreshNextValidTime(jobInfo, Date())
+                  log.warn("过期任务: {}", jobView.jobId)
+                  refreshNextValidTime(jobView, Date())
                 }
                 nowTime >= nextTriggerTime -> {
-                  triggerJob(jobInfo)
-                  refreshNextValidTime(jobInfo, Date())
-                  val newNextTriggerTime = jobInfo.nextTriggerTime
-                  if (jobInfo.jobStatus == JobInfo.JOB_START
+                  triggerJob(jobView)
+                  refreshNextValidTime(jobView, Date())
+                  val newNextTriggerTime = jobView.nextTriggerTime
+                  if (jobView.jobStatus == JobInfo.JOB_START
                       && nowTime + preReadMills > newNextTriggerTime) {
                     val ringSecond = (newNextTriggerTime / 1000 % 60).toInt()
-                    pushTimeRing(ringSecond, jobInfo)
-                    refreshNextValidTime(jobInfo, Date(newNextTriggerTime))
+                    pushTimeRing(ringSecond, jobView)
+                    refreshNextValidTime(jobView, Date(newNextTriggerTime))
                   }
                 }
                 else -> {
                   val ringSecond = (nextTriggerTime / 1000 % 60).toInt()
-                  pushTimeRing(ringSecond, jobInfo)
-                  refreshNextValidTime(jobInfo, Date(nextTriggerTime))
+                  pushTimeRing(ringSecond, jobView)
+                  refreshNextValidTime(jobView, Date(nextTriggerTime))
                 }
               }
             }
             // 更新任务信息
-            jobService.batchUpdateTriggerInfo(jobList)
+            jobService.batchUpdateTriggerInfo(jobViews)
           }
         }
 
@@ -162,8 +161,7 @@ class TimingSchedule(
       connection = dataSource.connection
       tempAutoCommit = connection.autoCommit
       connection.autoCommit = false
-      @Suppress("SqlResolve")
-      val sql = "select * from $lockTable where lock_name = 'schedule_lock' for update"
+      val sql = "select * from ideal_job_lock where lock_name = 'schedule_lock' for update"
       preparedStatement = connection
           .prepareStatement(sql)
       preparedStatement.execute()
@@ -197,32 +195,32 @@ class TimingSchedule(
     }
   }
 
-  private fun pushTimeRing(ringSecond: Int, jobInfo: JobInfo) {
+  private fun pushTimeRing(ringSecond: Int, jobView: DispatchJobView) {
     val list = ringData.computeIfAbsent(ringSecond) { ArrayList() }
-    list.add(jobInfo)
+    list.add(jobView)
   }
 
-  private fun triggerJob(jobInfo: JobInfo) {
+  private fun triggerJob(jobView: DispatchJobView) {
     cronJobThreadPool.execute {
       try {
-        jobDispatch.dispatch(jobInfo, TriggerTypeEnum.CRON, null)
+        jobDispatch.dispatch(jobView, TriggerTypeEnum.CRON, null)
       } catch (e: Exception) {
         val errMsg = "${e.javaClass.name}:${e.message}"
-        log.info("任务调度出现异常, jobId={}, message: {}", jobInfo.jobId, errMsg)
+        log.info("任务调度出现异常, jobId={}, message: {}", jobView.jobId, errMsg)
       }
     }
   }
 
-  private fun refreshNextValidTime(jobInfo: JobInfo, date: Date) {
-    val cron = jobInfo.cron
+  private fun refreshNextValidTime(jobView: DispatchJobView, date: Date) {
+    val cron = jobView.cron
     val nextValidTimeAfter = CronExpression(cron).getNextValidTimeAfter(date)
     if (nextValidTimeAfter != null) {
-      jobInfo.lastTriggerTime = jobInfo.nextTriggerTime
-      jobInfo.nextTriggerTime = nextValidTimeAfter.time
+      jobView.lastTriggerTime = jobView.nextTriggerTime
+      jobView.nextTriggerTime = nextValidTimeAfter.time
     } else {
-      jobInfo.jobStatus = JobInfo.JOB_STOP
-      jobInfo.lastTriggerTime = 0
-      jobInfo.nextTriggerTime = 0
+      jobView.jobStatus = JobInfo.JOB_STOP
+      jobView.lastTriggerTime = 0
+      jobView.nextTriggerTime = 0
     }
   }
 
@@ -289,5 +287,9 @@ class TimingSchedule(
       }
     }
     log.info("TimingSchedule stop")
+  }
+
+  override fun afterPropertiesSet() {
+    start()
   }
 }

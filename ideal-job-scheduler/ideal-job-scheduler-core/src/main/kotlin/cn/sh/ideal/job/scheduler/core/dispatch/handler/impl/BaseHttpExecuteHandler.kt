@@ -7,8 +7,8 @@ import cn.sh.ideal.job.common.exception.VisibleException
 import cn.sh.ideal.job.common.http.HttpMethod
 import cn.sh.ideal.job.common.http.HttpScriptUtils
 import cn.sh.ideal.job.common.utils.JsonUtils
-import cn.sh.ideal.job.scheduler.core.admin.entity.JobInfo
 import cn.sh.ideal.job.scheduler.core.admin.entity.JobInstance
+import cn.sh.ideal.job.scheduler.core.admin.entity.vo.DispatchJobView
 import cn.sh.ideal.job.scheduler.core.admin.service.JobInstanceService
 import cn.sh.ideal.job.scheduler.core.dispatch.handler.ExecuteHandler
 import cn.sh.ideal.job.scheduler.core.utils.WebClients
@@ -36,11 +36,11 @@ abstract class BaseHttpExecuteHandler(
 
   @Suppress("DuplicatedCode")
   override fun execute(instance: JobInstance,
-                       jobInfo: JobInfo,
+                       jobView: DispatchJobView,
                        triggerType: TriggerTypeEnum,
                        customExecuteParam: String?) {
-    val jobId = jobInfo.jobId
-    val executeParam = customExecuteParam ?: jobInfo.executeParam
+    val jobId = jobView.jobId
+    val executeParam = customExecuteParam ?: jobView.executeParam
     if (executeParam.isBlank()) {
       log.info("任务: {} Http script为空", jobId)
       throw VisibleException("Http script为空")
@@ -51,7 +51,7 @@ abstract class BaseHttpExecuteHandler(
       log.info("任务: {} http script解析异常: {}", jobId, e.message)
       throw VisibleException("http script解析异常: ${e.message}")
     }
-    val routeStrategy = jobInfo.routeStrategy
+    val routeStrategy = jobView.routeStrategy
     val url = httpRequest.url
     val chooseServer = getAddressList(jobId, routeStrategy, url)
     if (chooseServer.isEmpty()) {
@@ -87,7 +87,7 @@ abstract class BaseHttpExecuteHandler(
     if (chooseServer.size == 1) {
       val uri = chooseServer[0]
       instance.executorInstance = uri
-      val requestUri = if (queryString?.isNotBlank() == true) "$uri:$queryString" else uri
+      val requestUri = if (queryString?.isNotBlank() == true) "$uri?$queryString" else uri
       val client = buildWebClientSpec(
           method, requestUri, requestBody, multiValueMap, headers)
       val bodyToMono = client.retrieve().bodyToMono(String::class.java)
@@ -103,7 +103,7 @@ abstract class BaseHttpExecuteHandler(
         jobInstance.executorHandler = instance.executorHandler
         jobInstance.executeParam = executeParam
         jobInstance.executorInstance = uri
-        val requestUri = if (queryString?.isNotBlank() == true) "$uri:$queryString" else uri
+        val requestUri = if (queryString?.isNotBlank() == true) "$uri?$queryString" else uri
         val client = buildWebClientSpec(
             method, requestUri, requestBody, multiValueMap, headers)
         val bodyToMono = client.retrieve().bodyToMono(String::class.java)
@@ -117,6 +117,7 @@ abstract class BaseHttpExecuteHandler(
                                 currentTimeMillis: Long) {
     bodyToMono.onErrorResume { e ->
       val errMsg = "${e.javaClass.name}:${e.message}"
+      log.info("http调度异常: {}", errMsg)
       instance.handleStatus = HandleStatusEnum.ABNORMAL
       Mono.just(errMsg)
     }.map { result ->

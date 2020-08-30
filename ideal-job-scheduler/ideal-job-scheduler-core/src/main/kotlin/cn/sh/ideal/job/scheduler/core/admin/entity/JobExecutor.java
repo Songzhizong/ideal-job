@@ -20,14 +20,14 @@ import java.time.LocalDateTime;
 @SuppressWarnings("unused")
 @Entity
 @Table(
-    name = "job_executor",
+    name = "ideal_job_executor",
     indexes = {
         @Index(name = "uk_app_name", columnList = "appName", unique = true),
         @Index(name = "title", columnList = "title"),
     }
 )
-@org.hibernate.annotations.Table(appliesTo = "job_executor", comment = "执行器")
-@SQLDelete(sql = "update job_executor set deleted = 1 where executor_id = ?")
+@org.hibernate.annotations.Table(appliesTo = "ideal_job_executor", comment = "执行器")
+@SQLDelete(sql = "update ideal_job_executor set deleted = 1 where executor_id = ?")
 @Where(clause = "deleted = 0")
 @EntityListeners(AuditingEntityListener.class)
 public class JobExecutor {
