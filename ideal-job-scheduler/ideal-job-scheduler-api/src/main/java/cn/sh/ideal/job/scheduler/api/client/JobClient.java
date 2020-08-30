@@ -67,7 +67,7 @@ public interface JobClient {
                               @Nullable Paging paging);
 
   /**
-   * 启动任务
+   * 启用任务
    *
    * @param jobId 任务id
    * @return 执行结果
@@ -75,10 +75,10 @@ public interface JobClient {
    * @date 2020/8/20 4:38 下午
    */
   @Nonnull
-  Res<Void> start(@NotNull(message = "任务id不能为空") @Nonnull Long jobId);
+  Res<Void> enable(@NotNull(message = "任务id不能为空") @Nonnull Long jobId);
 
   /**
-   * 停止任务
+   * 停用任务
    *
    * @param jobId 任务id
    * @return 执行结果
@@ -86,13 +86,13 @@ public interface JobClient {
    * @date 2020/8/20 4:38 下午
    */
   @Nonnull
-  Res<Void> stop(@NotNull(message = "任务id不能为空") @Nonnull Long jobId);
+  Res<Void> disable(@NotNull(message = "任务id不能为空") @Nonnull Long jobId);
 
   /**
    * 触发任务
    *
    * @param jobId         任务id
-   * @param executorParam 执行参数, 为<code>null</code>空则使用任务默认配置
+   * @param executeParam 执行参数, 为<code>null</code>空则使用任务默认配置
    * @return 执行结果
    * @author 宋志宗
    * @date 2020/8/20 4:18 下午
@@ -100,5 +100,5 @@ public interface JobClient {
   @Nonnull
   Res<Void> trigger(@NotNull(message = "任务id不能为空")
                     @Nonnull Long jobId,
-                    @Nullable String executorParam);
+                    @Nullable String executeParam);
 }

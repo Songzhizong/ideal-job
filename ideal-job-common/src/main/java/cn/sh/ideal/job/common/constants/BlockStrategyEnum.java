@@ -9,44 +9,45 @@ import javax.annotation.Nullable;
  */
 public enum BlockStrategyEnum {
   /**
-   * 串行执行
+   * 并行
    */
-  SERIAL(1, "串行执行"),
+  PARALLEL("并行"),
   /**
    * 丢弃后续调度
    */
-  DISCARD_LATER(2, "丢弃后续调度"),
+  DISCARD("丢弃后续调度"),
   /**
    * 覆盖掉之前的调度
    */
-  COVER_EARLY(3, "覆盖掉之前的调度"),
+  COVER("覆盖掉之前的调度"),
+  /**
+   * 串行执行
+   */
+  SERIAL("串行执行"),
   ;
 
   @Nullable
-  public static BlockStrategyEnum valueOfCode(int code) {
-    switch (code) {
-      case 1:
+  public static BlockStrategyEnum valueOfName(@Nonnull String name) {
+    String upperCase = name.toUpperCase();
+    switch (upperCase) {
+      case "SERIAL":
         return SERIAL;
-      case 2:
-        return DISCARD_LATER;
-      case 3:
-        return COVER_EARLY;
+      case "DISCARD":
+        return DISCARD;
+      case "COVER":
+        return COVER;
+      case "PARALLEL":
+        return PARALLEL;
       default:
         return null;
     }
   }
 
-  private final int code;
   @Nonnull
   private final String desc;
 
-  BlockStrategyEnum(int code, @Nonnull String desc) {
-    this.code = code;
+  BlockStrategyEnum(@Nonnull String desc) {
     this.desc = desc;
-  }
-
-  public int getCode() {
-    return code;
   }
 
   @Nonnull

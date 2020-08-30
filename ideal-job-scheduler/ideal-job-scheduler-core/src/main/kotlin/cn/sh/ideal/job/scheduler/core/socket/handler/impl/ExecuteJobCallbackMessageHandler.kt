@@ -2,8 +2,8 @@ package cn.sh.ideal.job.scheduler.core.socket.handler.impl
 
 import cn.sh.ideal.job.common.message.MessageType
 import cn.sh.ideal.job.common.message.SocketMessage
-import cn.sh.ideal.job.common.message.payload.ExecuteJobCallback
-import cn.sh.ideal.job.scheduler.core.socket.SocketJobExecutor
+import cn.sh.ideal.job.common.message.payload.TaskCallback
+import cn.sh.ideal.job.scheduler.core.socket.SocketTaskExecutor
 import cn.sh.ideal.job.scheduler.core.socket.handler.MessageHandler
 import cn.sh.ideal.job.scheduler.core.socket.handler.MessageHandlerFactory
 import cn.sh.ideal.job.scheduler.core.dispatch.JobDispatch
@@ -28,10 +28,10 @@ final class ExecuteJobCallbackMessageHandler(
     MessageHandlerFactory.register(MessageType.EXECUTE_JOB_CALLBACK, this)
   }
 
-  override fun execute(executor: SocketJobExecutor, socketMessage: SocketMessage) {
+  override fun execute(executor: SocketTaskExecutor, socketMessage: SocketMessage) {
     val payload = socketMessage.payload
     val executeJobCallback = try {
-      ExecuteJobCallback.parseMessage(payload)
+      TaskCallback.parseMessage(payload)
     } catch (e: Exception) {
       val cause = e.cause
       val errMsg = cause!!.javaClass.name + ":" + e.message

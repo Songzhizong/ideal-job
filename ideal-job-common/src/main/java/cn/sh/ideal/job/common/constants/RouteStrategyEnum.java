@@ -58,7 +58,8 @@ public enum RouteStrategyEnum {
   @Nullable
   private final LbStrategyEnum lbStrategy;
 
-  RouteStrategyEnum(@Nonnull String desc, @Nullable LbStrategyEnum lbStrategy) {
+  RouteStrategyEnum(@Nonnull String desc,
+                    @Nullable LbStrategyEnum lbStrategy) {
     this.desc = desc;
     this.lbStrategy = lbStrategy;
   }

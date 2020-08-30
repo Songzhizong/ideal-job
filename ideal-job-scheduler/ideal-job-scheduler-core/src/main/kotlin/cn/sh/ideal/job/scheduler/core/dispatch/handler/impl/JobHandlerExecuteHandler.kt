@@ -4,9 +4,9 @@ import cn.sh.ideal.job.common.constants.ExecuteTypeEnum
 import cn.sh.ideal.job.common.constants.RouteStrategyEnum
 import cn.sh.ideal.job.common.constants.TriggerTypeEnum
 import cn.sh.ideal.job.common.exception.VisibleException
-import cn.sh.ideal.job.common.executor.JobExecutor
+import cn.sh.ideal.job.common.executor.TaskExecutor
 import cn.sh.ideal.job.common.loadbalancer.LbFactory
-import cn.sh.ideal.job.common.message.payload.ExecuteJobParam
+import cn.sh.ideal.job.common.message.payload.TaskParam
 import cn.sh.ideal.job.common.transfer.CommonResMsg
 import cn.sh.ideal.job.scheduler.core.admin.entity.JobInfo
 import cn.sh.ideal.job.scheduler.core.admin.entity.JobInstance
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component
  */
 @Component("jobHandlerExecuteHandler")
 final class JobHandlerExecuteHandler(
-    private val lbFactory: LbFactory<JobExecutor>,
+    private val lbFactory: LbFactory<TaskExecutor>,
     private val instanceService: JobInstanceService,
     private val jobExecutorService: JobExecutorService) : ExecuteHandler {
   val log: Logger = LoggerFactory.getLogger(this.javaClass)
@@ -37,24 +37,24 @@ final class JobHandlerExecuteHandler(
   override fun execute(instance: JobInstance,
                        jobInfo: JobInfo,
                        triggerType: TriggerTypeEnum,
-                       customExecutorParam: String?) {
+                       customExecuteParam: String?) {
     val jobId = jobInfo.jobId
-    val chooseExecutors = chooseServers(jobInfo, jobId, instance)
+    val chooseExecutors = chooseServers(jobInfo, jobId)
     val instanceId = instance.instanceId
-    val executorParam = customExecutorParam ?: jobInfo.executorParam
+    val executeParam = customExecuteParam ?: jobInfo.executeParam
 
     if (chooseExecutors.size == 1) {
       val jobExecutor = chooseExecutors[0]
-      val jobParam = ExecuteJobParam()
+      val jobParam = TaskParam()
       jobParam.jobId = jobId.toString()
-      jobParam.triggerId = instanceId
+      jobParam.instanceId = instanceId
       jobParam.executorHandler = jobInfo.executorHandler
-      jobParam.executorParams = executorParam
-      jobParam.blockStrategy = jobInfo.blockStrategy.code
+      jobParam.executeParam = executeParam
+      jobParam.blockStrategy = jobInfo.blockStrategy.name
 
       instance.executorInstance = jobExecutor.instanceId
       try {
-        jobExecutor.executeJob(jobParam)
+        jobExecutor.execute(jobParam)
       } catch (e: Exception) {
         val errMsg = "${e.javaClass.name}:${e.message}"
         log.info("远程服务: {} 调用异常: {}", jobExecutor.instanceId, errMsg)
@@ -70,17 +70,17 @@ final class JobHandlerExecuteHandler(
         jobInstance.schedulerInstance = instance.schedulerInstance
         jobInstance.executorInstance = executor.instanceId
         jobInstance.executorHandler = jobInfo.executorHandler
-        jobInstance.executorParam = executorParam
+        jobInstance.executeParam = executeParam
         instanceService.saveInstance(jobInstance)
 
-        val jobParam = ExecuteJobParam()
+        val jobParam = TaskParam()
         jobParam.jobId = jobId.toString()
-        jobParam.triggerId = jobInstance.instanceId
+        jobParam.instanceId = jobInstance.instanceId
         jobParam.executorHandler = jobInfo.executorHandler
-        jobParam.executorParams = executorParam
-        jobParam.blockStrategy = jobInfo.blockStrategy.code
+        jobParam.executeParam = executeParam
+        jobParam.blockStrategy = jobInfo.blockStrategy.name
         try {
-          executor.executeJob(jobParam)
+          executor.execute(jobParam)
         } catch (e: Exception) {
           val errMsg = "${e.javaClass.name}:${e.message}"
           instance.dispatchStatus = JobInstance.STATUS_FAIL
@@ -97,7 +97,7 @@ final class JobHandlerExecuteHandler(
    * @author 宋志宗
    * @date 2020/8/29 22:00
    */
-  private fun chooseServers(jobInfo: JobInfo, jobId: Long, instance: JobInstance): List<JobExecutor> {
+  private fun chooseServers(jobInfo: JobInfo, jobId: Long): List<TaskExecutor> {
     val executorId = jobInfo.executorId
     val executor = jobExecutorService.loadById(executorId)
     if (executor == null) {

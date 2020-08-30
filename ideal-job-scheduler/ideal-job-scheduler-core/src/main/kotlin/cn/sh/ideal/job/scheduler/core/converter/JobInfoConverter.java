@@ -86,11 +86,11 @@ public final class JobInfoConverter {
     } else {
       jobInfo.setExecutorHandler(DBDefaults.DEFAULT_STRING_VALUE);
     }
-    final String executorParam = createJobArgs.getExecutorParam();
-    if (StringUtils.isNotBlank(executorParam)) {
-      jobInfo.setExecutorParam(executorParam);
+    final String executeParam = createJobArgs.getExecuteParam();
+    if (StringUtils.isNotBlank(executeParam)) {
+      jobInfo.setExecuteParam(executeParam);
     } else {
-      jobInfo.setExecutorParam(DBDefaults.DEFAULT_STRING_VALUE);
+      jobInfo.setExecuteParam(DBDefaults.DEFAULT_STRING_VALUE);
     }
     final BlockStrategyEnum blockStrategy = createJobArgs.getBlockStrategy();
     if (blockStrategy != null) {
@@ -130,8 +130,8 @@ public final class JobInfoConverter {
     jobInfoRsp.setAlarmEmail(jobInfo.getAlarmEmail());
     jobInfoRsp.setRouteStrategy(jobInfo.getRouteStrategy().name());
     jobInfoRsp.setExecutorHandler(jobInfo.getExecutorHandler());
-    jobInfoRsp.setExecutorParam(jobInfo.getExecutorParam());
-    jobInfoRsp.setBlockStrategy(jobInfo.getBlockStrategy().getCode());
+    jobInfoRsp.setExecuteParam(jobInfo.getExecuteParam());
+    jobInfoRsp.setBlockStrategy(jobInfo.getBlockStrategy().name());
     jobInfoRsp.setRetryCount(jobInfo.getRetryCount());
     jobInfoRsp.setChildJobId(jobInfo.getChildJobId());
     jobInfoRsp.setJobStatus(jobInfo.getJobStatus());

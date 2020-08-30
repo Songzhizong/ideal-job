@@ -6,7 +6,7 @@ Content-Type: application/json
   "autoStart": true,
   "executorId": 131039063519002624,
   "executorHandler": "demoJobHandler",
-  "executorParam": "test",
+  "executeParam": "test",
   "routeStrategy": "CONSISTENT_HASH",
   "blockStrategy": "SERIAL",
   "cron": "0/10 * * * * ?",
@@ -28,7 +28,7 @@ Content-Type: application/json
   "jobId": 130301268919844864,
   "executorId": 130282956815073280,
   "executorHandler": "demoJobHandler",
-  "executorParam": "demoJobHandler",
+  "executeParam": "demoJobHandler",
   "routeStrategy": "WEIGHTED_RANDOM",
   "blockStrategy": "SERIAL",
   "cron": "0/1 * * * * ?",
@@ -60,4 +60,4 @@ jobId=130478053187919872
 POST http://{{ip}}:{{port}}/job/trigger
 Content-Type: application/x-www-form-urlencoded
 
-executorParam=sadsaasdfds&jobId=130479384879439872
+executeParam=sadsaasdfds&jobId=130479384879439872

@@ -87,7 +87,7 @@ class TimingSchedule(
                   log.warn("过期任务: {}", jobInfo.jobId)
                   refreshNextValidTime(jobInfo, Date())
                 }
-                nowTime > nextTriggerTime -> {
+                nowTime >= nextTriggerTime -> {
                   triggerJob(jobInfo)
                   refreshNextValidTime(jobInfo, Date())
                   val newNextTriggerTime = jobInfo.nextTriggerTime

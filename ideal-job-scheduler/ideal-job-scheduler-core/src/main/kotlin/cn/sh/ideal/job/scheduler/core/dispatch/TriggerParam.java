@@ -33,7 +33,7 @@ public class TriggerParam {
    * 执行参数
    */
   @Nonnull
-  private String executorParam = "";
+  private String executeParam = "";
   /**
    * 执行器路由策略
    */
@@ -84,12 +84,12 @@ public class TriggerParam {
   }
 
   @Nonnull
-  public String getExecutorParam() {
-    return executorParam;
+  public String getExecuteParam() {
+    return executeParam;
   }
 
-  public void setExecutorParam(@Nonnull String executorParam) {
-    this.executorParam = executorParam;
+  public void setExecuteParam(@Nonnull String executeParam) {
+    this.executeParam = executeParam;
   }
 
   @Nonnull

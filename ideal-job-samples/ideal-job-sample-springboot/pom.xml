@@ -14,7 +14,7 @@
   <dependencies>
     <dependency>
       <groupId>cn.sh.ideal</groupId>
-      <artifactId>ideal-job-executor-springboot-starter</artifactId>
+      <artifactId>ideal-job-worker-springboot-starter</artifactId>
       <version>${ideal-job.version}</version>
     </dependency>
     <!-- web -->

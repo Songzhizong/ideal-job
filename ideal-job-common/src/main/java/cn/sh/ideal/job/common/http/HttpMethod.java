@@ -17,7 +17,8 @@ public enum HttpMethod {
 
   @Nullable
   public static HttpMethod valueOfName(@Nonnull String name) {
-    switch (name) {
+    String upperCase = name.toUpperCase();
+    switch (upperCase) {
       case "DELETE":
         return DELETE;
       case "GET":

@@ -1,6 +1,6 @@
 package cn.sh.ideal.job.scheduler.core.conf;
 
-import cn.sh.ideal.job.common.executor.JobExecutor;
+import cn.sh.ideal.job.common.executor.TaskExecutor;
 import cn.sh.ideal.job.common.loadbalancer.LbFactory;
 import cn.sh.ideal.job.common.loadbalancer.SimpleLbFactory;
 import cn.sh.ideal.job.common.utils.IpUtil;
@@ -93,7 +93,7 @@ public class JobSchedulerConfig {
   }
 
   @Bean
-  public LbFactory<JobExecutor> lbFactory() {
+  public LbFactory<TaskExecutor> lbFactory() {
     return new SimpleLbFactory<>();
   }
 

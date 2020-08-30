@@ -90,7 +90,7 @@ public class JobInstance {
    */
   @Nonnull
   @Column(nullable = false, length = 4096)
-  private String executorParam;
+  private String executeParam;
 
   // -------------------------- 调度信息
   /**
@@ -170,7 +170,7 @@ public class JobInstance {
     instance.parentId = DBDefaults.DEFAULT_LONG_VALUE;
     instance.executorInstance = DBDefaults.DEFAULT_STRING_VALUE;
     instance.executorHandler = DBDefaults.DEFAULT_STRING_VALUE;
-    instance.executorParam = DBDefaults.DEFAULT_STRING_VALUE;
+    instance.executeParam = DBDefaults.DEFAULT_STRING_VALUE;
     instance.dispatchStatus = STATUS_SUCCESS;
     instance.dispatchMsg = DBDefaults.DEFAULT_STRING_VALUE;
     instance.handleStatus = HandleStatusEnum.WAITING;
@@ -251,12 +251,12 @@ public class JobInstance {
   }
 
   @Nonnull
-  public String getExecutorParam() {
-    return executorParam;
+  public String getExecuteParam() {
+    return executeParam;
   }
 
-  public void setExecutorParam(@Nonnull String executorParam) {
-    this.executorParam = executorParam;
+  public void setExecuteParam(@Nonnull String executeParam) {
+    this.executeParam = executeParam;
   }
 
   public int getDispatchStatus() {

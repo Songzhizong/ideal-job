@@ -43,7 +43,7 @@ public class CreateJobArgs {
    * 执行参数
    */
   @Nullable
-  private String executorParam;
+  private String executeParam;
   /**
    * 路由策略,默认轮询
    */

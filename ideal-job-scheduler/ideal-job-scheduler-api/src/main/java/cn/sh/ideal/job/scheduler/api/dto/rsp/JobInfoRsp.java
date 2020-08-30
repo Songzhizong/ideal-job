@@ -75,11 +75,12 @@ public class JobInfoRsp {
    * 执行参数
    */
   @Nonnull
-  private String executorParam;
+  private String executeParam;
   /**
    * 阻塞处理策略
    */
-  private int blockStrategy;
+  @Nonnull
+  private String blockStrategy;
   /**
    * 失败重试次数
    */

@@ -108,7 +108,7 @@ public class JobController implements JobClient {
   }
 
   /**
-   * 启动任务
+   * 启用任务
    *
    * @param jobId 任务id
    * @return 执行结果
@@ -117,13 +117,13 @@ public class JobController implements JobClient {
    */
   @Nonnull
   @Override
-  @PostMapping("/start")
-  public Res<Void> start(@Nonnull Long jobId) {
-    return jobService.startJob(jobId);
+  @PostMapping("/enable")
+  public Res<Void> enable(@Nonnull Long jobId) {
+    return jobService.enableJob(jobId);
   }
 
   /**
-   * 停止任务
+   * 停用任务
    *
    * @param jobId 任务id
    * @return 执行结果
@@ -132,16 +132,16 @@ public class JobController implements JobClient {
    */
   @Nonnull
   @Override
-  @PostMapping("/stop")
-  public Res<Void> stop(@Nonnull Long jobId) {
-    return jobService.stopJob(jobId);
+  @PostMapping("/disable")
+  public Res<Void> disable(@Nonnull Long jobId) {
+    return jobService.disableJob(jobId);
   }
 
   /**
    * 触发任务
    *
-   * @param jobId         任务id
-   * @param executorParam 执行参数, 为<code>null</code>空则使用任务默认配置
+   * @param jobId              任务id
+   * @param executeParam 执行参数, 为<code>null</code>空则使用任务默认配置
    * @return 执行结果
    * @author 宋志宗
    * @date 2020/8/20 4:18 下午
@@ -149,8 +149,8 @@ public class JobController implements JobClient {
   @Nonnull
   @Override
   @PostMapping("/trigger")
-  public Res<Void> trigger(@Nonnull Long jobId, @Nullable String executorParam) {
-    jobService.trigger(jobId, executorParam);
+  public Res<Void> trigger(@Nonnull Long jobId, @Nullable String executeParam) {
+    jobService.trigger(jobId, executeParam);
     return Res.success();
   }
 }

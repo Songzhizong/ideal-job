@@ -111,7 +111,7 @@ public class JobInfo {
 //  @Lob
   @Nonnull
   @Column(nullable = false, length = 8000)
-  private String executorParam;
+  private String executeParam;
 
   /**
    * 阻塞处理策略
@@ -286,12 +286,12 @@ public class JobInfo {
   }
 
   @Nonnull
-  public String getExecutorParam() {
-    return executorParam;
+  public String getExecuteParam() {
+    return executeParam;
   }
 
-  public void setExecutorParam(@Nonnull String executorParam) {
-    this.executorParam = executorParam;
+  public void setExecuteParam(@Nonnull String executeParam) {
+    this.executeParam = executeParam;
   }
 
   @Nonnull

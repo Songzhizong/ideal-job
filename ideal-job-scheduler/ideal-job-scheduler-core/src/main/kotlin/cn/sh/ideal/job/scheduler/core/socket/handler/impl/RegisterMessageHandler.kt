@@ -1,13 +1,13 @@
 package cn.sh.ideal.job.scheduler.core.socket.handler.impl
 
-import cn.sh.ideal.job.common.executor.JobExecutor
+import cn.sh.ideal.job.common.executor.TaskExecutor
 import cn.sh.ideal.job.common.loadbalancer.LbFactory
 import cn.sh.ideal.job.common.message.MessageType
 import cn.sh.ideal.job.common.message.SocketMessage
 import cn.sh.ideal.job.common.message.payload.RegisterCallback
 import cn.sh.ideal.job.common.message.payload.RegisterParam
 import cn.sh.ideal.job.scheduler.core.conf.JobSchedulerProperties
-import cn.sh.ideal.job.scheduler.core.socket.SocketJobExecutor
+import cn.sh.ideal.job.scheduler.core.socket.SocketTaskExecutor
 import cn.sh.ideal.job.scheduler.core.socket.handler.MessageHandler
 import cn.sh.ideal.job.scheduler.core.socket.handler.MessageHandlerFactory
 import org.slf4j.Logger
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component
  */
 @Component("registerMessageHandler")
 final class RegisterMessageHandler(
-    private val lbFactory: LbFactory<JobExecutor>,
+    private val lbFactory: LbFactory<TaskExecutor>,
     private val jobSchedulerProperties: JobSchedulerProperties) : MessageHandler {
   private val log: Logger = LoggerFactory.getLogger(this.javaClass)
 
@@ -30,7 +30,7 @@ final class RegisterMessageHandler(
     MessageHandlerFactory.register(MessageType.REGISTER, this)
   }
 
-  override fun execute(executor: SocketJobExecutor, socketMessage: SocketMessage) {
+  override fun execute(executor: SocketTaskExecutor, socketMessage: SocketMessage) {
     val payload = socketMessage.payload
     val appName = executor.appName
     val instanceId = executor.instanceId

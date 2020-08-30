@@ -48,18 +48,17 @@ class ReactiveSpringRedisSnowFlakeInitializer(
     if (SnowFlake.machineId > -1L) {
       return
     }
+    val maxMachineNum = SnowFlake.maxMachineNum
     val operations = stringRedisTemplate.opsForValue()
     while (true) {
       ++machineId
       val success = operations
-          .setIfAbsent(prefix + machineId, "machineId", expire).block()
-          ?: false
+          .setIfAbsent(prefix + machineId, "machineId", expire).block() ?: false
       if (success) {
         log.info("SnowFlake register success: applicationName = {}, machineId = {}", applicationName, machineId)
         SnowFlake.machineId = machineId
         break
       }
-      val maxMachineNum = SnowFlake.maxMachineNum
       if (machineId >= maxMachineNum) {
         log.error("停止服务, SnowFlake machineId 计算失败,已达上限:{}", maxMachineNum)
         exitProcess(0)

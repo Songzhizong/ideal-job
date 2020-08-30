@@ -103,7 +103,7 @@ class JobService(private val jobInfoRepository: JobInfoRepository) {
     }
     val executorId = updateJobArgs.executorId
     val executorHandler = updateJobArgs.executorHandler ?: DBDefaults.DEFAULT_STRING_VALUE
-    val executorParam = updateJobArgs.executorParam ?: DBDefaults.DEFAULT_STRING_VALUE
+    val executeParam = updateJobArgs.executeParam ?: DBDefaults.DEFAULT_STRING_VALUE
     val routeStrategy = updateJobArgs.routeStrategy ?: RouteStrategyEnum.POLLING
     val blockStrategy = updateJobArgs.blockStrategy ?: BlockStrategyEnum.SERIAL
     val cron = updateJobArgs.cron ?: DBDefaults.DEFAULT_STRING_VALUE
@@ -113,7 +113,7 @@ class JobService(private val jobInfoRepository: JobInfoRepository) {
 
     jobInfo.executorId = executorId
     jobInfo.executorHandler = executorHandler
-    jobInfo.executorParam = executorParam
+    jobInfo.executeParam = executeParam
     jobInfo.routeStrategy = routeStrategy
     jobInfo.blockStrategy = blockStrategy
     jobInfo.retryCount = retryCount
@@ -223,14 +223,14 @@ class JobService(private val jobInfoRepository: JobInfoRepository) {
   }
 
   /**
-   * 启动任务
+   * 启用任务
    *
    * @param jobId 任务id
    * @return 执行结果
    * @author 宋志宗
    * @date 2020/8/20 4:38 下午
    */
-  fun startJob(jobId: Long): Res<Void> {
+  fun enableJob(jobId: Long): Res<Void> {
     val jobInfo = jobInfoRepository.findByIdOrNull(jobId)
     if (jobInfo == null) {
       log.info("任务: {} 不存在", jobId)
@@ -266,14 +266,14 @@ class JobService(private val jobInfoRepository: JobInfoRepository) {
   }
 
   /**
-   * 停止任务
+   * 停用任务
    *
    * @param jobId 任务id
    * @return 执行结果
    * @author 宋志宗
    * @date 2020/8/20 4:38 下午
    */
-  fun stopJob(jobId: Long): Res<Void> {
+  fun disableJob(jobId: Long): Res<Void> {
     val jobInfo = jobInfoRepository.findByIdOrNull(jobId)
     if (jobInfo == null) {
       log.info("任务: {} 不存在", jobId)
@@ -293,18 +293,18 @@ class JobService(private val jobInfoRepository: JobInfoRepository) {
   /**
    * 触发任务
    *
-   * @param jobId         任务id
-   * @param executorParam 执行参数, 如果为<code>null</code则使用默认任务配置
+   * @param jobId              任务id
+   * @param customExecuteParam 执行参数, 如果为<code>null</code则使用默认任务配置
    * @author 宋志宗
    * @date 2020/8/24 8:46 下午
    */
-  fun trigger(jobId: Long, executorParam: String?) {
+  fun trigger(jobId: Long, customExecuteParam: String?) {
     val jobInfo = jobInfoRepository.findByIdOrNull(jobId)
     if (jobInfo == null) {
       log.info("任务: {} 不存在", jobId)
       throw VisibleException(CommonResMsg.NOT_FOUND, "任务不存在")
     }
-    jobDispatch.dispatch(jobInfo, TriggerTypeEnum.MANUAL, executorParam)
+    jobDispatch.dispatch(jobInfo, TriggerTypeEnum.MANUAL, customExecuteParam)
   }
 
   fun existsByExecutorId(executorId: Long): Boolean {

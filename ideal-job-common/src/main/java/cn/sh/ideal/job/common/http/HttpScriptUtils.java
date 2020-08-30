@@ -18,7 +18,7 @@ import java.util.Map;
  *    "jobId": 130301268919844864,
  *    "executorId": 130282956815073280,
  *    "executorHandler": "demoJobHandler",
- *    "executorParam": "demoJobHandler",
+ *    "executeParam": "demoJobHandler",
  *    "routeStrategy": "WEIGHTED_RANDOM",
  *    "blockStrategy": "SERIAL",
  *    "cron": "0/1 * * * * ?",

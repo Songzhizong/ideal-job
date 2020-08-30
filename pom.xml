@@ -11,9 +11,10 @@
 
   <modules>
     <module>ideal-job-common</module>
-    <module>ideal-job-executor</module>
-    <module>ideal-job-scheduler</module>
     <module>ideal-job-samples</module>
+    <module>ideal-job-scheduler</module>
+    <module>ideal-job-worker</module>
+    <module>ideal-job-worker-springboot-starter</module>
   </modules>
 
   <properties>

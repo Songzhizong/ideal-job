@@ -38,15 +38,15 @@ abstract class BaseHttpExecuteHandler(
   override fun execute(instance: JobInstance,
                        jobInfo: JobInfo,
                        triggerType: TriggerTypeEnum,
-                       customExecutorParam: String?) {
+                       customExecuteParam: String?) {
     val jobId = jobInfo.jobId
-    val executorParam = customExecutorParam ?: jobInfo.executorParam
-    if (executorParam.isBlank()) {
+    val executeParam = customExecuteParam ?: jobInfo.executeParam
+    if (executeParam.isBlank()) {
       log.info("任务: {} Http script为空", jobId)
       throw VisibleException("Http script为空")
     }
     val httpRequest = try {
-      HttpScriptUtils.parse(executorParam)
+      HttpScriptUtils.parse(executeParam)
     } catch (e: Exception) {
       log.info("任务: {} http script解析异常: {}", jobId, e.message)
       throw VisibleException("http script解析异常: ${e.message}")
@@ -101,7 +101,7 @@ abstract class BaseHttpExecuteHandler(
         jobInstance.triggerType = triggerType
         jobInstance.schedulerInstance = instance.schedulerInstance
         jobInstance.executorHandler = instance.executorHandler
-        jobInstance.executorParam = executorParam
+        jobInstance.executeParam = executeParam
         jobInstance.executorInstance = uri
         val requestUri = if (queryString?.isNotBlank() == true) "$uri:$queryString" else uri
         val client = buildWebClientSpec(
