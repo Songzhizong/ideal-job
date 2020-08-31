@@ -1,6 +1,6 @@
 package cn.sh.ideal.job.scheduler.core.socket.handler.impl
 
-import cn.sh.ideal.job.common.executor.TaskExecutor
+import cn.sh.ideal.job.common.worker.TaskWorker
 import cn.sh.ideal.job.common.loadbalancer.LbFactory
 import cn.sh.ideal.job.common.message.MessageType
 import cn.sh.ideal.job.common.message.SocketMessage
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component
  */
 @Component("registerMessageHandler")
 final class RegisterMessageHandler(
-    private val lbFactory: LbFactory<TaskExecutor>,
+    private val lbFactory: LbFactory<TaskWorker>,
     private val jobSchedulerProperties: JobSchedulerProperties) : MessageHandler {
   private val log: Logger = LoggerFactory.getLogger(this.javaClass)
 

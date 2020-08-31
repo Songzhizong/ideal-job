@@ -4,7 +4,7 @@ import cn.sh.ideal.job.common.constants.ExecuteTypeEnum
 import cn.sh.ideal.job.common.constants.RouteStrategyEnum
 import cn.sh.ideal.job.common.constants.TriggerTypeEnum
 import cn.sh.ideal.job.common.exception.VisibleException
-import cn.sh.ideal.job.common.executor.TaskExecutor
+import cn.sh.ideal.job.common.worker.TaskWorker
 import cn.sh.ideal.job.common.loadbalancer.LbFactory
 import cn.sh.ideal.job.common.message.payload.TaskParam
 import cn.sh.ideal.job.common.transfer.CommonResMsg
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component
  */
 @Component("jobHandlerExecuteHandler")
 final class JobHandlerExecuteHandler(
-    private val lbFactory: LbFactory<TaskExecutor>,
+    private val lbFactory: LbFactory<TaskWorker>,
     private val instanceService: JobInstanceService,
     private val jobExecutorService: JobExecutorService) : ExecuteHandler {
   val log: Logger = LoggerFactory.getLogger(this.javaClass)
@@ -97,7 +97,7 @@ final class JobHandlerExecuteHandler(
    * @author 宋志宗
    * @date 2020/8/29 22:00
    */
-  private fun chooseServers(jobView: DispatchJobView, jobId: Long): List<TaskExecutor> {
+  private fun chooseServers(jobView: DispatchJobView, jobId: Long): List<TaskWorker> {
     val executorId = jobView.executorId
     val executor = jobExecutorService.loadById(executorId)
     if (executor == null) {

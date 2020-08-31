@@ -1,3 +1,3 @@
 # Auto Configure
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  cn.sh.ideal.job.executor.spring.boot.starter.IdealJobBeanConfig
+  cn.sh.ideal.job.worker.spring.boot.starter.IdealJobBeanConfig

@@ -1,6 +1,6 @@
 package cn.sh.ideal.job.scheduler.core.socket;
 
-import cn.sh.ideal.job.common.executor.TaskExecutor;
+import cn.sh.ideal.job.common.worker.TaskWorker;
 import cn.sh.ideal.job.common.message.MessageType;
 import cn.sh.ideal.job.common.message.SocketMessage;
 import cn.sh.ideal.job.common.message.payload.TaskParam;
@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  * @author 宋志宗
  * @date 2020/8/20
  */
-public class SocketTaskExecutor implements TaskExecutor {
+public class SocketTaskExecutor implements TaskWorker {
   private static final Logger log = LoggerFactory.getLogger(SocketTaskExecutor.class);
   private final long createTime = System.currentTimeMillis();
   @Nonnull

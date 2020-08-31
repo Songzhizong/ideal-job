@@ -78,7 +78,7 @@ public final class JobInfoConverter {
     if (routeStrategy != null) {
       jobInfo.setRouteStrategy(routeStrategy);
     } else {
-      jobInfo.setRouteStrategy(RouteStrategyEnum.POLLING);
+      jobInfo.setRouteStrategy(RouteStrategyEnum.ROUND_ROBIN);
     }
     final String executorHandler = createJobArgs.getExecutorHandler();
     if (executorHandler != null) {

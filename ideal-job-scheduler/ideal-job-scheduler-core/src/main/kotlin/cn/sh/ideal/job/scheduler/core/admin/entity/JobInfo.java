@@ -87,7 +87,7 @@ public class JobInfo {
    */
   @Nonnull
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false, length = 16)
+  @Column(nullable = false, length = 20)
   private RouteStrategyEnum routeStrategy;
 
   /**

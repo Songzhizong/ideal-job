@@ -105,7 +105,7 @@ class JobService(private val jobInfoRepository: JobInfoRepository) {
     val executorId = updateJobArgs.executorId
     val executorHandler = updateJobArgs.executorHandler ?: DBDefaults.DEFAULT_STRING_VALUE
     val executeParam = updateJobArgs.executeParam ?: DBDefaults.DEFAULT_STRING_VALUE
-    val routeStrategy = updateJobArgs.routeStrategy ?: RouteStrategyEnum.POLLING
+    val routeStrategy = updateJobArgs.routeStrategy ?: RouteStrategyEnum.ROUND_ROBIN
     val blockStrategy = updateJobArgs.blockStrategy ?: BlockStrategyEnum.SERIAL
     val cron = updateJobArgs.cron ?: DBDefaults.DEFAULT_STRING_VALUE
     val retryCount = updateJobArgs.retryCount ?: DBDefaults.DEFAULT_INT_VALUE

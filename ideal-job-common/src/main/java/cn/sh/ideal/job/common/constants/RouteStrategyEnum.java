@@ -19,10 +19,6 @@ public enum RouteStrategyEnum {
    */
   CONSISTENT_HASH("一致性Hash", LbStrategyEnum.CONSISTENT_HASH),
   /**
-   * 故障转移
-   */
-  FAIL_TRANSFER("故障转移", LbStrategyEnum.FAIL_TRANSFER),
-  /**
    * 最不经常使用
    */
   LFU("最不经常使用", LbStrategyEnum.LFU),
@@ -33,7 +29,7 @@ public enum RouteStrategyEnum {
   /**
    * 轮询
    */
-  POLLING("轮询", LbStrategyEnum.POLLING),
+  ROUND_ROBIN("轮询", LbStrategyEnum.ROUND_ROBIN),
   /**
    * 随机
    */
@@ -41,11 +37,11 @@ public enum RouteStrategyEnum {
   /**
    * 加权轮询
    */
-  WEIGHTED_POLLING("加权轮询", LbStrategyEnum.WEIGHTED_POLLING),
+  WEIGHT_ROUND_ROBIN("加权轮询", LbStrategyEnum.WEIGHT_ROUND_ROBIN),
   /**
    * 加权随机
    */
-  WEIGHTED_RANDOM("加权随机", LbStrategyEnum.WEIGHTED_RANDOM),
+  WEIGHT_RANDOM("加权随机", LbStrategyEnum.WEIGHT_RANDOM),
   /**
    * 广播
    */

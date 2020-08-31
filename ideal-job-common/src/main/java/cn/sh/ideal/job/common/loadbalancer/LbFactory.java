@@ -23,7 +23,7 @@ public interface LbFactory<Server extends LbServer> {
   @Nullable
   default Server chooseServer(@Nonnull String serverName,
                               @Nullable Object key) {
-    return chooseServer(serverName, LbStrategyEnum.POLLING, key);
+    return chooseServer(serverName, LbStrategyEnum.ROUND_ROBIN, key);
   }
 
   /**
@@ -50,7 +50,7 @@ public interface LbFactory<Server extends LbServer> {
    */
   @Nonnull
   default LoadBalancer<Server> getLoadBalancer(@Nonnull String serverName) {
-    return getLoadBalancer(serverName, LbStrategyEnum.POLLING);
+    return getLoadBalancer(serverName, LbStrategyEnum.ROUND_ROBIN);
   }
 
   /**

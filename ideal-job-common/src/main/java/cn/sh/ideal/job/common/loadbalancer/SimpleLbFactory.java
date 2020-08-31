@@ -81,20 +81,20 @@ public class SimpleLbFactory<Server extends LbServer> implements LbFactory<Serve
       case LRU: {
         return new LRULoadBalancer<>();
       }
-      case POLLING: {
-        return new PollingLoadBalancer<>();
+      case ROUND_ROBIN: {
+        return new RoundRobinLoadBalancer<>();
       }
       case RANDOM: {
         return new RandomLoadBalancer<>();
       }
-      case WEIGHTED_POLLING: {
-        return new WeightedPollingLoadBalancer<>();
+      case WEIGHT_ROUND_ROBIN: {
+        return new WeightRoundRobinLoadBalancer<>();
       }
-      case WEIGHTED_RANDOM: {
-        return new WeightedRandomLoadBalancer<>();
+      case WEIGHT_RANDOM: {
+        return new WeightRandomLoadBalancer<>();
       }
       default: {
-        return new PollingLoadBalancer<>();
+        return new RoundRobinLoadBalancer<>();
       }
     }
   }

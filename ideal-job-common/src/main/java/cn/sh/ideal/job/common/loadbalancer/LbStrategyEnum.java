@@ -32,7 +32,7 @@ public enum LbStrategyEnum {
   /**
    * 轮询
    */
-  POLLING("轮询"),
+  ROUND_ROBIN("轮询"),
   /**
    * 随机
    */
@@ -40,11 +40,11 @@ public enum LbStrategyEnum {
   /**
    * 加权轮询
    */
-  WEIGHTED_POLLING("加权轮询"),
+  WEIGHT_ROUND_ROBIN("加权轮询"),
   /**
    * 加权随机
    */
-  WEIGHTED_RANDOM("加权随机"),
+  WEIGHT_RANDOM("加权随机"),
   ;
 
   @Nonnull

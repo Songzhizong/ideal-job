@@ -26,7 +26,7 @@ public class DispatchJobView {
    * 执行器路由策略
    */
   @Nonnull
-  private RouteStrategyEnum routeStrategy = RouteStrategyEnum.POLLING;
+  private RouteStrategyEnum routeStrategy = RouteStrategyEnum.ROUND_ROBIN;
   /**
    * 执行模式
    */

@@ -38,7 +38,7 @@ public class TriggerParam {
    * 执行器路由策略
    */
   @Nonnull
-  private LbStrategyEnum routeStrategy = LbStrategyEnum.POLLING;
+  private LbStrategyEnum routeStrategy = LbStrategyEnum.ROUND_ROBIN;
   /**
    * 阻塞处理策略
    */
