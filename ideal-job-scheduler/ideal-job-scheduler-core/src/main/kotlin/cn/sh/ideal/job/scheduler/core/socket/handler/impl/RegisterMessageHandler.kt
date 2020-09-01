@@ -5,7 +5,7 @@ import cn.sh.ideal.job.common.loadbalancer.LbFactory
 import cn.sh.ideal.job.common.message.MessageType
 import cn.sh.ideal.job.common.message.SocketMessage
 import cn.sh.ideal.job.common.message.payload.RegisterCallback
-import cn.sh.ideal.job.common.message.payload.RegisterParam
+import cn.sh.ideal.job.common.message.payload.LoginMessage
 import cn.sh.ideal.job.scheduler.core.conf.JobSchedulerProperties
 import cn.sh.ideal.job.scheduler.core.socket.WebsocketTaskWorker
 import cn.sh.ideal.job.scheduler.core.socket.handler.MessageHandler
@@ -41,7 +41,7 @@ final class RegisterMessageHandler(
     val serverHolder = lbFactory.getServerHolder(appName)
     val accessToken = jobSchedulerProperties.accessToken
     val registerParam = try {
-      RegisterParam.parseMessage(payload)
+      LoginMessage.parseMessage(payload)
     } catch (e: Exception) {
       log.error("解析服务注册参数出现异常: {}", e.message)
       return

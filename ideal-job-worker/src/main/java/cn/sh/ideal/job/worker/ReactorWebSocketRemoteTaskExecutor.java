@@ -83,7 +83,7 @@ public final class ReactorWebSocketRemoteTaskExecutor extends Thread implements 
   }
 
   private String createRegisterMessage() {
-    final RegisterParam param = new RegisterParam();
+    final LoginMessage param = new LoginMessage();
     param.setWeight(weight);
     param.setAccessToken(accessToken);
     final SocketMessage message = new SocketMessage();
