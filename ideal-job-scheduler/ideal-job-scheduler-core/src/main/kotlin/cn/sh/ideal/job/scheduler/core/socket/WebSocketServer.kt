@@ -20,15 +20,15 @@ import javax.websocket.server.ServerEndpoint
  */
 @Component
 @ServerEndpoint("/websocket/executor/{appName}/{instanceId}")
-class SocketServer {
+class WebSocketServer {
   companion object {
-    private val log: Logger = LoggerFactory.getLogger(SocketServer::class.java)
+    private val log: Logger = LoggerFactory.getLogger(WebSocketServer::class.java)
     private lateinit var lbFactory: LbFactory<TaskWorker>
     private lateinit var properties: JobSchedulerProperties
   }
 
   private lateinit var session: Session
-  private lateinit var socketExecutor: SocketTaskExecutor
+  private lateinit var websocketExecutor: WebsocketTaskWorker
 
   @Autowired
   fun setLbFactory(lbFactory: LbFactory<TaskWorker>) {
@@ -48,11 +48,11 @@ class SocketServer {
              @PathParam("appName") appName: String,
              @PathParam("instanceId") instanceId: String) {
     session.maxIdleTimeout
-    val executor = SocketTaskExecutor(appName, instanceId, session)
+    val executor = WebsocketTaskWorker(appName, instanceId, session)
     val weightRegisterSeconds = properties.weightRegisterSeconds
     executor.setWeightRegisterSeconds(weightRegisterSeconds)
     this.session = session
-    this.socketExecutor = executor
+    this.websocketExecutor = executor
     log.info("app: {}, instanceId: {}, sessionId: {} 已建立连接",
         appName, instanceId, session.id)
   }
@@ -60,10 +60,10 @@ class SocketServer {
   @OnClose
   fun onClose() {
 
-    val appName = socketExecutor.appName
-    val instanceId = socketExecutor.instanceId
+    val appName = websocketExecutor.appName
+    val instanceId = websocketExecutor.instanceId
     val serverHolder = lbFactory.getServerHolder(appName)
-    serverHolder.removeServer(socketExecutor)
+    serverHolder.removeServer(websocketExecutor)
     log.info("app: {}, instanceId: {}, sessionId: {} 下线",
         appName, instanceId, session.id)
   }
@@ -87,11 +87,11 @@ class SocketServer {
       log.error("messageType: {} 缺少处理器", messageType)
       return
     }
-    handler.execute(socketExecutor, socketMessage)
+    handler.execute(websocketExecutor, socketMessage)
   }
 
   @OnError
   fun onError(throwable: Throwable) {
-    socketExecutor.disposeSocketError(throwable)
+    websocketExecutor.disposeSocketError(throwable)
   }
 }

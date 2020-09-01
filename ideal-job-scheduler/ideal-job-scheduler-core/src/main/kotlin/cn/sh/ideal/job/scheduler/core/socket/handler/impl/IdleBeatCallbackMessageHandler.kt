@@ -4,7 +4,7 @@ import cn.sh.ideal.job.common.exception.ParseException
 import cn.sh.ideal.job.common.message.MessageType
 import cn.sh.ideal.job.common.message.SocketMessage
 import cn.sh.ideal.job.common.message.payload.IdleBeatCallback
-import cn.sh.ideal.job.scheduler.core.socket.SocketTaskExecutor
+import cn.sh.ideal.job.scheduler.core.socket.WebsocketTaskWorker
 import cn.sh.ideal.job.scheduler.core.socket.handler.MessageHandler
 import cn.sh.ideal.job.scheduler.core.socket.handler.MessageHandlerFactory
 import org.apache.commons.lang3.StringUtils
@@ -26,7 +26,7 @@ final class IdleBeatCallbackMessageHandler : MessageHandler {
     MessageHandlerFactory.register(MessageType.IDLE_BEAT_CALLBACK, this)
   }
 
-  override fun execute(executor: SocketTaskExecutor,
+  override fun execute(executor: WebsocketTaskWorker,
                        socketMessage: SocketMessage) {
     val payload = socketMessage.payload
     val idleBeatCallback = try {

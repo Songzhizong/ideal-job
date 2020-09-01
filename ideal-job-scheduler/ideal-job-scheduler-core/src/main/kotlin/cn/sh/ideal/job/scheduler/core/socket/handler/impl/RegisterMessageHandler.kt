@@ -7,7 +7,7 @@ import cn.sh.ideal.job.common.message.SocketMessage
 import cn.sh.ideal.job.common.message.payload.RegisterCallback
 import cn.sh.ideal.job.common.message.payload.RegisterParam
 import cn.sh.ideal.job.scheduler.core.conf.JobSchedulerProperties
-import cn.sh.ideal.job.scheduler.core.socket.SocketTaskExecutor
+import cn.sh.ideal.job.scheduler.core.socket.WebsocketTaskWorker
 import cn.sh.ideal.job.scheduler.core.socket.handler.MessageHandler
 import cn.sh.ideal.job.scheduler.core.socket.handler.MessageHandlerFactory
 import org.slf4j.Logger
@@ -30,7 +30,7 @@ final class RegisterMessageHandler(
     MessageHandlerFactory.register(MessageType.REGISTER, this)
   }
 
-  override fun execute(executor: SocketTaskExecutor, socketMessage: SocketMessage) {
+  override fun execute(executor: WebsocketTaskWorker, socketMessage: SocketMessage) {
     val payload = socketMessage.payload
     val appName = executor.appName
     val instanceId = executor.instanceId

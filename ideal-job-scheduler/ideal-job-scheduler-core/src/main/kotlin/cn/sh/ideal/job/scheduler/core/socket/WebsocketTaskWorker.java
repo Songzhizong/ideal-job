@@ -21,8 +21,8 @@ import java.util.concurrent.TimeUnit;
  * @author 宋志宗
  * @date 2020/8/20
  */
-public class SocketTaskExecutor implements TaskWorker {
-  private static final Logger log = LoggerFactory.getLogger(SocketTaskExecutor.class);
+public class WebsocketTaskWorker implements TaskWorker {
+  private static final Logger log = LoggerFactory.getLogger(WebsocketTaskWorker.class);
   private final long createTime = System.currentTimeMillis();
   @Nonnull
   private final String appName;
@@ -40,9 +40,9 @@ public class SocketTaskExecutor implements TaskWorker {
   private volatile boolean registered = false;
   private volatile boolean destroyed = false;
 
-  public SocketTaskExecutor(@Nonnull String appName,
-                            @Nonnull String instanceId,
-                            @Nonnull Session session) {
+  public WebsocketTaskWorker(@Nonnull String appName,
+                             @Nonnull String instanceId,
+                             @Nonnull Session session) {
     this.appName = appName;
     this.instanceId = instanceId;
     this.session = session;
