@@ -10,6 +10,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import reactor.core.publisher.Flux
 import javax.websocket.*
 import javax.websocket.server.PathParam
 import javax.websocket.server.ServerEndpoint
@@ -59,7 +60,6 @@ class WebSocketServer {
 
   @OnClose
   fun onClose() {
-
     val appName = websocketExecutor.appName
     val instanceId = websocketExecutor.instanceId
     val serverHolder = lbFactory.getServerHolder(appName)

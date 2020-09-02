@@ -5,7 +5,6 @@ import cn.sh.ideal.job.common.message.payload.LoginMessage;
 import cn.sh.ideal.job.common.utils.JsonUtils;
 import cn.sh.ideal.job.common.worker.TaskWorker;
 import cn.sh.ideal.job.scheduler.core.conf.JobSchedulerProperties;
-import io.rsocket.util.DefaultPayload;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,14 +53,21 @@ public class RSocketServer {
           if (StringUtils.isNotBlank(propertiesAccessToken)
               && !propertiesAccessToken.equals(accessToken)) {
             log.info("accessToken不合法");
-            requester.rsocket()
-                .fireAndForget(DefaultPayload.create("accessToken不合法"))
+            requester.route("client-receive")
+                .data("accessToken不合法")
+                .send()
                 .subscribe();
             requester.rsocket().dispose();
           } else {
             // Add all new clients to a client list
             log.info("Client: {} CONNECTED.", loginMessage);
             CLIENTS.add(requester);
+            // Callback to client, confirming connection
+            requester.route("client-status")
+                .data("OPEN")
+                .retrieveFlux(String.class)
+                .doOnNext(s -> log.info("Client: {} Free Memory: {}.", loginMessage, s))
+                .subscribe();
           }
         })
         .doOnError(error -> {
@@ -71,15 +77,8 @@ public class RSocketServer {
         .doFinally(consumer -> {
           // Remove disconnected clients from the client list
           CLIENTS.remove(requester);
-          log.info("Client {} DISCONNECTED", loginMessage);
+          log.info("Client {} DISCONNECTED: {}", loginMessage, consumer);
         })
         .subscribe();
-    // Callback to client, confirming connection
-    requester.route("client-status")
-        .data("OPEN")
-        .retrieveFlux(String.class)
-        .doOnNext(s -> log.info("Client: {} Free Memory: {}.", loginMessage, s))
-        .subscribe();
   }
-
 }
