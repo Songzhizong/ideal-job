@@ -12,15 +12,15 @@ import java.util.Map;
  * @date 2020/8/20
  */
 public final class MessageHandlerFactory {
-  private static final Map<MessageType, MessageHandler> handlerMapper = new HashMap<>();
+    private static final Map<MessageType, MessageHandler> handlerMapper = new HashMap<>();
 
-  public static void register(@Nonnull MessageType type,
-                              @Nonnull MessageHandler handler) {
-    handlerMapper.put(type, handler);
-  }
+    public static void register(@Nonnull MessageType type,
+                                @Nonnull MessageHandler handler) {
+        handlerMapper.put(type, handler);
+    }
 
-  @Nullable
-  public static MessageHandler getHandler(@Nonnull MessageType type) {
-    return handlerMapper.get(type);
-  }
+    @Nullable
+    public static MessageHandler getHandler(@Nonnull MessageType type) {
+        return handlerMapper.get(type);
+    }
 }

@@ -13,9 +13,9 @@ import javax.annotation.Nonnull;
  */
 public interface MessageHandler {
 
-  /**
-   * 处理请求消息
-   */
-  void execute(@Nonnull WebsocketTaskWorker executor,
-               @Nonnull SocketMessage socketMessage);
+    /**
+     * 处理请求消息
+     */
+    void execute(@Nonnull WebsocketTaskWorker executor,
+                 @Nonnull SocketMessage socketMessage);
 }

@@ -20,26 +20,26 @@ import java.util.concurrent.ExecutorService
  */
 @Component("executeJobCallbackMessageHandler")
 final class ExecuteJobCallbackMessageHandler(
-    private val jobCallbackThreadPool: ExecutorService,
-    private val jobDispatch: JobDispatch) : MessageHandler {
-  private val log: Logger = LoggerFactory.getLogger(this.javaClass)
+        private val jobCallbackThreadPool: ExecutorService,
+        private val jobDispatch: JobDispatch) : MessageHandler {
+    private val log: Logger = LoggerFactory.getLogger(this.javaClass)
 
-  init {
-    MessageHandlerFactory.register(MessageType.EXECUTE_JOB_CALLBACK, this)
-  }
+    init {
+        MessageHandlerFactory.register(MessageType.EXECUTE_JOB_CALLBACK, this)
+    }
 
-  override fun execute(executor: WebsocketTaskWorker, socketMessage: SocketMessage) {
-    val payload = socketMessage.payload
-    val executeJobCallback = try {
-      TaskCallback.parseMessage(payload)
-    } catch (e: Exception) {
-      val cause = e.cause
-      val errMsg = cause!!.javaClass.name + ":" + e.message
-      log.warn("解析 ExecuteJobCallback 出现异常: {}, payload = {}", errMsg, payload)
-      return
+    override fun execute(executor: WebsocketTaskWorker, socketMessage: SocketMessage) {
+        val payload = socketMessage.payload
+        val executeJobCallback = try {
+            TaskCallback.parseMessage(payload)
+        } catch (e: Exception) {
+            val cause = e.cause
+            val errMsg = cause!!.javaClass.name + ":" + e.message
+            log.warn("解析 ExecuteJobCallback 出现异常: {}, payload = {}", errMsg, payload)
+            return
+        }
+        jobCallbackThreadPool.execute {
+            jobDispatch.dispatchCallback(executeJobCallback)
+        }
     }
-    jobCallbackThreadPool.execute {
-      jobDispatch.dispatchCallback(executeJobCallback)
-    }
-  }
 }

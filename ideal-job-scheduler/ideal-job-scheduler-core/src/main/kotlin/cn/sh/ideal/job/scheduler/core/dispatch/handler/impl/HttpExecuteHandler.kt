@@ -13,9 +13,9 @@ import java.util.concurrent.ExecutorService
 @Component("httpExecuteHandler")
 final class HttpExecuteHandler(instanceService: JobInstanceService,
                                jobCallbackThreadPool: ExecutorService)
-  : BaseHttpExecuteHandler(instanceService, jobCallbackThreadPool) {
+    : BaseHttpExecuteHandler(instanceService, jobCallbackThreadPool) {
 
-  init {
-    ExecuteHandlerFactory.register(ExecuteTypeEnum.HTTP_SCRIPT, this)
-  }
+    init {
+        ExecuteHandlerFactory.register(ExecuteTypeEnum.HTTP_SCRIPT, this)
+    }
 }

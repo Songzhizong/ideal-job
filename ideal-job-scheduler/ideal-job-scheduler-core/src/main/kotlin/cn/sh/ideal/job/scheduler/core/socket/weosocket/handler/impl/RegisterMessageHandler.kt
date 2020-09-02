@@ -22,55 +22,55 @@ import org.springframework.stereotype.Component
  */
 @Component("registerMessageHandler")
 final class RegisterMessageHandler(
-    private val lbFactory: LbFactory<TaskWorker>,
-    private val jobSchedulerProperties: JobSchedulerProperties) : MessageHandler {
-  private val log: Logger = LoggerFactory.getLogger(this.javaClass)
+        private val lbFactory: LbFactory<TaskWorker>,
+        private val jobSchedulerProperties: JobSchedulerProperties) : MessageHandler {
+    private val log: Logger = LoggerFactory.getLogger(this.javaClass)
 
-  init {
-    MessageHandlerFactory.register(MessageType.REGISTER, this)
-  }
+    init {
+        MessageHandlerFactory.register(MessageType.REGISTER, this)
+    }
 
-  override fun execute(executor: WebsocketTaskWorker, socketMessage: SocketMessage) {
-    val payload = socketMessage.payload
-    val appName = executor.appName
-    val instanceId = executor.instanceId
-    if (executor.isRegistered) {
-      log.warn("appName: {}, instanceId: {}, 客户端重复注册, 已忽略该消息", appName, instanceId)
-      return
-    }
-    val serverHolder = lbFactory.getServerHolder(appName)
-    val accessToken = jobSchedulerProperties.accessToken
-    val registerParam = try {
-      LoginMessage.parseMessage(payload)
-    } catch (e: Exception) {
-      log.error("解析服务注册参数出现异常: {}", e.message)
-      return
-    }
-    val callback = RegisterCallback()
-    callback.messageId = socketMessage.messageId
-    if (accessToken.isNotBlank()) {
-      val registerToken = registerParam.accessToken
-      if (accessToken != registerToken) {
-        log.warn("appName: {}, instanceId: {} 请求token不合法: {}",
-            appName, instanceId, registerToken)
-        callback.isSuccess = false
-        callback.message = "accessToken不合法"
+    override fun execute(executor: WebsocketTaskWorker, socketMessage: SocketMessage) {
+        val payload = socketMessage.payload
+        val appName = executor.appName
+        val instanceId = executor.instanceId
+        if (executor.isRegistered) {
+            log.warn("appName: {}, instanceId: {}, 客户端重复注册, 已忽略该消息", appName, instanceId)
+            return
+        }
+        val serverHolder = lbFactory.getServerHolder(appName)
+        val accessToken = jobSchedulerProperties.accessToken
+        val registerParam = try {
+            LoginMessage.parseMessage(payload)
+        } catch (e: Exception) {
+            log.error("解析服务注册参数出现异常: {}", e.message)
+            return
+        }
+        val callback = RegisterCallback()
+        callback.messageId = socketMessage.messageId
+        if (accessToken.isNotBlank()) {
+            val registerToken = registerParam.accessToken
+            if (accessToken != registerToken) {
+                log.warn("appName: {}, instanceId: {} 请求token不合法: {}",
+                        appName, instanceId, registerToken)
+                callback.isSuccess = false
+                callback.message = "accessToken不合法"
+                val callbackMessage = SocketMessage(RegisterCallback.typeCode,
+                        callback.toMessageString())
+                executor.sendMessage(callbackMessage.toMessageString())
+                executor.destroy()
+                return
+            }
+        }
+        executor.weight = registerParam.weight
+        executor.isRegistered = true
+        serverHolder.addServers(listOf(executor), true)
+        log.info("客户端完成注册, appName: {}, instanceId: {}, 注册参数: {}",
+                appName, instanceId, payload)
+        callback.isSuccess = true
+        callback.message = "success"
         val callbackMessage = SocketMessage(RegisterCallback.typeCode,
-            callback.toMessageString())
+                callback.toMessageString())
         executor.sendMessage(callbackMessage.toMessageString())
-        executor.destroy()
-        return
-      }
     }
-    executor.weight = registerParam.weight
-    executor.isRegistered = true
-    serverHolder.addServers(listOf(executor), true)
-    log.info("客户端完成注册, appName: {}, instanceId: {}, 注册参数: {}",
-        appName, instanceId, payload)
-    callback.isSuccess = true
-    callback.message = "success"
-    val callbackMessage = SocketMessage(RegisterCallback.typeCode,
-        callback.toMessageString())
-    executor.sendMessage(callbackMessage.toMessageString())
-  }
 }

@@ -13,61 +13,61 @@ import javax.annotation.Nonnull;
 @Component
 @ConfigurationProperties("ideal.job")
 public class JobSchedulerProperties {
-  /**
-   * 任务实例保存天数
-   */
-  private int jobInstanceStorageDay = 30;
-  /**
-   * 建立连接后等待客户端注册的时间
-   */
-  private int weightRegisterSeconds = 10;
-  @Nonnull
-  private String accessToken = "";
+    /**
+     * 任务实例保存天数
+     */
+    private int jobInstanceStorageDay = 30;
+    /**
+     * 建立连接后等待客户端注册的时间
+     */
+    private int weightRegisterSeconds = 10;
+    @Nonnull
+    private String accessToken = "";
 
-  @NestedConfigurationProperty
-  private ThreadPoolProperties executeJobCallbackPool = new ThreadPoolProperties();
+    @NestedConfigurationProperty
+    private ThreadPoolProperties executeJobCallbackPool = new ThreadPoolProperties();
 
-  @NestedConfigurationProperty
-  private ThreadPoolProperties cronJobTriggerPool = new ThreadPoolProperties();
+    @NestedConfigurationProperty
+    private ThreadPoolProperties cronJobTriggerPool = new ThreadPoolProperties();
 
-  public int getJobInstanceStorageDay() {
-    return jobInstanceStorageDay;
-  }
+    public int getJobInstanceStorageDay() {
+        return jobInstanceStorageDay;
+    }
 
-  public void setJobInstanceStorageDay(int jobInstanceStorageDay) {
-    this.jobInstanceStorageDay = jobInstanceStorageDay;
-  }
+    public void setJobInstanceStorageDay(int jobInstanceStorageDay) {
+        this.jobInstanceStorageDay = jobInstanceStorageDay;
+    }
 
-  public int getWeightRegisterSeconds() {
-    return weightRegisterSeconds;
-  }
+    public int getWeightRegisterSeconds() {
+        return weightRegisterSeconds;
+    }
 
-  public void setWeightRegisterSeconds(int weightRegisterSeconds) {
-    this.weightRegisterSeconds = weightRegisterSeconds;
-  }
+    public void setWeightRegisterSeconds(int weightRegisterSeconds) {
+        this.weightRegisterSeconds = weightRegisterSeconds;
+    }
 
-  @Nonnull
-  public String getAccessToken() {
-    return accessToken;
-  }
+    @Nonnull
+    public String getAccessToken() {
+        return accessToken;
+    }
 
-  public void setAccessToken(@Nonnull String accessToken) {
-    this.accessToken = accessToken;
-  }
+    public void setAccessToken(@Nonnull String accessToken) {
+        this.accessToken = accessToken;
+    }
 
-  public ThreadPoolProperties getExecuteJobCallbackPool() {
-    return executeJobCallbackPool;
-  }
+    public ThreadPoolProperties getExecuteJobCallbackPool() {
+        return executeJobCallbackPool;
+    }
 
-  public void setExecuteJobCallbackPool(ThreadPoolProperties executeJobCallbackPool) {
-    this.executeJobCallbackPool = executeJobCallbackPool;
-  }
+    public void setExecuteJobCallbackPool(ThreadPoolProperties executeJobCallbackPool) {
+        this.executeJobCallbackPool = executeJobCallbackPool;
+    }
 
-  public ThreadPoolProperties getCronJobTriggerPool() {
-    return cronJobTriggerPool;
-  }
+    public ThreadPoolProperties getCronJobTriggerPool() {
+        return cronJobTriggerPool;
+    }
 
-  public void setCronJobTriggerPool(ThreadPoolProperties cronJobTriggerPool) {
-    this.cronJobTriggerPool = cronJobTriggerPool;
-  }
+    public void setCronJobTriggerPool(ThreadPoolProperties cronJobTriggerPool) {
+        this.cronJobTriggerPool = cronJobTriggerPool;
+    }
 }

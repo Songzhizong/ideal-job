@@ -20,29 +20,29 @@ import org.springframework.stereotype.Component
  */
 @Component("idleBeatCallbackMessageHandler")
 final class IdleBeatCallbackMessageHandler : MessageHandler {
-  val log: Logger = LoggerFactory.getLogger(this.javaClass)
+    val log: Logger = LoggerFactory.getLogger(this.javaClass)
 
-  init {
-    MessageHandlerFactory.register(MessageType.IDLE_BEAT_CALLBACK, this)
-  }
+    init {
+        MessageHandlerFactory.register(MessageType.IDLE_BEAT_CALLBACK, this)
+    }
 
-  override fun execute(executor: WebsocketTaskWorker,
-                       socketMessage: SocketMessage) {
-    val payload = socketMessage.payload
-    val idleBeatCallback = try {
-      IdleBeatCallback.parseMessage(payload)
-    } catch (e: ParseException) {
-      val cause = e.cause
-      val errMsg = cause!!.javaClass.name + ":" + e.message
-      log.warn("解析IdleBeatCallback出现异常: {}, payload = {}", errMsg, payload)
-      return
+    override fun execute(executor: WebsocketTaskWorker,
+                         socketMessage: SocketMessage) {
+        val payload = socketMessage.payload
+        val idleBeatCallback = try {
+            IdleBeatCallback.parseMessage(payload)
+        } catch (e: ParseException) {
+            val cause = e.cause
+            val errMsg = cause!!.javaClass.name + ":" + e.message
+            log.warn("解析IdleBeatCallback出现异常: {}, payload = {}", errMsg, payload)
+            return
+        }
+        val jobId = idleBeatCallback.jobId
+        val idleLevel = idleBeatCallback.idleLevel
+        if (StringUtils.isBlank(jobId)) {
+            executor.setNoneJobIdleLevel(idleLevel)
+        } else {
+            executor.putJobIdleLevel(jobId, idleLevel)
+        }
     }
-    val jobId = idleBeatCallback.jobId
-    val idleLevel = idleBeatCallback.idleLevel
-    if (StringUtils.isBlank(jobId)) {
-      executor.setNoneJobIdleLevel(idleLevel)
-    } else {
-      executor.putJobIdleLevel(jobId, idleLevel)
-    }
-  }
 }

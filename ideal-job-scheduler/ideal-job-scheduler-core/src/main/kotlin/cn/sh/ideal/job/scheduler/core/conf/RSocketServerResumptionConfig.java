@@ -16,8 +16,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class RSocketServerResumptionConfig implements RSocketServerCustomizer {
 
-  @Override
-  public void customize(RSocketServer rSocketServer) {
-    rSocketServer.resume(new Resume());
-  }
+    @Override
+    public void customize(RSocketServer rSocketServer) {
+        rSocketServer.resume(new Resume());
+    }
 }
