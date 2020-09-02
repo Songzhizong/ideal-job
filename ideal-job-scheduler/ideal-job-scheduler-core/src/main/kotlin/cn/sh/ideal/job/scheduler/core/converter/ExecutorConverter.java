@@ -10,14 +10,14 @@ import javax.annotation.Nonnull;
  * @date 2020/8/27
  */
 public final class ExecutorConverter {
-  @Nonnull
-  public static ExecutorInfoRsp toExecutorInfoRsp(@Nonnull JobExecutor executor) {
-    ExecutorInfoRsp executorInfoRsp = new ExecutorInfoRsp();
-    executorInfoRsp.setExecutorId(executor.getExecutorId());
-    executorInfoRsp.setAppName(executor.getAppName());
-    executorInfoRsp.setTitle(executor.getTitle());
-    executorInfoRsp.setCreatedTime(executor.getCreatedTime());
-    executorInfoRsp.setUpdateTime(executor.getUpdateTime());
-    return executorInfoRsp;
-  }
+    @Nonnull
+    public static ExecutorInfoRsp toExecutorInfoRsp(@Nonnull JobExecutor executor) {
+        ExecutorInfoRsp executorInfoRsp = new ExecutorInfoRsp();
+        executorInfoRsp.setExecutorId(executor.getExecutorId());
+        executorInfoRsp.setAppName(executor.getAppName());
+        executorInfoRsp.setTitle(executor.getTitle());
+        executorInfoRsp.setCreatedTime(executor.getCreatedTime());
+        executorInfoRsp.setUpdateTime(executor.getUpdateTime());
+        return executorInfoRsp;
+    }
 }

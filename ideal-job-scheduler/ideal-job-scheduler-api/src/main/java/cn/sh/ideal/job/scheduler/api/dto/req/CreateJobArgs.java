@@ -1,6 +1,7 @@
 package cn.sh.ideal.job.scheduler.api.dto.req;
 
 import cn.sh.ideal.job.common.constants.BlockStrategyEnum;
+import cn.sh.ideal.job.common.constants.DBDefaults;
 import cn.sh.ideal.job.common.constants.ExecuteTypeEnum;
 import cn.sh.ideal.job.common.constants.RouteStrategyEnum;
 import lombok.Getter;
@@ -17,89 +18,87 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 public class CreateJobArgs {
-  /**
-   * 创建后是否自动运行, 默认否
-   */
-  @Nullable
-  private Boolean autoStart;
-  /**
-   * 所属执行器Id
-   */
-  @Nonnull
-  @NotNull(message = "所属执行器id不能为空")
-  private Long executorId;
-  /**
-   * 执行模式
-   */
-  @Nonnull
-  @NotNull(message = "执行模式不能为空")
-  private ExecuteTypeEnum executeType;
-  /**
-   * JobHandler
-   */
-  @Nullable
-  private String executorHandler;
-  /**
-   * 执行参数
-   */
-  @Nullable
-  private String executeParam;
-  /**
-   * 路由策略,默认轮询
-   */
-  @Nullable
-  private RouteStrategyEnum routeStrategy;
-  /**
-   * 阻塞策略, 默认串行执行
-   */
-  @Nullable
-  private BlockStrategyEnum blockStrategy;
-  /**
-   * 任务执行CRON
-   */
-  @Nullable
-  private String cron;
-  /**
-   * 失败重试次数, 默认不重试
-   */
-  @Nullable
-  private Integer retryCount;
-  /**
-   * 任务名称
-   */
-  @Nullable
-  private String jobName;
-  /**
-   * 告警邮件地址
-   */
-  @Nullable
-  private String alarmEmail;
+    /**
+     * 创建后是否自动运行, 默认否
+     */
+    private boolean autoStart = false;
+    /**
+     * 所属执行器Id
+     */
+    @Nonnull
+    @NotNull(message = "所属执行器id不能为空")
+    private Long executorId;
+    /**
+     * 执行模式
+     */
+    @Nonnull
+    @NotNull(message = "执行模式不能为空")
+    private ExecuteTypeEnum executeType;
+    /**
+     * JobHandler
+     */
+    @Nonnull
+    private String executorHandler = DBDefaults.DEFAULT_STRING_VALUE;
+    /**
+     * 执行参数
+     */
+    @Nonnull
+    private String executeParam = DBDefaults.DEFAULT_STRING_VALUE;
+    /**
+     * 路由策略,默认轮询
+     */
+    @Nonnull
+    private RouteStrategyEnum routeStrategy = RouteStrategyEnum.ROUND_ROBIN;
+    /**
+     * 阻塞策略, 默认串行执行
+     */
+    @Nonnull
+    private BlockStrategyEnum blockStrategy = BlockStrategyEnum.PARALLEL;
+    /**
+     * 任务执行CRON
+     */
+    @Nonnull
+    private String cron = DBDefaults.DEFAULT_STRING_VALUE;
+    /**
+     * 失败重试次数, 默认不重试
+     */
+    private int retryCount = DBDefaults.DEFAULT_INT_VALUE;
+    /**
+     * 任务名称
+     */
+    @Nonnull
+    private String jobName = DBDefaults.DEFAULT_STRING_VALUE;
+    /**
+     * 告警邮件地址
+     */
+    @Nonnull
+    private String alarmEmail = DBDefaults.DEFAULT_STRING_VALUE;
 
-  // ---------------------------- 以下为扩展查询字段, 适用于各种业务场景的查询需求
+    // ---------------------------- 以下为扩展查询字段, 适用于各种业务场景的查询需求
 
-  /**
-   * 所属应用, 用于多应用隔离
-   */
-  @Nullable
-  private String application;
-  /**
-   * 所属租户, 用于saas系统租户隔离
-   */
-  @Nullable
-  private String tenantId;
-  /**
-   * 所属业务
-   */
-  @Nullable
-  private String bizType;
-  /**
-   * 自定义标签
-   */
-  @Nullable
-  private String customTag;
-  /**
-   * 业务id
-   */
-  @Nullable
-  private String businessId;
+    /**
+     * 所属应用, 用于多应用隔离
+     */
+    @Nonnull
+    private String application = DBDefaults.DEFAULT_STRING_VALUE;
+    /**
+     * 所属租户, 用于saas系统租户隔离
+     */
+    @Nonnull
+    private String tenantId = DBDefaults.DEFAULT_STRING_VALUE;
+    /**
+     * 所属业务
+     */
+    @Nonnull
+    private String bizType = DBDefaults.DEFAULT_STRING_VALUE;
+    /**
+     * 自定义标签
+     */
+    @Nonnull
+    private String customTag = DBDefaults.DEFAULT_STRING_VALUE;
+    /**
+     * 业务id
+     */
+    @Nonnull
+    private String businessId = DBDefaults.DEFAULT_STRING_VALUE;
 }

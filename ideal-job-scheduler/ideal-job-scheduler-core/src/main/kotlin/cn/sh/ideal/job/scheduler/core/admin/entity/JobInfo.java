@@ -50,8 +50,7 @@ public class JobInfo {
   @Nonnull
   @GeneratedValue(strategy = GenerationType.AUTO, generator = "job_info_generator")
   @GenericGenerator(name = "job_info_generator",
-      strategy = "cn.sh.ideal.job.scheduler.core.generator.JpaIdentityGenerator",
-      parameters = {@org.hibernate.annotations.Parameter(name = "biz", value = "job_info")})
+      strategy = "cn.sh.ideal.job.scheduler.core.generator.JpaIdentityGenerator")
   @Column(nullable = false, updatable = false)
   private Long jobId;
 

@@ -39,8 +39,7 @@ public class JobInstance {
   @Nonnull
   @GeneratedValue(strategy = GenerationType.AUTO, generator = "job_trigger_log_generator")
   @GenericGenerator(name = "job_trigger_log_generator",
-      strategy = "cn.sh.ideal.job.scheduler.core.generator.JpaIdentityGenerator",
-      parameters = {@org.hibernate.annotations.Parameter(name = "biz", value = "job_trigger_log")})
+      strategy = "cn.sh.ideal.job.scheduler.core.generator.JpaIdentityGenerator")
   @Column(nullable = false, updatable = false)
   private Long instanceId;
 

@@ -1,4 +1,4 @@
-package cn.sh.ideal.job.scheduler.core.socket;
+package cn.sh.ideal.job.scheduler.core.socket.weosocket;
 
 import cn.sh.ideal.job.common.worker.TaskWorker;
 import cn.sh.ideal.job.common.message.MessageType;

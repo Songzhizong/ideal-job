@@ -3,6 +3,8 @@ package cn.sh.ideal.job.common.utils;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
 import javax.annotation.Nonnull;
@@ -13,6 +15,25 @@ import java.util.concurrent.TimeUnit;
  * @date 2020/8/21
  */
 public final class ReactorUtils {
+
+
+  @Nonnull
+  public static WebClient createWebClient(int connectTimeOut,
+                                          long writeTimeOut,
+                                          long readTimeOut) {
+    WebClient.Builder builder = createWebClientBuilder(connectTimeOut, writeTimeOut, readTimeOut);
+    return builder.build();
+  }
+
+
+  @Nonnull
+  public static WebClient.Builder createWebClientBuilder(int connectTimeOut,
+                                                         long writeTimeOut,
+                                                         long readTimeOut) {
+    HttpClient httpClient = createHttpClient(connectTimeOut, writeTimeOut, readTimeOut);
+    return WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient));
+  }
+
 
   @Nonnull
   public static HttpClient createHttpClient(int connectTimeOut,

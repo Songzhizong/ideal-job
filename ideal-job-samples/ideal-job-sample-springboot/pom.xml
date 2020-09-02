@@ -33,11 +33,11 @@
       <artifactId>reactor-netty</artifactId>
     </dependency>
 
-    <!--    <dependency>-->
-    <!--      <groupId>cn.sh.ideal</groupId>-->
-    <!--      <artifactId>ideal-job-worker-springboot-starter</artifactId>-->
-    <!--      <version>${ideal-job.version}</version>-->
-    <!--    </dependency>-->
+    <dependency>
+      <groupId>cn.sh.ideal</groupId>
+      <artifactId>ideal-job-worker-springboot-starter</artifactId>
+      <version>${ideal-job.version}</version>
+    </dependency>
     <!-- web -->
     <dependency>
       <groupId>org.springframework.boot</groupId>

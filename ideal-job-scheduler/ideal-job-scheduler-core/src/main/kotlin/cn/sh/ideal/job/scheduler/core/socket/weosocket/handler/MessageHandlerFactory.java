@@ -1,4 +1,4 @@
-package cn.sh.ideal.job.scheduler.core.socket.handler;
+package cn.sh.ideal.job.scheduler.core.socket.weosocket.handler;
 
 import cn.sh.ideal.job.common.message.MessageType;
 

@@ -25,9 +25,9 @@ import org.springframework.stereotype.Component
  */
 @Component("jobHandlerExecuteHandler")
 final class JobHandlerExecuteHandler(
-    private val lbFactory: LbFactory<TaskWorker>,
-    private val instanceService: JobInstanceService,
-    private val jobExecutorService: JobExecutorService) : ExecuteHandler {
+        private val lbFactory: LbFactory<TaskWorker>,
+        private val instanceService: JobInstanceService,
+        private val jobExecutorService: JobExecutorService) : ExecuteHandler {
   val log: Logger = LoggerFactory.getLogger(this.javaClass)
 
   init {

@@ -17,35 +17,35 @@ import java.util.concurrent.ExecutorService
  */
 @Component("springCloudHttpExecuteHandler")
 final class SpringCloudBaseHttpExecuteHandler(
-    instanceService: JobInstanceService,
-    jobCallbackThreadPool: ExecutorService,
-    private val springClientFactory: SpringClientFactory?,
-    private val jobExecutorService: JobExecutorService)
-  : BaseHttpExecuteHandler(instanceService, jobCallbackThreadPool) {
+        instanceService: JobInstanceService,
+        jobCallbackThreadPool: ExecutorService,
+        private val springClientFactory: SpringClientFactory?,
+        private val jobExecutorService: JobExecutorService)
+    : BaseHttpExecuteHandler(instanceService, jobCallbackThreadPool) {
 
-  private val virtualHttpServerMap = ConcurrentHashMap<String, VirtualHttpServer>()
+    private val virtualHttpServerMap = ConcurrentHashMap<String, VirtualHttpServer>()
 
-  init {
-    ExecuteHandlerFactory.register(ExecuteTypeEnum.LB_HTTP_SCRIPT, this)
-  }
-
-  override fun getAddressList(jobId: Long, routeStrategy: RouteStrategyEnum, scriptUrl: String): List<String> {
-    if (springClientFactory == null) {
-      log.error("springClientFactory 为空, 请检查实发配置注册中心, SpringCloud http script 必须配合注册中心使用")
-      throw UnsupportedOperationException("无法获取spring cloud 注册中心信息")
+    init {
+        ExecuteHandlerFactory.register(ExecuteTypeEnum.LB_HTTP_SCRIPT, this)
     }
 
-    TODO("Not yet implemented")
-  }
+    override fun getAddressList(jobId: Long, routeStrategy: RouteStrategyEnum, scriptUrl: String): List<String> {
+        if (springClientFactory == null) {
+            log.error("springClientFactory 为空, 请检查实发配置注册中心, SpringCloud http script 必须配合注册中心使用")
+            throw UnsupportedOperationException("无法获取spring cloud 注册中心信息")
+        }
 
-
-  class VirtualHttpServer(private val hostPort: String) : LbServer {
-    override fun heartbeat(): Boolean {
-      return true
+        TODO("Not yet implemented")
     }
 
-    override fun getInstanceId(): String {
-      return hostPort
+
+    class VirtualHttpServer(private val hostPort: String) : LbServer {
+        override fun heartbeat(): Boolean {
+            return true
+        }
+
+        override fun getInstanceId(): String {
+            return hostPort
+        }
     }
-  }
 }

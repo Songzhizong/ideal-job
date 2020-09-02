@@ -6,7 +6,5 @@ package cn.sh.ideal.job.scheduler.core.generator;
  */
 public interface IDGenerator {
 
-  long generate();
-
-  long generate(String biz);
+    long generate();
 }

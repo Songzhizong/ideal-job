@@ -1,7 +1,7 @@
-package cn.sh.ideal.job.scheduler.core.socket.handler;
+package cn.sh.ideal.job.scheduler.core.socket.weosocket.handler;
 
 import cn.sh.ideal.job.common.message.SocketMessage;
-import cn.sh.ideal.job.scheduler.core.socket.WebsocketTaskWorker;
+import cn.sh.ideal.job.scheduler.core.socket.weosocket.WebsocketTaskWorker;
 
 import javax.annotation.Nonnull;
 

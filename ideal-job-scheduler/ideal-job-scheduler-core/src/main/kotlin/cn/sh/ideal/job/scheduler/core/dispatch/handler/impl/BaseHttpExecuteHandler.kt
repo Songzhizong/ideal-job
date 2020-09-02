@@ -7,11 +7,11 @@ import cn.sh.ideal.job.common.exception.VisibleException
 import cn.sh.ideal.job.common.http.HttpMethod
 import cn.sh.ideal.job.common.http.HttpScriptUtils
 import cn.sh.ideal.job.common.utils.JsonUtils
+import cn.sh.ideal.job.common.utils.ReactorUtils
 import cn.sh.ideal.job.scheduler.core.admin.entity.JobInstance
 import cn.sh.ideal.job.scheduler.core.admin.entity.vo.DispatchJobView
 import cn.sh.ideal.job.scheduler.core.admin.service.JobInstanceService
 import cn.sh.ideal.job.scheduler.core.dispatch.handler.ExecuteHandler
-import cn.sh.ideal.job.scheduler.core.utils.WebClients
 import org.apache.commons.lang3.StringUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -27,11 +27,11 @@ import java.util.concurrent.ExecutorService
  * @date 2020/8/28
  */
 abstract class BaseHttpExecuteHandler(
-    private val instanceService: JobInstanceService,
-    private val jobCallbackThreadPool: ExecutorService) : ExecuteHandler {
+        private val instanceService: JobInstanceService,
+        private val jobCallbackThreadPool: ExecutorService) : ExecuteHandler {
   val log: Logger = LoggerFactory.getLogger(this.javaClass)
 
-  private val webClient = WebClients.createWebClient(
+  private val webClient = ReactorUtils.createWebClient(
       400, 400, 120_000)
 
   @Suppress("DuplicatedCode")

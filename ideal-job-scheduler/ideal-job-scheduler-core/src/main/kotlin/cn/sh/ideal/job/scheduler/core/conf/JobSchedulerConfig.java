@@ -6,9 +6,7 @@ import cn.sh.ideal.job.common.loadbalancer.SimpleLbFactory;
 import cn.sh.ideal.job.common.utils.IpUtil;
 import cn.sh.ideal.job.common.utils.JsonUtils;
 import cn.sh.ideal.job.scheduler.core.generator.IDGenerator;
-import cn.sh.ideal.job.scheduler.core.generator.ReactiveSpringRedisSnowFlakeInitializer;
-import cn.sh.ideal.job.scheduler.core.generator.SnowFlake;
-import cn.sh.ideal.job.scheduler.core.generator.SnowFlakeInitializer;
+import cn.sh.ideal.job.scheduler.core.generator.ReactiveRedisRegisterSnowFlake;
 import cn.sh.ideal.job.scheduler.core.dispatch.TimingSchedule;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -51,14 +49,11 @@ public class JobSchedulerConfig {
   private String ipPort = null;
   private final WebServerApplicationContext context;
   private final JobSchedulerProperties schedulerProperties;
-  private final ReactiveStringRedisTemplate reactiveStringRedisTemplate;
 
   public JobSchedulerConfig(WebServerApplicationContext context,
-                            JobSchedulerProperties schedulerProperties,
-                            ReactiveStringRedisTemplate reactiveStringRedisTemplate) {
+                            JobSchedulerProperties schedulerProperties) {
     this.context = context;
     this.schedulerProperties = schedulerProperties;
-    this.reactiveStringRedisTemplate = reactiveStringRedisTemplate;
   }
 
   public String getIp() {
@@ -98,18 +93,10 @@ public class JobSchedulerConfig {
   }
 
   @Bean
-  public SnowFlakeInitializer snowFlakeInitializer() {
-    return new ReactiveSpringRedisSnowFlakeInitializer(300,
-        30, applicationName, reactiveStringRedisTemplate);
-  }
-
-  @Bean
-  public IDGenerator idGenerator(@Nonnull SnowFlakeInitializer snowFlakeInitializer) {
-    snowFlakeInitializer.init();
-    SnowFlake snowFlake = SnowFlake.INSTANCE;
-    if (log.isDebugEnabled()) {
-      log.debug("test SnowFlake generate: " + snowFlake.generate());
-    }
+  public IDGenerator idGenerator(ReactiveStringRedisTemplate reactiveStringRedisTemplate) {
+    ReactiveRedisRegisterSnowFlake snowFlake = new ReactiveRedisRegisterSnowFlake(
+        0, 300, 60, applicationName, reactiveStringRedisTemplate);
+    log.debug("test SnowFlake generate: " + snowFlake.generate());
     return snowFlake;
   }
 
@@ -169,7 +156,7 @@ public class JobSchedulerConfig {
         new ThreadFactoryBuilder().setNameFormat("cron-job-pool-%d").build(),
         (runnable, executor) -> {
           if (!executor.isShutdown()) {
-            final Logger log = TimingSchedule.Companion.getLog();
+            final Logger log = TimingSchedule.log;
             log.error("cron-job-pool 无法接受新任务 已在调用线程执行, corePoolSize={}, maximumPoolSize={}, workQueueSize={}",
                 finalCorePoolSize, finalMaximumPoolSize, workQueueSize);
             runnable.run();
