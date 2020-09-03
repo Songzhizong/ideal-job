@@ -17,7 +17,6 @@ import cn.sh.ideal.job.scheduler.core.admin.repository.JobInfoRepository;
 import cn.sh.ideal.job.scheduler.core.converter.JobInfoConverter;
 import cn.sh.ideal.job.scheduler.core.dispatch.JobDispatch;
 import cn.sh.ideal.job.scheduler.core.utils.CronExpression;
-import kotlin.collections.ArrayDeque;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +31,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.criteria.Predicate;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -158,7 +158,7 @@ public class JobService {
         String businessId = args.getBusinessId();
 
         Page<JobInfo> page = jobInfoRepository.findAll((root, cq, cb) -> {
-            List<Predicate> predicates = new ArrayDeque<>();
+            List<Predicate> predicates = new ArrayList<>();
             if (executorId != null) {
                 predicates.add(cb.equal(root.get("executorId"), executorId));
             }

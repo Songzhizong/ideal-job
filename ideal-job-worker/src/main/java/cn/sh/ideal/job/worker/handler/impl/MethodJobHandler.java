@@ -11,25 +11,25 @@ import java.lang.reflect.Method;
  * @date 2020/8/22
  */
 public class MethodJobHandler implements IJobHandler {
-  private final Object target;
-  private final Method method;
-  private final boolean hasParam;
+    private final Object target;
+    private final Method method;
+    private final boolean hasParam;
 
-  public MethodJobHandler(Object target,
-                          Method method,
-                          boolean hasParam) {
-    this.target = target;
-    this.method = method;
-    this.hasParam = hasParam;
-  }
-
-  @Nullable
-  @Override
-  public Object execute(@Nonnull String param) throws Exception {
-    if (hasParam) {
-      return method.invoke(target, param);
-    } else {
-      return method.invoke(target);
+    public MethodJobHandler(Object target,
+                            Method method,
+                            boolean hasParam) {
+        this.target = target;
+        this.method = method;
+        this.hasParam = hasParam;
     }
-  }
+
+    @Nullable
+    @Override
+    public Object execute(@Nonnull String param) throws Exception {
+        if (hasParam) {
+            return method.invoke(target, param);
+        } else {
+            return method.invoke(target);
+        }
+    }
 }

@@ -3,6 +3,8 @@ package cn.sh.ideal.job.scheduler.core.admin.entity.vo;
 import cn.sh.ideal.job.common.constants.BlockStrategyEnum;
 import cn.sh.ideal.job.common.constants.ExecuteTypeEnum;
 import cn.sh.ideal.job.common.constants.RouteStrategyEnum;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.annotation.Nonnull;
 
@@ -11,6 +13,8 @@ import javax.annotation.Nonnull;
  * @date 2020/8/30
  */
 @SuppressWarnings("unused")
+@Getter
+@Setter
 public class DispatchJobView {
     /**
      * 任务Id
@@ -67,7 +71,8 @@ public class DispatchJobView {
     public DispatchJobView() {
     }
 
-    public DispatchJobView(long jobId, long executorId, @Nonnull String cron, @Nonnull RouteStrategyEnum routeStrategy,
+    public DispatchJobView(long jobId, long executorId, @Nonnull String cron,
+                           @Nonnull RouteStrategyEnum routeStrategy,
                            @Nonnull ExecuteTypeEnum executeType, @Nonnull String executorHandler,
                            @Nonnull String executeParam, @Nonnull BlockStrategyEnum blockStrategy,
                            int retryCount, int jobStatus, long lastTriggerTime, long nextTriggerTime) {
@@ -82,108 +87,6 @@ public class DispatchJobView {
         this.retryCount = retryCount;
         this.jobStatus = jobStatus;
         this.lastTriggerTime = lastTriggerTime;
-        this.nextTriggerTime = nextTriggerTime;
-    }
-
-    public long getJobId() {
-        return jobId;
-    }
-
-    public void setJobId(long jobId) {
-        this.jobId = jobId;
-    }
-
-    public long getExecutorId() {
-        return executorId;
-    }
-
-    public void setExecutorId(long executorId) {
-        this.executorId = executorId;
-    }
-
-    @Nonnull
-    public String getCron() {
-        return cron;
-    }
-
-    public void setCron(@Nonnull String cron) {
-        this.cron = cron;
-    }
-
-    @Nonnull
-    public RouteStrategyEnum getRouteStrategy() {
-        return routeStrategy;
-    }
-
-    public void setRouteStrategy(@Nonnull RouteStrategyEnum routeStrategy) {
-        this.routeStrategy = routeStrategy;
-    }
-
-    @Nonnull
-    public ExecuteTypeEnum getExecuteType() {
-        return executeType;
-    }
-
-    public void setExecuteType(@Nonnull ExecuteTypeEnum executeType) {
-        this.executeType = executeType;
-    }
-
-    @Nonnull
-    public String getExecutorHandler() {
-        return executorHandler;
-    }
-
-    public void setExecutorHandler(@Nonnull String executorHandler) {
-        this.executorHandler = executorHandler;
-    }
-
-    @Nonnull
-    public String getExecuteParam() {
-        return executeParam;
-    }
-
-    public void setExecuteParam(@Nonnull String executeParam) {
-        this.executeParam = executeParam;
-    }
-
-    @Nonnull
-    public BlockStrategyEnum getBlockStrategy() {
-        return blockStrategy;
-    }
-
-    public void setBlockStrategy(@Nonnull BlockStrategyEnum blockStrategy) {
-        this.blockStrategy = blockStrategy;
-    }
-
-    public int getRetryCount() {
-        return retryCount;
-    }
-
-    public void setRetryCount(int retryCount) {
-        this.retryCount = retryCount;
-    }
-
-    public int getJobStatus() {
-        return jobStatus;
-    }
-
-    public void setJobStatus(int jobStatus) {
-        this.jobStatus = jobStatus;
-    }
-
-    public long getLastTriggerTime() {
-        return lastTriggerTime;
-    }
-
-    public void setLastTriggerTime(long lastTriggerTime) {
-        this.lastTriggerTime = lastTriggerTime;
-    }
-
-    public long getNextTriggerTime() {
-        return nextTriggerTime;
-    }
-
-    public void setNextTriggerTime(long nextTriggerTime) {
         this.nextTriggerTime = nextTriggerTime;
     }
 }

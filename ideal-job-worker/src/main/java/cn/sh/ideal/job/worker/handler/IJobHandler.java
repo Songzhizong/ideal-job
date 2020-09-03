@@ -9,6 +9,6 @@ import javax.annotation.Nullable;
  */
 public interface IJobHandler {
 
-  @Nullable
-  Object execute(@Nonnull String param) throws Exception;
+    @Nullable
+    Object execute(@Nonnull String param) throws Exception;
 }

@@ -13,16 +13,16 @@ import javax.validation.constraints.NotBlank;
 @Getter
 @Setter
 public class CreateExecutorArgs {
-  /**
-   * 执行器AppName
-   */
-  @Nonnull
-  @NotBlank(message = "appName不能为空")
-  private String appName;
-  /**
-   * 执行器名称
-   */
-  @Nonnull
-  @NotBlank(message = "执行器名称不能为空")
-  private String title;
+    /**
+     * 执行器AppName
+     */
+    @Nonnull
+    @NotBlank(message = "appName不能为空")
+    private String appName;
+    /**
+     * 执行器名称
+     */
+    @Nonnull
+    @NotBlank(message = "执行器名称不能为空")
+    private String title;
 }

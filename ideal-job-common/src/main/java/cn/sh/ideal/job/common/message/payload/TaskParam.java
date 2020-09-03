@@ -16,39 +16,39 @@ import javax.annotation.Nonnull;
 @Getter
 @Setter
 public class TaskParam {
-  public static String typeCode = MessageType.EXECUTE_JOB.getCode();
-  /**
-   * 任务id
-   */
-  @Nonnull
-  private String jobId = "";
-  /**
-   * 任务实例ID
-   */
-  private long instanceId;
-  /**
-   * 执行处理器
-   */
-  private String executorHandler;
-  /**
-   * 执行参数
-   */
-  private String executeParam;
-  /**
-   * 阻塞策略,{@link BlockStrategyEnum}
-   */
-  @Nonnull
-  private String blockStrategy;
+    public static String typeCode = MessageType.EXECUTE_JOB.getCode();
+    /**
+     * 任务id
+     */
+    @Nonnull
+    private String jobId = "";
+    /**
+     * 任务实例ID
+     */
+    private long instanceId;
+    /**
+     * 执行处理器
+     */
+    private String executorHandler;
+    /**
+     * 执行参数
+     */
+    private String executeParam;
+    /**
+     * 阻塞策略,{@link BlockStrategyEnum}
+     */
+    @Nonnull
+    private String blockStrategy;
 
-  public String toMessageString() {
-    return JsonUtils.toJsonString(this);
-  }
-
-  public static TaskParam parseMessage(@Nonnull String message) throws ParseException {
-    try {
-      return JsonUtils.parseJson(message, TaskParam.class);
-    } catch (Exception exception) {
-      throw new ParseException(exception);
+    public String toMessageString() {
+        return JsonUtils.toJsonString(this);
     }
-  }
+
+    public static TaskParam parseMessage(@Nonnull String message) throws ParseException {
+        try {
+            return JsonUtils.parseJson(message, TaskParam.class);
+        } catch (Exception exception) {
+            throw new ParseException(exception);
+        }
+    }
 }

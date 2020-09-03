@@ -13,46 +13,46 @@ import java.util.function.Consumer;
 @Getter
 public class HttpAddressLbServer implements LbServer {
 
-  @Nonnull
-  private final String host;
+    @Nonnull
+    private final String host;
 
-  private final int port;
+    private final int port;
 
-  @Setter
-  private int weight = -1;
+    @Setter
+    private int weight = -1;
 
-  private final Consumer<Boolean> heartbeatFunction;
+    private final Consumer<Boolean> heartbeatFunction;
 
-  public HttpAddressLbServer(@Nonnull String host, int port) {
-    this.host = host;
-    this.port = port;
-    this.heartbeatFunction = null;
-  }
+    public HttpAddressLbServer(@Nonnull String host, int port) {
+        this.host = host;
+        this.port = port;
+        this.heartbeatFunction = null;
+    }
 
-  public HttpAddressLbServer(@Nonnull String host, int port,
-                             @Nonnull Consumer<Boolean> heartbeatFunction) {
-    this.host = host;
-    this.port = port;
-    this.heartbeatFunction = heartbeatFunction;
-  }
+    public HttpAddressLbServer(@Nonnull String host, int port,
+                               @Nonnull Consumer<Boolean> heartbeatFunction) {
+        this.host = host;
+        this.port = port;
+        this.heartbeatFunction = heartbeatFunction;
+    }
 
-  public String getHostPort() {
-    return host + ":" + port;
-  }
+    public String getHostPort() {
+        return host + ":" + port;
+    }
 
-  @Nonnull
-  @Override
-  public String getInstanceId() {
-    return getHostPort();
-  }
+    @Nonnull
+    @Override
+    public String getInstanceId() {
+        return getHostPort();
+    }
 
-  @Override
-  public boolean heartbeat() {
-    return true;
-  }
+    @Override
+    public boolean heartbeat() {
+        return true;
+    }
 
-  @Override
-  public int getWeight() {
-    return Math.max(weight, 1);
-  }
+    @Override
+    public int getWeight() {
+        return Math.max(weight, 1);
+    }
 }

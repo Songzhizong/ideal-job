@@ -15,22 +15,22 @@ import javax.annotation.Nonnull;
 @Getter
 @Setter
 public class IdleBeatCallback {
-  public static String typeCode = MessageType.IDLE_BEAT_CALLBACK.getCode();
+    public static String typeCode = MessageType.IDLE_BEAT_CALLBACK.getCode();
 
-  @Nonnull
-  private String jobId = "";
+    @Nonnull
+    private String jobId = "";
 
-  private int idleLevel;
+    private int idleLevel;
 
-  public String toMessageString() {
-    return JsonUtils.toJsonString(this);
-  }
-
-  public static IdleBeatCallback parseMessage(@Nonnull String message) throws ParseException {
-    try {
-      return JsonUtils.parseJson(message, IdleBeatCallback.class);
-    } catch (Exception exception) {
-      throw new ParseException(exception);
+    public String toMessageString() {
+        return JsonUtils.toJsonString(this);
     }
-  }
+
+    public static IdleBeatCallback parseMessage(@Nonnull String message) throws ParseException {
+        try {
+            return JsonUtils.parseJson(message, IdleBeatCallback.class);
+        } catch (Exception exception) {
+            throw new ParseException(exception);
+        }
+    }
 }

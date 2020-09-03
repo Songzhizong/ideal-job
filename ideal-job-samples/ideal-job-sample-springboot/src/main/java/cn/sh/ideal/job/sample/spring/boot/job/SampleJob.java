@@ -15,10 +15,10 @@ import javax.annotation.Nonnull;
 @Component
 @JobHandlerBean
 public class SampleJob {
-  private static final Logger log = LoggerFactory.getLogger(SampleJob.class);
+    private static final Logger log = LoggerFactory.getLogger(SampleJob.class);
 
-  @JobHandler("demoJobHandler")
-  public void demoJobHandler(@Nonnull String param) {
-    log.info("execute demoJobHandler, param = {}", param);
-  }
+    @JobHandler("demoJobHandler")
+    public void demoJobHandler(@Nonnull String param) {
+        log.info("execute demoJobHandler, param = {}", param);
+    }
 }

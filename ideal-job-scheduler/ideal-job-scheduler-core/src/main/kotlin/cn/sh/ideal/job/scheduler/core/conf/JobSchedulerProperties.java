@@ -1,5 +1,7 @@
 package cn.sh.ideal.job.scheduler.core.conf;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
@@ -10,6 +12,8 @@ import javax.annotation.Nonnull;
  * @author 宋志宗
  * @date 2020/8/20
  */
+@Getter
+@Setter
 @Component
 @ConfigurationProperties("ideal.job")
 public class JobSchedulerProperties {
@@ -29,45 +33,4 @@ public class JobSchedulerProperties {
 
     @NestedConfigurationProperty
     private ThreadPoolProperties cronJobTriggerPool = new ThreadPoolProperties();
-
-    public int getJobInstanceStorageDay() {
-        return jobInstanceStorageDay;
-    }
-
-    public void setJobInstanceStorageDay(int jobInstanceStorageDay) {
-        this.jobInstanceStorageDay = jobInstanceStorageDay;
-    }
-
-    public int getWeightRegisterSeconds() {
-        return weightRegisterSeconds;
-    }
-
-    public void setWeightRegisterSeconds(int weightRegisterSeconds) {
-        this.weightRegisterSeconds = weightRegisterSeconds;
-    }
-
-    @Nonnull
-    public String getAccessToken() {
-        return accessToken;
-    }
-
-    public void setAccessToken(@Nonnull String accessToken) {
-        this.accessToken = accessToken;
-    }
-
-    public ThreadPoolProperties getExecuteJobCallbackPool() {
-        return executeJobCallbackPool;
-    }
-
-    public void setExecuteJobCallbackPool(ThreadPoolProperties executeJobCallbackPool) {
-        this.executeJobCallbackPool = executeJobCallbackPool;
-    }
-
-    public ThreadPoolProperties getCronJobTriggerPool() {
-        return cronJobTriggerPool;
-    }
-
-    public void setCronJobTriggerPool(ThreadPoolProperties cronJobTriggerPool) {
-        this.cronJobTriggerPool = cronJobTriggerPool;
-    }
 }

@@ -3,6 +3,8 @@ package cn.sh.ideal.job.scheduler.core.dispatch;
 import cn.sh.ideal.job.common.constants.BlockStrategyEnum;
 import cn.sh.ideal.job.common.constants.TriggerTypeEnum;
 import cn.sh.ideal.job.common.loadbalancer.LbStrategyEnum;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.annotation.Nonnull;
 
@@ -10,6 +12,8 @@ import javax.annotation.Nonnull;
  * @author 宋志宗
  * @date 2020/8/23
  */
+@Getter
+@Setter
 public class TriggerParam {
     /**
      * 任务Id
@@ -48,73 +52,4 @@ public class TriggerParam {
      * 失败重试次数
      */
     private int retryCount = -1;
-
-    public long getJobId() {
-        return jobId;
-    }
-
-    public void setJobId(long jobId) {
-        this.jobId = jobId;
-    }
-
-    public long getExecutorId() {
-        return executorId;
-    }
-
-    public void setExecutorId(long executorId) {
-        this.executorId = executorId;
-    }
-
-    @Nonnull
-    public TriggerTypeEnum getTriggerType() {
-        return triggerType;
-    }
-
-    public void setTriggerType(@Nonnull TriggerTypeEnum triggerType) {
-        this.triggerType = triggerType;
-    }
-
-    @Nonnull
-    public String getExecutorHandler() {
-        return executorHandler;
-    }
-
-    public void setExecutorHandler(@Nonnull String executorHandler) {
-        this.executorHandler = executorHandler;
-    }
-
-    @Nonnull
-    public String getExecuteParam() {
-        return executeParam;
-    }
-
-    public void setExecuteParam(@Nonnull String executeParam) {
-        this.executeParam = executeParam;
-    }
-
-    @Nonnull
-    public LbStrategyEnum getRouteStrategy() {
-        return routeStrategy;
-    }
-
-    public void setRouteStrategy(@Nonnull LbStrategyEnum routeStrategy) {
-        this.routeStrategy = routeStrategy;
-    }
-
-    @Nonnull
-    public BlockStrategyEnum getBlockStrategy() {
-        return blockStrategy;
-    }
-
-    public void setBlockStrategy(@Nonnull BlockStrategyEnum blockStrategy) {
-        this.blockStrategy = blockStrategy;
-    }
-
-    public int getRetryCount() {
-        return retryCount;
-    }
-
-    public void setRetryCount(int retryCount) {
-        this.retryCount = retryCount;
-    }
 }

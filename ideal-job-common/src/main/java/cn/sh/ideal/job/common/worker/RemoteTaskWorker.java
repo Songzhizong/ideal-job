@@ -10,21 +10,21 @@ import javax.annotation.Nonnull;
  * @date 2020/8/20
  */
 public interface RemoteTaskWorker extends TaskWorker {
-  /**
-   * 任务执行完成回调
-   *
-   * @param callback 回调消息
-   * @author 宋志宗
-   * @date 2020/8/22 23:47
-   */
-  void taskCallback(@Nonnull TaskCallback callback);
+    /**
+     * 任务执行完成回调
+     *
+     * @param callback 回调消息
+     * @author 宋志宗
+     * @date 2020/8/22 23:47
+     */
+    void taskCallback(@Nonnull TaskCallback callback);
 
-  /**
-   * 空闲测试回调
-   *
-   * @param callback 回调消息
-   * @author 宋志宗
-   * @date 2020/8/22 23:47
-   */
-  void idleBeatCallback(@Nonnull IdleBeatCallback callback);
+    /**
+     * 空闲测试回调
+     *
+     * @param callback 回调消息
+     * @author 宋志宗
+     * @date 2020/8/22 23:47
+     */
+    void idleBeatCallback(@Nonnull IdleBeatCallback callback);
 }

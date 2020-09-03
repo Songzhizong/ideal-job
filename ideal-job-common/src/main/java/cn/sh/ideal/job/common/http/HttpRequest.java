@@ -16,33 +16,33 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 public class HttpRequest {
-  /**
-   * 请求方法
-   */
-  @Nonnull
-  @NotNull(message = "HttpMethod不能为空")
-  private HttpMethod method;
+    /**
+     * 请求方法
+     */
+    @Nonnull
+    @NotNull(message = "HttpMethod不能为空")
+    private HttpMethod method;
 
-  /**
-   * 请求地址
-   */
-  @Nonnull
-  @NotBlank(message = "请求地址不能为空")
-  private String url;
-  /**
-   * Query string
-   */
-  @Nullable
-  private String queryString;
-  /**
-   * 请求头
-   */
-  @Nullable
-  private HttpHeaders headers;
+    /**
+     * 请求地址
+     */
+    @Nonnull
+    @NotBlank(message = "请求地址不能为空")
+    private String url;
+    /**
+     * Query string
+     */
+    @Nullable
+    private String queryString;
+    /**
+     * 请求头
+     */
+    @Nullable
+    private HttpHeaders headers;
 
-  /**
-   * body
-   */
-  @Nullable
-  private String body;
+    /**
+     * body
+     */
+    @Nullable
+    private String body;
 }

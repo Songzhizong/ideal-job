@@ -11,7 +11,6 @@ import cn.sh.ideal.job.scheduler.api.dto.rsp.ExecutorInfoRsp;
 import cn.sh.ideal.job.scheduler.core.admin.entity.JobExecutor;
 import cn.sh.ideal.job.scheduler.core.admin.repository.JobExecutorRepository;
 import cn.sh.ideal.job.scheduler.core.converter.ExecutorConverter;
-import kotlin.collections.ArrayDeque;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +24,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.criteria.Predicate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -104,7 +104,7 @@ public class JobExecutorService {
         String appName = args.getAppName();
         String title = args.getTitle();
         Page<JobExecutor> page = jobExecutorRepository.findAll((root, cq, cb) -> {
-            List<Predicate> predicates = new ArrayDeque<>();
+            List<Predicate> predicates = new ArrayList<>();
             if (StringUtils.isNotBlank(appName)) {
                 predicates.add(cb.like(root.get("appName"), appName + "%"));
             }

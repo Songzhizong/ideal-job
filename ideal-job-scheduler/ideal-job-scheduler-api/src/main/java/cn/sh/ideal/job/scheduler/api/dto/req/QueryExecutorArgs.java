@@ -12,14 +12,14 @@ import javax.annotation.Nullable;
 @Getter
 @Setter
 public class QueryExecutorArgs {
-  /**
-   * 执行器AppName
-   */
-  @Nullable
-  private String appName;
-  /**
-   * 执行器名称
-   */
-  @Nullable
-  private String title;
+    /**
+     * 执行器AppName
+     */
+    @Nullable
+    private String appName;
+    /**
+     * 执行器名称
+     */
+    @Nullable
+    private String title;
 }

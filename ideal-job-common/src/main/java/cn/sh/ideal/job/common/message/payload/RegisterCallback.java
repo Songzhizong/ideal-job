@@ -15,30 +15,30 @@ import javax.annotation.Nonnull;
 @Getter
 @Setter
 public class RegisterCallback {
-  public static String typeCode = MessageType.REGISTER_CALLBACK.getCode();
-  /**
-   * 对应的注册消息ID
-   */
-  private String messageId;
-  /**
-   * 是否注册成功
-   */
-  private boolean success;
-  /**
-   * 提示信息
-   */
-  private String message;
+    public static String typeCode = MessageType.REGISTER_CALLBACK.getCode();
+    /**
+     * 对应的注册消息ID
+     */
+    private String messageId;
+    /**
+     * 是否注册成功
+     */
+    private boolean success;
+    /**
+     * 提示信息
+     */
+    private String message;
 
 
-  public String toMessageString() {
-    return JsonUtils.toJsonString(this);
-  }
-
-  public static RegisterCallback parseMessage(@Nonnull String message) throws ParseException {
-    try {
-      return JsonUtils.parseJson(message, RegisterCallback.class);
-    } catch (Exception exception) {
-      throw new ParseException(exception);
+    public String toMessageString() {
+        return JsonUtils.toJsonString(this);
     }
-  }
+
+    public static RegisterCallback parseMessage(@Nonnull String message) throws ParseException {
+        try {
+            return JsonUtils.parseJson(message, RegisterCallback.class);
+        } catch (Exception exception) {
+            throw new ParseException(exception);
+        }
+    }
 }

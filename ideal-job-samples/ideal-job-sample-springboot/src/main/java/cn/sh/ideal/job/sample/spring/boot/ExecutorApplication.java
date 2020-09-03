@@ -38,87 +38,87 @@ import java.util.List;
 @RestController
 @SpringBootApplication
 public class ExecutorApplication {
-  private static final String PATHPATTERN_ROUTEMATCHER_CLASS = "org.springframework.web.util.pattern.PathPatternRouteMatcher";
-  private static final Logger log = LoggerFactory.getLogger(ExecutorApplication.class);
+    private static final String PATHPATTERN_ROUTEMATCHER_CLASS = "org.springframework.web.util.pattern.PathPatternRouteMatcher";
+    private static final Logger log = LoggerFactory.getLogger(ExecutorApplication.class);
 
-  public static void main(String[] args) {
-    SpringApplication.run(ExecutorApplication.class, args);
-  }
-
-  private static final ObjectMapper objectMapper = new ObjectMapper();
-
-  private static final List<RSocketStrategiesCustomizer> customizers = new ArrayList<RSocketStrategiesCustomizer>() {
-    {
-      MediaType[] SUPPORTED_TYPES = {MediaType.APPLICATION_CBOR};
-      add((strategy) -> {
-        ObjectMapper mapper = new Jackson2ObjectMapperBuilder()
-            .createXmlMapper(false).factory(new CBORFactory()).build();
-        strategy.decoder(new Jackson2CborDecoder(mapper, SUPPORTED_TYPES));
-        strategy.encoder(new Jackson2CborEncoder(mapper, SUPPORTED_TYPES));
-      });
-      add((strategy) -> {
-        strategy.decoder(new Jackson2JsonDecoder(objectMapper, SUPPORTED_TYPES));
-        strategy.encoder(new Jackson2JsonEncoder(objectMapper, SUPPORTED_TYPES));
-      });
+    public static void main(String[] args) {
+        SpringApplication.run(ExecutorApplication.class, args);
     }
-  };
 
-  private static final RSocketStrategies rsocketStrategies = rSocketStrategies();
-  private static final RSocketRequester.Builder rsocketRequesterBuilder
-      = RSocketRequester.builder().rsocketStrategies(rsocketStrategies);
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
-  public static RSocketStrategies rSocketStrategies() {
-    RSocketStrategies.Builder builder = RSocketStrategies.builder();
-    if (ClassUtils.isPresent(PATHPATTERN_ROUTEMATCHER_CLASS, null)) {
-      builder.routeMatcher(new PathPatternRouteMatcher());
+    private static final List<RSocketStrategiesCustomizer> customizers = new ArrayList<RSocketStrategiesCustomizer>() {
+        {
+            MediaType[] SUPPORTED_TYPES = {MediaType.APPLICATION_CBOR};
+            add((strategy) -> {
+                ObjectMapper mapper = new Jackson2ObjectMapperBuilder()
+                        .createXmlMapper(false).factory(new CBORFactory()).build();
+                strategy.decoder(new Jackson2CborDecoder(mapper, SUPPORTED_TYPES));
+                strategy.encoder(new Jackson2CborEncoder(mapper, SUPPORTED_TYPES));
+            });
+            add((strategy) -> {
+                strategy.decoder(new Jackson2JsonDecoder(objectMapper, SUPPORTED_TYPES));
+                strategy.encoder(new Jackson2JsonEncoder(objectMapper, SUPPORTED_TYPES));
+            });
+        }
+    };
+
+    private static final RSocketStrategies rsocketStrategies = rSocketStrategies();
+    private static final RSocketRequester.Builder rsocketRequesterBuilder
+            = RSocketRequester.builder().rsocketStrategies(rsocketStrategies);
+
+    public static RSocketStrategies rSocketStrategies() {
+        RSocketStrategies.Builder builder = RSocketStrategies.builder();
+        if (ClassUtils.isPresent(PATHPATTERN_ROUTEMATCHER_CLASS, null)) {
+            builder.routeMatcher(new PathPatternRouteMatcher());
+        }
+        customizers.forEach((customizer) -> customizer.customize(builder));
+        return builder.build();
     }
-    customizers.forEach((customizer) -> customizer.customize(builder));
-    return builder.build();
-  }
 
 
-  RSocketRequester rsocketRequester;
+    RSocketRequester rsocketRequester;
 
 
-  @GetMapping
-  public void test() throws JsonProcessingException {
-    SocketAcceptor responder = RSocketMessageHandler.responder(rsocketStrategies, new ClientHandler());
-    LoginMessage loginMessage = new LoginMessage();
-    loginMessage.setAppName("example");
-    loginMessage.setInstanceId("192.168.1.181");
-    loginMessage.setAccessToken("jhsdagfahsdgfaksjhfkj");
-    loginMessage.setWeight(10);
-    this.rsocketRequester = rsocketRequesterBuilder
-        .setupRoute("login")
-        .setupData(objectMapper.writeValueAsString(loginMessage))
-        .rsocketConnector(connector -> connector.acceptor(responder))
-        .connectTcp("localhost", 9904)
-        .doOnError(throwable -> log.info("", throwable))
-        .block();
+    @GetMapping
+    public void test() throws JsonProcessingException {
+        SocketAcceptor responder = RSocketMessageHandler.responder(rsocketStrategies, new ClientHandler());
+        LoginMessage loginMessage = new LoginMessage();
+        loginMessage.setAppName("example");
+        loginMessage.setInstanceId("192.168.1.181");
+        loginMessage.setAccessToken("jhsdagfahsdgfaksjhfkj");
+        loginMessage.setWeight(10);
+        this.rsocketRequester = rsocketRequesterBuilder
+                .setupRoute("login")
+                .setupData(objectMapper.writeValueAsString(loginMessage))
+                .rsocketConnector(connector -> connector.acceptor(responder))
+                .connectTcp("localhost", 9904)
+                .doOnError(throwable -> log.info("", throwable))
+                .block();
 
-    this.rsocketRequester.rsocket()
-        .onClose()
-        .doOnError(error -> log.warn("Connection CLOSED", error))
-        .doFinally(consumer -> log.info("Client DISCONNECTED\n"))
-        .subscribe();
-  }
+        this.rsocketRequester.rsocket()
+                .onClose()
+                .doOnError(error -> log.warn("Connection CLOSED", error))
+                .doFinally(consumer -> log.info("Client DISCONNECTED\n"))
+                .subscribe();
+    }
 
 }
 
 class ClientHandler {
-  private static final Logger log = LoggerFactory.getLogger(ClientHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(ClientHandler.class);
 
-  @MessageMapping("client-status")
-  public Flux<String> statusUpdate(String status) {
-    log.info("Connection {}", status);
-    return Flux.interval(Duration.ofSeconds(5)).map(index -> String.valueOf(Runtime.getRuntime().freeMemory()));
-  }
+    @MessageMapping("client-status")
+    public Flux<String> statusUpdate(String status) {
+        log.info("Connection {}", status);
+        return Flux.interval(Duration.ofSeconds(5)).map(index -> String.valueOf(Runtime.getRuntime().freeMemory()));
+    }
 
 
-  @MessageMapping("client-receive")
-  public Mono<Void> receive(String message) {
-    System.out.println(message);
+    @MessageMapping("client-receive")
+    public Mono<Void> receive(String message) {
+        System.out.println(message);
 //    client.rsocketRequester.rsocket().dispose();
-    return Mono.empty();
-  }
+        return Mono.empty();
+    }
 }

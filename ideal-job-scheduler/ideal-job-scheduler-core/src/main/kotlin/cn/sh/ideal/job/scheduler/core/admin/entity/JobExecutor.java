@@ -1,5 +1,8 @@
 package cn.sh.ideal.job.scheduler.core.admin.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
@@ -26,6 +29,9 @@ import java.time.LocalDateTime;
                 @Index(name = "title", columnList = "title"),
         }
 )
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @org.hibernate.annotations.Table(appliesTo = "ideal_job_executor", comment = "执行器")
 @SQLDelete(sql = "update ideal_job_executor set deleted = 1 where executor_id = ?")
 @Where(clause = "deleted = 0")
@@ -77,59 +83,6 @@ public class JobExecutor {
      */
     @Column(nullable = false)
     private int deleted;
-
-    @Nonnull
-    public Long getExecutorId() {
-        return executorId;
-    }
-
-    public void setExecutorId(@Nonnull Long executorId) {
-        this.executorId = executorId;
-    }
-
-    @Nonnull
-    public String getAppName() {
-        return appName;
-    }
-
-    public void setAppName(@Nonnull String appName) {
-        this.appName = appName;
-    }
-
-    @Nonnull
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(@Nonnull String title) {
-        this.title = title;
-    }
-
-    @Nonnull
-    public LocalDateTime getCreatedTime() {
-        return createdTime;
-    }
-
-    public void setCreatedTime(@Nonnull LocalDateTime createdTime) {
-        this.createdTime = createdTime;
-    }
-
-    @Nonnull
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(@Nonnull LocalDateTime updateTime) {
-        this.updateTime = updateTime;
-    }
-
-    public int getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(int deleted) {
-        this.deleted = deleted;
-    }
 }
 
 

@@ -17,41 +17,37 @@ import java.util.concurrent.TimeUnit;
 public final class ReactorUtils {
 
 
-  @Nonnull
-  public static WebClient createWebClient(int connectTimeOut,
-                                          long writeTimeOut,
-                                          long readTimeOut) {
-    WebClient.Builder builder = createWebClientBuilder(connectTimeOut, writeTimeOut, readTimeOut);
-    return builder.build();
-  }
-
-
-  @Nonnull
-  public static WebClient.Builder createWebClientBuilder(int connectTimeOut,
-                                                         long writeTimeOut,
-                                                         long readTimeOut) {
-    HttpClient httpClient = createHttpClient(connectTimeOut, writeTimeOut, readTimeOut);
-    return WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient));
-  }
-
-
-  @Nonnull
-  public static HttpClient createHttpClient(int connectTimeOut,
+    @Nonnull
+    public static WebClient createWebClient(int connectTimeOut,
                                             long writeTimeOut,
                                             long readTimeOut) {
-    return HttpClient.create()
-        .tcpConfiguration(tcpClient ->
-            tcpClient.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectTimeOut)
-                .option(ChannelOption.SO_KEEPALIVE, true)
-                .option(ChannelOption.TCP_NODELAY, true)
-                .doOnConnected(connection -> {
-                      connection
-                          .addHandlerLast(
-                              new WriteTimeoutHandler(writeTimeOut, TimeUnit.MILLISECONDS))
-                          .addHandlerLast(
-                              new ReadTimeoutHandler(readTimeOut, TimeUnit.MILLISECONDS));
-                    }
-                )
-        );
-  }
+        return createWebClientBuilder(connectTimeOut, writeTimeOut, readTimeOut).build();
+    }
+
+
+    @Nonnull
+    public static WebClient.Builder createWebClientBuilder(int connectTimeOut,
+                                                           long writeTimeOut,
+                                                           long readTimeOut) {
+        HttpClient httpClient = createHttpClient(connectTimeOut, writeTimeOut, readTimeOut);
+        return WebClient.builder().clientConnector(new ReactorClientHttpConnector(httpClient));
+    }
+
+
+    @Nonnull
+    public static HttpClient createHttpClient(int connectTimeOut,
+                                              long writeTimeOut,
+                                              long readTimeOut) {
+        return HttpClient.create()
+                .tcpConfiguration(tcpClient -> tcpClient
+                        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectTimeOut)
+                        .option(ChannelOption.SO_KEEPALIVE, true)
+                        .doOnConnected(connection -> connection
+                                .addHandlerLast(
+                                        new WriteTimeoutHandler(writeTimeOut, TimeUnit.MILLISECONDS))
+                                .addHandlerLast(
+                                        new ReadTimeoutHandler(readTimeOut, TimeUnit.MILLISECONDS))
+                        )
+                );
+    }
 }

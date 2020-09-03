@@ -5,6 +5,8 @@ import cn.sh.ideal.job.common.message.MessageType;
 import cn.sh.ideal.job.common.message.SocketMessage;
 import cn.sh.ideal.job.common.message.payload.TaskParam;
 import cn.sh.ideal.job.common.message.payload.IdleBeatParam;
+import lombok.Getter;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,19 +26,23 @@ import java.util.concurrent.TimeUnit;
 public class WebsocketTaskWorker implements TaskWorker {
     private static final Logger log = LoggerFactory.getLogger(WebsocketTaskWorker.class);
     private final long createTime = System.currentTimeMillis();
+    @Getter
     @Nonnull
     private final String appName;
     @Nonnull
     private final String instanceId;
     @Nonnull
     private final Session session;
-
+    @Setter
     private int weight = 1;
+    @Setter
     private volatile int weightRegisterSeconds = 60;
-
-    private volatile int idleLevel = 0;
+    @Setter
+    private volatile int noneJobIdleLevel = 0;
     private final ConcurrentMap<String, Integer> idleLevelMap = new ConcurrentHashMap<>();
 
+    @Getter
+    @Setter
     private volatile boolean registered = false;
     private volatile boolean destroyed = false;
 
@@ -64,33 +70,8 @@ public class WebsocketTaskWorker implements TaskWorker {
         }).start();
     }
 
-    @Nonnull
-    public String getAppName() {
-        return appName;
-    }
-
-    public void setWeight(int weight) {
-        this.weight = weight;
-    }
-
-    public void setWeightRegisterSeconds(int weightRegisterSeconds) {
-        this.weightRegisterSeconds = weightRegisterSeconds;
-    }
-
-    public void setNoneJobIdleLevel(int idleLevel) {
-        this.idleLevel = idleLevel;
-    }
-
     public void putJobIdleLevel(@Nonnull String jobId, int idleLevel) {
         idleLevelMap.put(jobId, idleLevel);
-    }
-
-    public boolean isRegistered() {
-        return registered;
-    }
-
-    public void setRegistered(boolean registered) {
-        this.registered = registered;
     }
 
     /**
@@ -155,7 +136,7 @@ public class WebsocketTaskWorker implements TaskWorker {
 
     @Override
     public int idleBeat(@Nullable Object key) {
-        int level = idleLevel;
+        int level = noneJobIdleLevel;
         if (key != null) {
             Integer keyIdleLevel = idleLevelMap.putIfAbsent(key.toString(), 0);
             assert keyIdleLevel != null;

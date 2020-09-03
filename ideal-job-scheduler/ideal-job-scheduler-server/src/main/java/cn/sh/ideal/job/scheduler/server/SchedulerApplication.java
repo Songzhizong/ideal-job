@@ -23,9 +23,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication(scanBasePackages = "cn.sh.ideal")
 @EnableCaching
 public class SchedulerApplication {
-  public static void main(String[] args) {
-    // jpa生成表时指定 innodb 引擎
-    System.setProperty("hibernate.dialect.storage_engine", "innodb");
-    SpringApplication.run(SchedulerApplication.class, args);
-  }
+    public static void main(String[] args) {
+        // jpa生成表时指定 innodb 引擎
+        System.setProperty("hibernate.dialect.storage_engine", "innodb");
+        SpringApplication.run(SchedulerApplication.class, args);
+    }
 }

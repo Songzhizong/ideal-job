@@ -15,19 +15,19 @@ import javax.annotation.Nonnull;
 @Getter
 @Setter
 public class IdleBeatParam {
-  public static String typeCode = MessageType.IDLE_BEAT.getCode();
-  @Nonnull
-  private String jobId = "";
+    public static String typeCode = MessageType.IDLE_BEAT.getCode();
+    @Nonnull
+    private String jobId = "";
 
-  public String toMessageString() {
-    return JsonUtils.toJsonString(this);
-  }
-
-  public static IdleBeatParam parseMessage(@Nonnull String message) throws ParseException {
-    try {
-      return JsonUtils.parseJson(message, IdleBeatParam.class);
-    } catch (Exception exception) {
-      throw new ParseException(exception);
+    public String toMessageString() {
+        return JsonUtils.toJsonString(this);
     }
-  }
+
+    public static IdleBeatParam parseMessage(@Nonnull String message) throws ParseException {
+        try {
+            return JsonUtils.parseJson(message, IdleBeatParam.class);
+        } catch (Exception exception) {
+            throw new ParseException(exception);
+        }
+    }
 }

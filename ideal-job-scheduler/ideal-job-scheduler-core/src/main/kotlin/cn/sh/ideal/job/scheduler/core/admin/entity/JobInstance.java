@@ -1,6 +1,9 @@
 package cn.sh.ideal.job.scheduler.core.admin.entity;
 
 import cn.sh.ideal.job.common.constants.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -26,6 +29,9 @@ import java.time.LocalDateTime;
         @Index(name = "created_time", columnList = "createdTime"),
     }
 )
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @org.hibernate.annotations.Table(appliesTo = "ideal_job_instance", comment = "任务实例")
 @EntityListeners(AuditingEntityListener.class)
 public class JobInstance {
