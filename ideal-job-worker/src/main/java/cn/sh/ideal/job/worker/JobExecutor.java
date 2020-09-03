@@ -9,6 +9,7 @@ import cn.sh.ideal.job.common.message.payload.TaskCallback;
 import cn.sh.ideal.job.common.message.payload.TaskParam;
 import cn.sh.ideal.job.worker.handler.IJobHandler;
 import cn.sh.ideal.job.worker.handler.JobHandlerFactory;
+import cn.sh.ideal.job.worker.socket.ReactorWebSocketRemoteTaskExecutor;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.Getter;
 import lombok.Setter;

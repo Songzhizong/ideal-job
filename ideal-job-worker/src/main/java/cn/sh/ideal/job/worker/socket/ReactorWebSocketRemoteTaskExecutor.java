@@ -1,4 +1,4 @@
-package cn.sh.ideal.job.worker;
+package cn.sh.ideal.job.worker.socket;
 
 import cn.sh.ideal.job.common.exception.ParseException;
 import cn.sh.ideal.job.common.worker.RemoteTaskWorker;
@@ -7,11 +7,11 @@ import cn.sh.ideal.job.common.message.SocketMessage;
 import cn.sh.ideal.job.common.message.payload.*;
 import cn.sh.ideal.job.common.utils.JsonUtils;
 import cn.sh.ideal.job.common.utils.ReactorUtils;
+import cn.sh.ideal.job.worker.JobExecutor;
 import io.netty.handler.timeout.ReadTimeoutException;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.web.reactive.socket.WebSocketMessage;
 import org.springframework.web.reactive.socket.WebSocketSession;
 import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
@@ -324,15 +324,6 @@ public final class ReactorWebSocketRemoteTaskExecutor extends Thread implements 
         String callbackMessage = callback.toMessageString();
         SocketMessage socketMessage
                 = new SocketMessage(TaskCallback.typeCode, callbackMessage);
-        String messageString = socketMessage.toMessageString();
-        sendMessage(messageString);
-    }
-
-    @Override
-    public void idleBeatCallback(@Nonnull IdleBeatCallback callback) {
-        String callbackMessage = callback.toMessageString();
-        SocketMessage socketMessage
-                = new SocketMessage(IdleBeatCallback.typeCode, callbackMessage);
         String messageString = socketMessage.toMessageString();
         sendMessage(messageString);
     }

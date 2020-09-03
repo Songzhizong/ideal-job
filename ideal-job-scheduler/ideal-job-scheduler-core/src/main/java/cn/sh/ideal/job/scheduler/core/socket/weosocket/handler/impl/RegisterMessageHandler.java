@@ -12,6 +12,7 @@ import cn.sh.ideal.job.scheduler.core.conf.JobSchedulerProperties;
 import cn.sh.ideal.job.scheduler.core.socket.weosocket.WebsocketTaskWorker;
 import cn.sh.ideal.job.scheduler.core.socket.weosocket.handler.MessageHandler;
 import cn.sh.ideal.job.scheduler.core.socket.weosocket.handler.MessageHandlerFactory;
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

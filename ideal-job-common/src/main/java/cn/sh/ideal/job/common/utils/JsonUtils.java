@@ -40,12 +40,12 @@ public class JsonUtils {
             .addSerializer(LocalTime.class, new LocalTimeSerializer(timeFormatter))
             .addDeserializer(LocalTime.class, new LocalTimeDeserializer(timeFormatter));
 
-    private static final ObjectMapper mapper = new ObjectMapper()
+    public static final ObjectMapper mapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .registerModule(javaTimeModule)
             .findAndRegisterModules();
 
-    private static final ObjectMapper ignoreNullMapper = new ObjectMapper()
+    public static final ObjectMapper ignoreNullMapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)
             .registerModule(javaTimeModule)
