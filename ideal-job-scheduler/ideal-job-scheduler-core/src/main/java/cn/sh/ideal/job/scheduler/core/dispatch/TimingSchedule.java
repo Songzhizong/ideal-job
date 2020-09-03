@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class TimingSchedule implements ServletContextListener, InitializingBean {
     public static final Logger log = LoggerFactory.getLogger(TimingSchedule.class);
     private static final String LOCK_SQL
-            = "select * from ideal_job_lock where lock_name = 'schedule_lock' for update";
+            = "select lock_name from ideal_job_lock where lock_name = 'schedule_lock' for update";
     private static final int preReadCount = 500;
     private static final long preReadMills = 5000L;
 
@@ -247,10 +247,11 @@ public class TimingSchedule implements ServletContextListener, InitializingBean 
             connection = dataSource.getConnection();
             tempAutoCommit = connection.getAutoCommit();
             connection.setAutoCommit(false);
-            preparedStatement = connection.prepareStatement(LOCK_SQL);
+            preparedStatement = connection.prepareStatement("select lock_name from ideal_job_lock where lock_name = 'schedule_lock' for update");
             preparedStatement.execute();
             runnable.run();
         } catch (Exception e) {
+            e.printStackTrace();
             String errMsg = e.getClass().getName() + ": " + e.getMessage();
             log.warn("schedule-trigger-thread exception: {}", errMsg);
         } finally {

@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.lang.Nullable;
 
 import javax.annotation.Nonnull;
@@ -27,7 +28,7 @@ public interface JobInfoRepository
             "job.jobStatus,job.lastTriggerTime,job.nextTriggerTime)" +
             " from JobInfo job" +
             " where job.jobId = :jobId")
-    DispatchJobView findDispatchJobViewById(long jobId);
+    DispatchJobView findDispatchJobViewById(@Param("jobId") long jobId);
 
     @Nonnull
     @Query("select new cn.sh.ideal.job.scheduler.core.admin.entity.vo.DispatchJobView(" +
@@ -36,7 +37,9 @@ public interface JobInfoRepository
             "job.jobStatus,job.lastTriggerTime,job.nextTriggerTime)" +
             " from JobInfo job " +
             " where job.jobStatus = :jobStatus and job.nextTriggerTime <= :maxNextTime")
-    List<DispatchJobView> loadScheduleJobViews(int jobStatus, long maxNextTime, Pageable pageable);
+    List<DispatchJobView> loadScheduleJobViews(@Param("jobStatus") int jobStatus,
+                                               @Param("maxNextTime") long maxNextTime,
+                                               @Param("pageable") Pageable pageable);
 
-    boolean existsByExecutorId(long executorId);
+    boolean existsByExecutorId(@Param("executorId") long executorId);
 }

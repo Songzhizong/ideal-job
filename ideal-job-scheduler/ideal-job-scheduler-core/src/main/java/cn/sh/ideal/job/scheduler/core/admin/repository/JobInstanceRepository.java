@@ -4,6 +4,7 @@ import cn.sh.ideal.job.scheduler.core.admin.entity.JobInstance;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -26,7 +27,7 @@ public interface JobInstanceRepository extends JpaRepository<JobInstance, Long> 
             "    ins.updateTime = :#{#instance.updateTime} " +
             "where ins.instanceId = :#{#instance.instanceId} " +
             "    and ins.sequence < :#{#instance.sequence}")
-    int updateWhenTriggerCallback(JobInstance instance);
+    int updateWhenTriggerCallback(@Param("instance") JobInstance instance);
 
     @Modifying
     @Transactional(rollbackFor = Exception.class)
@@ -35,10 +36,10 @@ public interface JobInstanceRepository extends JpaRepository<JobInstance, Long> 
             "    ins.dispatchMsg = :#{#instance.dispatchMsg}, " +
             "    ins.executorInstance = :#{#instance.executorInstance} " +
             "where ins.instanceId = :#{#instance.instanceId}")
-    int updateDispatchInfo(JobInstance instance);
+    int updateDispatchInfo(@Param("instance") JobInstance instance);
 
     @Modifying
     @Transactional(rollbackFor = Exception.class)
     @Query("delete from JobInstance where createdTime < :time")
-    int deleteAllByCreatedTimeLessThan(LocalDateTime time);
+    int deleteAllByCreatedTimeLessThan(@Param("time") LocalDateTime time);
 }
