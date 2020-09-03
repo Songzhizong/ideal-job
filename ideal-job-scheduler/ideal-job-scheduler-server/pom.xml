@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>ideal-job-scheduler</artifactId>
-        <groupId>cn.sh.ideal</groupId>
+        <groupId>com.zzsong</groupId>
         <version>0.0.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -13,7 +13,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>cn.sh.ideal</groupId>
+            <groupId>com.zzsong</groupId>
             <artifactId>ideal-job-scheduler-core</artifactId>
             <version>${ideal-job.version}</version>
         </dependency>
@@ -43,7 +43,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring.boot.version}</version>
                 <configuration>
-                    <mainClass>cn.sh.ideal.job.scheduler.server.SchedulerApplication</mainClass>
+                    <mainClass>com.zzsong.job.scheduler.server.SchedulerApplication</mainClass>
                 </configuration>
                 <executions>
                     <execution>
