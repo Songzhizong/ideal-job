@@ -14,6 +14,7 @@ import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.util.pattern.PathPatternRouteMatcher;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +49,7 @@ public final class RSocketConfigure {
     public static final RSocketRequester.Builder rSocketRequesterBuilder
             = RSocketRequester.builder().rsocketStrategies(rsocketStrategies);
 
+    @Nonnull
     private static RSocketStrategies rSocketStrategies() {
         RSocketStrategies.Builder builder = RSocketStrategies.builder();
         if (ClassUtils.isPresent(PATH_PATTERN_ROUTE_MATCHER_CLASS, null)) {
