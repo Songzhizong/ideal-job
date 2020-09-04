@@ -60,12 +60,12 @@ public final class ReactorWebSocketRemoteTaskWorker extends Thread implements Re
      * 当前执行器ip地址
      */
     @Setter
-    private String ip;
+    private String workerIp;
     /**
      * 当前执行器端口号
      */
     @Setter
-    private int port;
+    private int workerPort;
     private int weight = 1;
     @Setter
     private String accessToken;
@@ -81,6 +81,7 @@ public final class ReactorWebSocketRemoteTaskWorker extends Thread implements Re
     public ReactorWebSocketRemoteTaskWorker(String schedulerAddress) {
         super("RemoteJobExecutor-" + schedulerAddress + "-" + atomicInteger.getAndIncrement());
         this.schedulerAddress = schedulerAddress;
+        this.setDaemon(true);
     }
 
     public void setWeight(int weight) {
@@ -108,7 +109,7 @@ public final class ReactorWebSocketRemoteTaskWorker extends Thread implements Re
         }
         running = true;
         String address = schedulerAddress + "/websocket/executor/" +
-                appName + "/" + ip + ":" + port;
+                appName + "/" + workerIp + ":" + workerPort;
         final HttpClient httpClient = ReactorUtils
                 .createHttpClient(connectTimeOutMills, writeTimeOutMills, readTimeOutMills);
         final ReactorNettyWebSocketClient socketClient
@@ -248,7 +249,6 @@ public final class ReactorWebSocketRemoteTaskWorker extends Thread implements Re
 
     @Override
     public void run() {
-        this.setDaemon(true);
 //    Runtime.getRuntime().addShutdownHook(new Thread(this::destroy));
         startSocket();
         while (!destroyed) {

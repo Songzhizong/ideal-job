@@ -1,5 +1,6 @@
 package com.zzsong.job.scheduler.core.socket.weosocket.handler.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.zzsong.job.common.exception.ParseException;
 import com.zzsong.job.common.loadbalancer.LbFactory;
 import com.zzsong.job.common.loadbalancer.LbServerHolder;
@@ -60,7 +61,6 @@ public final class RegisterMessageHandler implements MessageHandler {
             log.warn("解析 ExecuteJobCallback 出现异常: {}, payload = {}", errMsg, payload);
             return;
         }
-        LbServerHolder<TaskWorker> serverHolder = lbFactory.getServerHolder(appName);
         String accessToken = properties.getAccessToken();
         RegisterCallback callback = new RegisterCallback();
         callback.setMessage(socketMessage.getMessageId());
@@ -80,7 +80,8 @@ public final class RegisterMessageHandler implements MessageHandler {
         }
         executor.setWeight(loginMessage.getWeight());
         executor.setRegistered(true);
-        serverHolder.addServers(Collections.singletonList(executor), true);
+        LbServerHolder<TaskWorker> serverHolder = lbFactory.getServerHolder(appName);
+        serverHolder.addServers(ImmutableList.of(executor));
         log.info("客户端完成注册, appName: {}, instanceId: {}, 注册参数: {}",
                 appName, instanceId, payload);
         callback.setSuccess(true);

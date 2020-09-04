@@ -49,9 +49,9 @@ public class JobExecutor {
     @Setter
     private String appName;
     @Setter
-    private String ip;
+    private String workerIp;
     @Setter
-    private int port;
+    private int workerPort;
     @Setter
     private int corePoolSize = -1;
     @Setter
@@ -125,7 +125,7 @@ public class JobExecutor {
             initWebsocketRemoteWorks();
         }
         LbServerHolder<RemoteTaskWorker> holder = getServerHolder();
-        holder.addServers(remoteTaskWorkers, true);
+        holder.addServers(remoteTaskWorkers);
     }
 
     private void initRSocketRemoteWorks() {
@@ -138,14 +138,20 @@ public class JobExecutor {
                 throw new IllegalArgumentException("RSocket地址配置错误");
             }
             String ip = split[0];
-            int port = Integer.parseInt(split[1]);
+            int port;
+            try {
+                port = Integer.parseInt(split[1]);
+            } catch (NumberFormatException e) {
+                log.error("RSocket地址配置错误: {}", address);
+                throw new IllegalArgumentException("RSocket地址配置错误");
+            }
             RSocketRemoteTaskWorker worker = new RSocketRemoteTaskWorker(ip, port);
             worker.setAppName(appName);
             worker.setWeight(weight);
             worker.setAccessToken(accessToken);
-            worker.setWorkerIp(ip);
-            worker.setWorkerPort(port);
-            worker.start();
+            worker.setWorkerIp(workerIp);
+            worker.setWorkerPort(workerPort);
+            worker.startWorker();
             remoteTaskWorkers.add(worker);
         }
     }
@@ -157,8 +163,8 @@ public class JobExecutor {
             ReactorWebSocketRemoteTaskWorker worker
                     = new ReactorWebSocketRemoteTaskWorker(address);
             worker.setAppName(appName);
-            worker.setIp(ip);
-            worker.setPort(port);
+            worker.setWorkerIp(workerIp);
+            worker.setWorkerPort(workerPort);
             worker.setWeight(weight);
             worker.setAccessToken(accessToken);
             worker.setConnectTimeOutMills(CONNECT_TIME_OUT_MILLS);

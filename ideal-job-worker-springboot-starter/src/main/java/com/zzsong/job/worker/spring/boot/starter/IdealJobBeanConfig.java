@@ -77,8 +77,8 @@ public class IdealJobBeanConfig {
         executor.setProtocolType(protocolType);
         executor.setSchedulerAddresses(schedulerAddresses);
         executor.setAppName(appName);
-        executor.setIp(ip);
-        executor.setPort(port);
+        executor.setWorkerIp(ip);
+        executor.setWorkerPort(port);
         executor.setCorePoolSize(corePoolSize);
         executor.setMaximumPoolSize(maximumPoolSize);
         executor.setPoolQueueSize(workQueueSize);

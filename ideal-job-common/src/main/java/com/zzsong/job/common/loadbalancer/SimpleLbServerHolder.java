@@ -1,5 +1,6 @@
 package com.zzsong.job.common.loadbalancer;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -70,7 +71,7 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
         long heartbeatIntervalMills = heartbeatIntervalSeconds * 1000;
         this.serverName = serverName;
 
-        new Thread(() -> {
+        Thread thread = new Thread(() -> {
             long lastHeartbeatTime = System.currentTimeMillis();
             while (!destroyed) {
                 try {
@@ -82,19 +83,21 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
                     }
                     if (poll != null) {
                         log.debug("可用服务列表发生变化, 更新数据...");
-                        List<Server> lbServers = new ArrayList<>(reachableServerMap.values());
-                        reachableServers = Collections.unmodifiableList(lbServers);
+                        reachableServers = ImmutableList.copyOf(reachableServerMap.values());
                     }
                 } catch (InterruptedException e) {
                     log.debug("{}", e.getMessage());
                 }
             }
-        }).start();
+        });
+        thread.setDaemon(true);
+        thread.start();
     }
 
     @Override
     public void addServers(@Nonnull List<Server> newServers, boolean reachable) {
         synchronized (this) {
+            boolean refreshReachableServers = false;
             Map<String, Integer> indexMap = new HashMap<>();
             for (int i = 0; i < allServers.size(); i++) {
                 final Server server = allServers.get(i);
@@ -113,11 +116,14 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
                     server.destroy();
                     allServers.set(integer, newServer);
                 }
-                if (reachable) {
+                if (reachable && newServer.heartbeat()) {
+                    refreshReachableServers = true;
                     reachableServerMap.put(instanceId, newServer);
                 }
             }
-            refreshReachableServers();
+            if (refreshReachableServers) {
+                refreshReachableServers();
+            }
         }
     }
 
@@ -134,8 +140,11 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
     }
 
     @Override
-    public synchronized void removeServer(@Nonnull Server server) {
-        final String instanceId = server.getInstanceId();
+    public void removeServer(@Nonnull Server server) {
+        removeServer(server.getInstanceId());
+    }
+
+    private synchronized void removeServer(@Nonnull String instanceId) {
         reachableServerMap.remove(instanceId);
         List<Server> newAllServers = new ArrayList<>(allServers.size());
         for (Server lbServer : allServers) {

@@ -1,6 +1,8 @@
 package com.zzsong.job.scheduler.core.socket.rsocket;
 
+import com.google.common.collect.ImmutableList;
 import com.zzsong.job.common.loadbalancer.LbFactory;
+import com.zzsong.job.common.loadbalancer.LbServerHolder;
 import com.zzsong.job.common.message.payload.LoginMessage;
 import com.zzsong.job.common.utils.JsonUtils;
 import com.zzsong.job.common.worker.TaskWorker;
@@ -14,8 +16,7 @@ import org.springframework.messaging.rsocket.annotation.ConnectMapping;
 import org.springframework.stereotype.Controller;
 
 import javax.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author 宋志宗
@@ -24,7 +25,6 @@ import java.util.List;
 @Controller
 public class RSocketServer {
     private static final Logger log = LoggerFactory.getLogger(RSocketServer.class);
-    private static final List<RSocketRequester> CLIENTS = new ArrayList<>();
     @Nonnull
     private final LbFactory<TaskWorker> lbFactory;
     @Nonnull
@@ -40,45 +40,55 @@ public class RSocketServer {
      * 客户端与服务端建立连接
      */
     @ConnectMapping("login")
-    void login(RSocketRequester requester, @Payload String loginMessage) {
+    void login(@Nonnull RSocketRequester requester, @Payload String loginMessage) {
         String propertiesAccessToken = schedulerProperties.getAccessToken();
         LoginMessage message = JsonUtils.parseJson(loginMessage, LoginMessage.class);
         String instanceId = message.getInstanceId();
         String appName = message.getAppName();
         String accessToken = message.getAccessToken();
         int weight = message.getWeight();
+        RSocketTaskWorker[] warp = new RSocketTaskWorker[1];
         requester.rsocket()
                 .onClose()
                 .doFirst(() -> {
                     if (StringUtils.isNotBlank(propertiesAccessToken)
                             && !propertiesAccessToken.equals(accessToken)) {
                         log.info("accessToken不合法");
-                        requester.route("client-receive")
+                        requester.route("interrupt")
                                 .data("accessToken不合法")
-                                .send()
+                                .retrieveMono(String.class)
+                                .doOnNext(log::info)
                                 .subscribe();
-                        requester.rsocket().dispose();
                     } else {
-                        // Add all new clients to a client list
-                        log.info("Client: {} CONNECTED.", loginMessage);
-                        CLIENTS.add(requester);
-                        // Callback to client, confirming connection
-                        requester.route("client-status")
-                                .data("OPEN")
-                                .retrieveFlux(String.class)
-                                .doOnNext(s -> log.info("Client: {} Free Memory: {}.", loginMessage, s))
-                                .subscribe();
+                        log.info("Client: {} CONNECTED.", instanceId);
+                        RSocketTaskWorker worker
+                                = new RSocketTaskWorker(appName, instanceId, requester);
+                        warp[0] = worker;
+                        worker.setWeight(weight);
+                        LbServerHolder<TaskWorker> serverHolder
+                                = lbFactory.getServerHolder(appName);
+                        serverHolder.addServers(ImmutableList.of(worker));
                     }
                 })
                 .doOnError(error -> {
-                    String errMessage = error.getClass().getName() + ": " + error.getMessage();
+                    String errMessage = error.getClass().getName() +
+                            ": " + error.getMessage();
                     log.info("socket error: {}", errMessage);
                 })
                 .doFinally(consumer -> {
-                    // Remove disconnected clients from the client list
-                    CLIENTS.remove(requester);
-                    log.info("Client {} DISCONNECTED: {}", loginMessage, consumer);
+                    RSocketTaskWorker worker = warp[0];
+                    if (worker != null) {
+                        LbServerHolder<TaskWorker> serverHolder
+                                = lbFactory.getServerHolder(appName);
+                        serverHolder.markServerDown(worker);
+                    }
+                    log.info("Client {} disconnected: {}", instanceId, consumer);
                 })
                 .subscribe();
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

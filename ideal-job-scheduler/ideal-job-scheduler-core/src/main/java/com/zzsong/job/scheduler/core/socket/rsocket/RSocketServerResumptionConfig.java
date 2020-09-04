@@ -1,4 +1,4 @@
-package com.zzsong.job.scheduler.core.conf;
+package com.zzsong.job.scheduler.core.socket.rsocket;
 
 import io.rsocket.core.RSocketServer;
 import io.rsocket.core.Resume;

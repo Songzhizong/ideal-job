@@ -12,10 +12,23 @@ import java.util.List;
 @SuppressWarnings({"unused", "RedundantSuppression"})
 public interface LbServerHolder<Server extends LbServer> {
 
+
+    /**
+     * 添加一组服务, 并直接标记为可达状态
+     *
+     * @param newServers 新加入的服务列表
+     * @author 宋志宗
+     * @date 2020/8/19 23:40
+     */
+    default void addServers(@Nonnull List<Server> newServers) {
+        addServers(newServers, true);
+    }
+
     /**
      * 添加一组服务
      *
      * @param newServers 新加入的服务列表
+     * @param reachable  是否尝试标记为可达状态, 如果设为true且心跳测试通过则直接标记为可达状态
      * @author 宋志宗
      * @date 2020/8/19 23:40
      */
