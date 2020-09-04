@@ -65,6 +65,10 @@ public class RSocketRemoteTaskWorker implements RemoteTaskWorker {
         this.weight = Math.max(weight, 1);
     }
 
+    public void start() {
+        startSocket();
+    }
+
     private synchronized void startSocket() {
         RSocketStrategies rSocketStrategies = RSocketConfigure.rsocketStrategies;
         RSocketRequester.Builder requesterBuilder = RSocketConfigure.rSocketRequesterBuilder;
@@ -74,6 +78,7 @@ public class RSocketRemoteTaskWorker implements RemoteTaskWorker {
         loginMessage.setAppName(appName);
         loginMessage.setInstanceId(workerIp + ":" + workerPort);
         loginMessage.setWeight(weight);
+        loginMessage.setAccessToken(accessToken);
         String messageString = loginMessage.toMessageString();
         this.rsocketRequester = requesterBuilder
                 .setupRoute("login")

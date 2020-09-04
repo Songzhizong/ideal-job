@@ -2,6 +2,7 @@ package com.zzsong.job.worker.spring.boot.starter;
 
 import com.zzsong.job.common.utils.IpUtil;
 import com.zzsong.job.worker.SpringJobExecutor;
+import com.zzsong.job.worker.socket.ProtocolTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +45,7 @@ public class IdealJobBeanConfig {
         }
         final String accessToken = properties.getAccessToken();
         final int weight = properties.getWeight();
+        ProtocolTypeEnum protocolType = properties.getProtocolType();
         final String schedulerAddresses = properties.getSchedulerAddresses();
         String ip = properties.getIp();
         if (StringUtils.isBlank(ip)) {
@@ -57,9 +59,6 @@ public class IdealJobBeanConfig {
                 port = serverPort;
             }
         }
-        final long connectTimeOutMills = properties.getConnectTimeOut().toMillis();
-        final long writeTimeOutMills = properties.getWriteTimeOut().toMillis();
-        final long readTimeOutMills = properties.getReadTimeOut().toMillis();
         int corePoolSize = properties.getExecutorPool().getCorePoolSize();
         int maximumPoolSize = properties.getExecutorPool().getMaximumPoolSize();
         int workQueueSize = properties.getExecutorPool().getWorkQueueSize();
@@ -71,9 +70,11 @@ public class IdealJobBeanConfig {
             log.error("schedulerAddresses is blank.");
             return null;
         }
+
         final SpringJobExecutor executor = new SpringJobExecutor();
         executor.setAccessToken(accessToken);
         executor.setWeight(weight);
+        executor.setProtocolType(protocolType);
         executor.setSchedulerAddresses(schedulerAddresses);
         executor.setAppName(appName);
         executor.setIp(ip);
@@ -81,9 +82,6 @@ public class IdealJobBeanConfig {
         executor.setCorePoolSize(corePoolSize);
         executor.setMaximumPoolSize(maximumPoolSize);
         executor.setPoolQueueSize(workQueueSize);
-        executor.setConnectTimeOutMills((int) connectTimeOutMills);
-        executor.setWriteTimeOutMills(writeTimeOutMills);
-        executor.setReadTimeOutMills(readTimeOutMills);
         return executor;
     }
 }

@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="scheduler - 2" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <module name="ideal-job-scheduler-server" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="SchedulerApplication" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.zzsong.job.scheduler.server.SchedulerApplication" />
     <option name="PROGRAM_PARAMETERS" value="--spring.profiles.active=local --server.port=8805" />
     <option name="ALTERNATIVE_JRE_PATH" />
     <method v="2">

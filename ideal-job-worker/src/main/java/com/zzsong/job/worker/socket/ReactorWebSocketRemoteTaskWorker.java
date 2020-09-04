@@ -37,9 +37,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author 宋志宗
  * @date 2020/8/20
  */
-public final class ReactorWebSocketRemoteTaskExecutor extends Thread implements RemoteTaskWorker {
+public final class ReactorWebSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker {
     private static final Logger log = LoggerFactory
-            .getLogger(ReactorWebSocketRemoteTaskExecutor.class);
+            .getLogger(ReactorWebSocketRemoteTaskWorker.class);
     private static final AtomicInteger atomicInteger = new AtomicInteger(0);
     private UnicastProcessor<String> directProcessor;
     private Disposable socketDisposable;
@@ -78,7 +78,7 @@ public final class ReactorWebSocketRemoteTaskExecutor extends Thread implements 
     private volatile boolean running = false;
     private volatile boolean destroyed = false;
 
-    public ReactorWebSocketRemoteTaskExecutor(String schedulerAddress) {
+    public ReactorWebSocketRemoteTaskWorker(String schedulerAddress) {
         super("RemoteJobExecutor-" + schedulerAddress + "-" + atomicInteger.getAndIncrement());
         this.schedulerAddress = schedulerAddress;
     }

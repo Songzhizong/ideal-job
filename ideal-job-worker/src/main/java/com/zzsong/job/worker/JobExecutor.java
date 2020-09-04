@@ -9,9 +9,10 @@ import com.zzsong.job.common.message.payload.TaskCallback;
 import com.zzsong.job.common.message.payload.TaskParam;
 import com.zzsong.job.worker.handler.IJobHandler;
 import com.zzsong.job.worker.handler.JobHandlerFactory;
-import com.zzsong.job.worker.socket.ReactorWebSocketRemoteTaskExecutor;
+import com.zzsong.job.worker.socket.ProtocolTypeEnum;
+import com.zzsong.job.worker.socket.ReactorWebSocketRemoteTaskWorker;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import lombok.Getter;
+import com.zzsong.job.worker.socket.rsocket.RSocketRemoteTaskWorker;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -26,32 +27,40 @@ import java.util.concurrent.*;
  * @author 宋志宗
  * @date 2020/8/21
  */
-@Getter
-@Setter
 public class JobExecutor {
     private static final Logger log = LoggerFactory.getLogger(JobExecutor.class);
     private static final String SCHEDULER_SERVER_NAME = "ideal-job-scheduler";
     private static final LbFactory<RemoteTaskWorker> lbFactory = new SimpleLbFactory<>();
     private static JobExecutor executor;
 
-    private ThreadPoolExecutor executorService;
-    private String accessToken;
-    private int weight;
-    private String schedulerAddresses;
-    private String appName;
-    private String ip;
-    private int port;
+    private static final int CONNECT_TIME_OUT_MILLS = 2000;
+    private static final long WRITE_TIME_OUT_MILLS = 1000;
+    private static final long READ_TIME_OUT_MILLS = 120 * 1000;
 
+    private ThreadPoolExecutor executorService;
+    @Setter
+    private String accessToken;
+    @Setter
+    private int weight;
+    @Setter
+    private ProtocolTypeEnum protocolType;
+    @Setter
+    private String schedulerAddresses;
+    @Setter
+    private String appName;
+    @Setter
+    private String ip;
+    @Setter
+    private int port;
+    @Setter
     private int corePoolSize = -1;
+    @Setter
     private int maximumPoolSize = -1;
+    @Setter
     private int poolQueueSize = 200;
 
-    private int connectTimeOutMills = 2000;
-    private long writeTimeOutMills = 200;
-    private long readTimeOutMills = 120 * 1000;
-
     private volatile boolean destroyed;
-    private final List<RemoteTaskWorker> remoteExecutors = new ArrayList<>();
+    private final List<RemoteTaskWorker> remoteTaskWorkers = new ArrayList<>();
 
     @Nonnull
     public static JobExecutor getExecutor() {
@@ -92,7 +101,7 @@ public class JobExecutor {
                 });
         executorService.allowCoreThreadTimeOut(true);
         Runtime.getRuntime().addShutdownHook(new Thread(this::destroy));
-        initRemoteExecutors();
+        initRemoteWorks();
         JobExecutor.executor = this;
     }
 
@@ -100,7 +109,7 @@ public class JobExecutor {
         if (!destroyed) {
             log.info("JobExecutor destroy.");
             destroyed = true;
-            for (RemoteTaskWorker remoteExecutor : remoteExecutors) {
+            for (RemoteTaskWorker remoteExecutor : remoteTaskWorkers) {
                 remoteExecutor.destroy();
             }
             executorService.shutdown();
@@ -108,25 +117,56 @@ public class JobExecutor {
     }
 
 
-    private void initRemoteExecutors() {
+    private void initRemoteWorks() {
+        if (protocolType == ProtocolTypeEnum.RSOCKET) {
+            initRSocketRemoteWorks();
+        }
+        if (protocolType == ProtocolTypeEnum.WEBSOCKET) {
+            initWebsocketRemoteWorks();
+        }
+        LbServerHolder<RemoteTaskWorker> holder = getServerHolder();
+        holder.addServers(remoteTaskWorkers, true);
+    }
+
+    private void initRSocketRemoteWorks() {
         final String[] addresses = StringUtils
                 .split(schedulerAddresses, ",");
         for (String address : addresses) {
-            ReactorWebSocketRemoteTaskExecutor executor
-                    = new ReactorWebSocketRemoteTaskExecutor(address);
-            executor.setAppName(appName);
-            executor.setIp(ip);
-            executor.setPort(port);
-            executor.setWeight(weight);
-            executor.setAccessToken(accessToken);
-            executor.setConnectTimeOutMills(connectTimeOutMills);
-            executor.setWriteTimeOutMills(writeTimeOutMills);
-            executor.setReadTimeOutMills(readTimeOutMills);
-            executor.start();
-            remoteExecutors.add(executor);
+            String[] split = StringUtils.split(address, ":");
+            if (split.length != 2) {
+                log.error("RSocket地址配置错误: {}", address);
+                throw new IllegalArgumentException("RSocket地址配置错误");
+            }
+            String ip = split[0];
+            int port = Integer.parseInt(split[1]);
+            RSocketRemoteTaskWorker worker = new RSocketRemoteTaskWorker(ip, port);
+            worker.setAppName(appName);
+            worker.setWeight(weight);
+            worker.setAccessToken(accessToken);
+            worker.setWorkerIp(ip);
+            worker.setWorkerPort(port);
+            worker.start();
+            remoteTaskWorkers.add(worker);
         }
-        LbServerHolder<RemoteTaskWorker> holder = getServerHolder();
-        holder.addServers(remoteExecutors, true);
+    }
+
+    private void initWebsocketRemoteWorks() {
+        final String[] addresses = StringUtils
+                .split(schedulerAddresses, ",");
+        for (String address : addresses) {
+            ReactorWebSocketRemoteTaskWorker worker
+                    = new ReactorWebSocketRemoteTaskWorker(address);
+            worker.setAppName(appName);
+            worker.setIp(ip);
+            worker.setPort(port);
+            worker.setWeight(weight);
+            worker.setAccessToken(accessToken);
+            worker.setConnectTimeOutMills(CONNECT_TIME_OUT_MILLS);
+            worker.setWriteTimeOutMills(WRITE_TIME_OUT_MILLS);
+            worker.setReadTimeOutMills(READ_TIME_OUT_MILLS);
+            worker.start();
+            remoteTaskWorkers.add(worker);
+        }
     }
 
     public LbServerHolder<RemoteTaskWorker> getServerHolder() {

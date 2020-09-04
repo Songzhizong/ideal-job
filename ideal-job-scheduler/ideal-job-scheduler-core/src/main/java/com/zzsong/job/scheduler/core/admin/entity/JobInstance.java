@@ -47,7 +47,7 @@ public class JobInstance {
   @Nonnull
   @GeneratedValue(strategy = GenerationType.AUTO, generator = "job_trigger_log_generator")
   @GenericGenerator(name = "job_trigger_log_generator",
-      strategy = "com.zzsong.scheduler.core.generator.JpaIdentityGenerator")
+      strategy = "com.zzsong.job.scheduler.core.generator.JpaIdentityGenerator")
   @Column(nullable = false, updatable = false)
   private Long instanceId;
 
