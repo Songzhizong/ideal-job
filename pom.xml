@@ -8,7 +8,6 @@
     <packaging>pom</packaging>
     <version>0.0.1</version>
 
-
     <modules>
         <module>ideal-job-common</module>
         <module>ideal-job-samples</module>
@@ -16,7 +15,6 @@
         <module>ideal-job-worker</module>
         <module>ideal-job-worker-springboot-starter</module>
     </modules>
-
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
