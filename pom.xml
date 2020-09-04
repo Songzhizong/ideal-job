@@ -8,6 +8,7 @@
     <packaging>pom</packaging>
     <version>0.0.1</version>
 
+
     <modules>
         <module>ideal-job-common</module>
         <module>ideal-job-samples</module>
