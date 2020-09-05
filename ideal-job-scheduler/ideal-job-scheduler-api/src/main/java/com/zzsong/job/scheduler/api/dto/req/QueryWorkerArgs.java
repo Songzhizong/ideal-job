@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
  */
 @Getter
 @Setter
-public class QueryExecutorArgs {
+public class QueryWorkerArgs {
     /**
      * 执行器AppName
      */

@@ -10,19 +10,23 @@ import javax.annotation.Nonnull;
  */
 public class VisibleException extends RuntimeException {
 
-    private ResMsg resMsg = null;
+  private ResMsg resMsg = null;
 
-    public VisibleException(@Nonnull String message) {
-        super(message);
-    }
+  public VisibleException(@Nonnull String message) {
+    super(message);
+  }
 
-    public VisibleException(@Nonnull ResMsg resMsg) {
-        this(resMsg.message());
-        this.resMsg = resMsg;
-    }
+  public VisibleException(@Nonnull ResMsg resMsg) {
+    this(resMsg.message());
+    this.resMsg = resMsg;
+  }
 
-    public VisibleException(@Nonnull ResMsg resMsg, String message) {
-        this(message);
-        this.resMsg = resMsg;
-    }
+  public VisibleException(@Nonnull ResMsg resMsg, String message) {
+    this(message);
+    this.resMsg = resMsg;
+  }
+
+  public ResMsg getResMsg() {
+    return resMsg;
+  }
 }

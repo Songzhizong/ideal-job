@@ -13,7 +13,7 @@ import javax.annotation.Nonnull;
  */
 @Getter
 @Setter
-public class CreateExecutorArgs {
+public class CreateWorkerArgs {
     /**
      * 执行器AppName
      */
@@ -26,7 +26,7 @@ public class CreateExecutorArgs {
     private String title;
 
 
-    public CreateExecutorArgs checkArgs() {
+    public CreateWorkerArgs checkArgs() {
         if (StringUtils.isBlank(this.appName)) {
             throw new VisibleException("appName不能为空");
         }

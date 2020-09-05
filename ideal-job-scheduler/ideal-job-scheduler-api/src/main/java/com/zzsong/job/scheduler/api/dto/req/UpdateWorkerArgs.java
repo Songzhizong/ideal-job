@@ -13,11 +13,11 @@ import javax.annotation.Nonnull;
  */
 @Getter
 @Setter
-public class UpdateExecutorArgs {
+public class UpdateWorkerArgs {
     /**
      * 执行器Id
      */
-    private long executorId = -1L;
+    private long workerId = -1L;
     /**
      * 执行器AppName
      */
@@ -29,8 +29,8 @@ public class UpdateExecutorArgs {
     @Nonnull
     private String title = "";
 
-    public UpdateExecutorArgs checkArgs() {
-        if (executorId < 1) {
+    public UpdateWorkerArgs checkArgs() {
+        if (workerId < 1) {
             throw new VisibleException("执行器Id不合法");
         }
         if (StringUtils.isBlank(this.appName)) {
