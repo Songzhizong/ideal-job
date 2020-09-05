@@ -6,6 +6,7 @@ import com.zzsong.job.scheduler.api.dto.req.CreateExecutorArgs;
 import com.zzsong.job.scheduler.api.dto.req.QueryExecutorArgs;
 import com.zzsong.job.scheduler.api.dto.req.UpdateExecutorArgs;
 import com.zzsong.job.scheduler.api.dto.rsp.ExecutorInfoRsp;
+import com.zzsong.job.scheduler.api.pojo.JobWorker;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
@@ -39,7 +40,7 @@ public interface ExecutorClient {
      * @date 2020/8/26 23:42
      */
     @Nonnull
-    Mono<Res<Void>> update(@Nonnull UpdateExecutorArgs args);
+    Mono<Res<JobWorker>> update(@Nonnull UpdateExecutorArgs args);
 
     /**
      * 删除执行器
@@ -50,7 +51,7 @@ public interface ExecutorClient {
      * @date 2020/8/26 23:43
      */
     @Nonnull
-    Mono<Res<Void>> delete(long executorId);
+    Mono<Res<Integer>> delete(long executorId);
 
     /**
      * 查询执行器列表

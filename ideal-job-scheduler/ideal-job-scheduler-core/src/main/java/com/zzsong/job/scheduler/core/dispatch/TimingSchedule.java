@@ -1,8 +1,8 @@
 package com.zzsong.job.scheduler.core.dispatch;
 
 import com.zzsong.job.common.constants.TriggerTypeEnum;
+import com.zzsong.job.scheduler.api.pojo.JobView;
 import com.zzsong.job.scheduler.core.admin.db.entity.JobInfoDo;
-import com.zzsong.job.scheduler.core.admin.pojo.JobView;
 import com.zzsong.job.scheduler.core.admin.service.JobService;
 import com.zzsong.job.scheduler.core.utils.CronExpression;
 import org.slf4j.Logger;

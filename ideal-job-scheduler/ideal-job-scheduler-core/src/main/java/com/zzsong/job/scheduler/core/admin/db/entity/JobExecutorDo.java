@@ -35,7 +35,6 @@ import java.time.LocalDateTime;
 @org.hibernate.annotations.Table(appliesTo = "ideal_job_executor", comment = "执行器")
 @SQLDelete(sql = "update ideal_job_executor set deleted = 1 where executor_id = ?")
 @Where(clause = "deleted = 0")
-@EntityListeners(AuditingEntityListener.class)
 public class JobExecutorDo {
     /**
      * 执行器Id
@@ -66,7 +65,6 @@ public class JobExecutorDo {
      * 创建时间
      */
     @Nonnull
-    @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdTime;
 
@@ -74,7 +72,6 @@ public class JobExecutorDo {
      * 更新时间
      */
     @Nonnull
-    @LastModifiedDate
     @Column(nullable = false)
     private LocalDateTime updateTime;
 

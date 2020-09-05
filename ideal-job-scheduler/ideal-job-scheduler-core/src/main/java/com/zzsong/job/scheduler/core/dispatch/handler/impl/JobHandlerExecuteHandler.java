@@ -11,9 +11,9 @@ import com.zzsong.job.common.loadbalancer.LoadBalancer;
 import com.zzsong.job.common.message.payload.TaskParam;
 import com.zzsong.job.common.transfer.CommonResMsg;
 import com.zzsong.job.common.worker.TaskWorker;
-import com.zzsong.job.scheduler.core.admin.db.entity.JobExecutorDo;
+import com.zzsong.job.scheduler.api.pojo.JobView;
+import com.zzsong.job.scheduler.api.pojo.JobWorker;
 import com.zzsong.job.scheduler.core.admin.db.entity.JobInstanceDo;
-import com.zzsong.job.scheduler.core.admin.pojo.JobView;
 import com.zzsong.job.scheduler.core.admin.service.JobExecutorService;
 import com.zzsong.job.scheduler.core.admin.service.JobInstanceService;
 import com.zzsong.job.scheduler.core.dispatch.handler.ExecuteHandler;
@@ -27,6 +27,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author 宋志宗
@@ -115,11 +116,12 @@ public final class JobHandlerExecuteHandler implements ExecuteHandler {
         long executorId = jobView.getExecutorId();
         String executorHandler = jobView.getExecutorHandler();
         RouteStrategyEnum routeStrategy = jobView.getRouteStrategy();
-        JobExecutorDo executor = jobExecutorService.loadById(executorId);
-        if (executor == null) {
+        Optional<JobWorker> block = jobExecutorService.loadById(executorId).block();
+        if (block == null || !block.isPresent()) {
             log.info("任务: {} 调度失败, 执行器: {} 不存在", jobId, executorId);
             throw new VisibleException(CommonResMsg.NOT_FOUND, "执行器不存在");
         }
+        JobWorker executor = block.get();
         String executorAppName = executor.getAppName();
         if (StringUtils.isBlank(executorAppName)) {
             log.info("任务: {} 调度失败, 执行器: {} 应用名称为空", jobId, executorId);

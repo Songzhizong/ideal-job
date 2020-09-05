@@ -1,6 +1,6 @@
 package com.zzsong.job.scheduler.core.admin.db.repository;
 
-import com.zzsong.job.scheduler.core.admin.pojo.JobView;
+import com.zzsong.job.scheduler.api.pojo.JobView;
 
 import java.util.Collection;
 

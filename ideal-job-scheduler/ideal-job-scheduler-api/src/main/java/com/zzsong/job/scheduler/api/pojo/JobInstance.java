@@ -1,4 +1,4 @@
-package com.zzsong.job.scheduler.core.admin.pojo;
+package com.zzsong.job.scheduler.api.pojo;
 
 import lombok.Getter;
 import lombok.Setter;

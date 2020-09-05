@@ -1,7 +1,7 @@
 package com.zzsong.job.scheduler.core.admin.db.repository;
 
+import com.zzsong.job.scheduler.api.pojo.JobView;
 import com.zzsong.job.scheduler.core.admin.db.entity.JobInfoDo;
-import com.zzsong.job.scheduler.core.admin.pojo.JobView;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -22,7 +22,7 @@ public interface JobInfoRepository
 
 
     @Nullable
-    @Query("select new com.zzsong.job.scheduler.core.admin.entity.vo.DispatchJobView(" +
+    @Query("select new com.zzsong.job.scheduler.api.pojo.JobView(" +
             "job.jobId, job.executorId, job.cron, job.routeStrategy, job.executeType, " +
             "job.executorHandler, job.executeParam, job.blockStrategy, job.retryCount, " +
             "job.jobStatus,job.lastTriggerTime,job.nextTriggerTime)" +
@@ -31,7 +31,7 @@ public interface JobInfoRepository
     JobView findDispatchJobViewById(@Param("jobId") long jobId);
 
     @Nonnull
-    @Query("select new com.zzsong.job.scheduler.core.admin.entity.vo.DispatchJobView(" +
+    @Query("select new com.zzsong.job.scheduler.api.pojo.JobView(" +
             "job.jobId, job.executorId, job.cron, job.routeStrategy, job.executeType, " +
             "job.executorHandler, job.executeParam, job.blockStrategy, job.retryCount, " +
             "job.jobStatus,job.lastTriggerTime,job.nextTriggerTime)" +

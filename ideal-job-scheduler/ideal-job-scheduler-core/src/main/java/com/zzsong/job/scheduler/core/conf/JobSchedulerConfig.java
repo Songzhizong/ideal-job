@@ -1,39 +1,27 @@
 package com.zzsong.job.scheduler.core.conf;
 
+import com.zzsong.job.common.cache.ReactiveCache;
+import com.zzsong.job.common.cache.ReactiveRedisClient;
 import com.zzsong.job.common.worker.TaskWorker;
 import com.zzsong.job.common.loadbalancer.LbFactory;
 import com.zzsong.job.common.loadbalancer.SimpleLbFactory;
 import com.zzsong.job.common.utils.IpUtil;
-import com.zzsong.job.common.utils.JsonUtils;
 import com.zzsong.job.scheduler.core.generator.IDGenerator;
 import com.zzsong.job.scheduler.core.generator.ReactiveRedisRegisterSnowFlake;
 import com.zzsong.job.scheduler.core.dispatch.TimingSchedule;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.context.WebServerApplicationContext;
-import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.cache.RedisCacheConfiguration;
-import org.springframework.data.redis.cache.RedisCacheManager;
-import org.springframework.data.redis.cache.RedisCacheWriter;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.RedisSerializationContext;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.Nonnull;
-import java.time.Duration;
 import java.util.concurrent.*;
 
 /**
@@ -104,6 +92,11 @@ public class JobSchedulerConfig {
     }
 
     @Bean
+    public ReactiveCache reactiveCache(@Nonnull ReactiveStringRedisTemplate template) {
+        return new ReactiveRedisClient(template);
+    }
+
+    @Bean
     public ExecutorService jobCallbackThreadPool() {
         int processors = Runtime.getRuntime().availableProcessors();
         ThreadPoolProperties properties = schedulerProperties.getExecuteJobCallbackPool();
@@ -168,29 +161,6 @@ public class JobSchedulerConfig {
                 });
         poolExecutor.allowCoreThreadTimeOut(true);
         return poolExecutor;
-    }
-
-    @Bean
-    public CacheManager cacheManager(@Nonnull RedisConnectionFactory redisConnectionFactory) {
-        RedisCacheWriter redisCacheWriter = RedisCacheWriter
-                .nonLockingRedisCacheWriter(redisConnectionFactory);
-        Jackson2JsonRedisSerializer<Object> serializer
-                = new Jackson2JsonRedisSerializer<>(Object.class);
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY)
-                .activateDefaultTyping(LaissezFaireSubTypeValidator.instance,
-                        ObjectMapper.DefaultTyping.NON_FINAL)
-                .registerModule(JsonUtils.getJavaTimeModule())
-                .findAndRegisterModules();
-        serializer.setObjectMapper(objectMapper);
-        RedisCacheConfiguration redisCacheConfiguration
-                = RedisCacheConfiguration.defaultCacheConfig()
-                .serializeKeysWith(RedisSerializationContext
-                        .SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(RedisSerializationContext
-                        .SerializationPair.fromSerializer(serializer))
-                .entryTtl(Duration.ofHours(36));
-        return new RedisCacheManager(redisCacheWriter, redisCacheConfiguration);
     }
 
     @Bean

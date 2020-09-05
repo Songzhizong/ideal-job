@@ -10,9 +10,9 @@ import com.zzsong.job.scheduler.api.dto.req.CreateJobArgs;
 import com.zzsong.job.scheduler.api.dto.req.QueryJobArgs;
 import com.zzsong.job.scheduler.api.dto.req.UpdateJobArgs;
 import com.zzsong.job.scheduler.api.dto.rsp.JobInfoRsp;
-import com.zzsong.job.scheduler.core.admin.db.entity.JobExecutorDo;
+import com.zzsong.job.scheduler.api.pojo.JobView;
+import com.zzsong.job.scheduler.api.pojo.JobWorker;
 import com.zzsong.job.scheduler.core.admin.db.entity.JobInfoDo;
-import com.zzsong.job.scheduler.core.admin.pojo.JobView;
 import com.zzsong.job.scheduler.core.admin.db.repository.JobInfoRepository;
 import com.zzsong.job.scheduler.core.converter.JobInfoConverter;
 import com.zzsong.job.scheduler.core.dispatch.JobDispatch;
@@ -34,6 +34,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author 宋志宗
@@ -68,8 +69,8 @@ public class JobService {
         long executorId = createJobArgs.getExecutorId();
         boolean autoStart = createJobArgs.isAutoStart();
         String cron = createJobArgs.getCron();
-        JobExecutorDo jobExecutor = jobExecutorService.loadById(executorId);
-        if (jobExecutor == null) {
+        Optional<JobWorker> block = jobExecutorService.loadById(executorId).block();
+        if (block == null || !block.isPresent()) {
             log.info("新建任务失败, 执行器: {} 不存在", executorId);
             throw new VisibleException(CommonResMsg.NOT_FOUND, "执行器不存在");
         }

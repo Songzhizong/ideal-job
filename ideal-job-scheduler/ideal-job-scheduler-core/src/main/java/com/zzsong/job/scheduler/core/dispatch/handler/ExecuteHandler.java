@@ -1,8 +1,8 @@
 package com.zzsong.job.scheduler.core.dispatch.handler;
 
 import com.zzsong.job.common.constants.TriggerTypeEnum;
+import com.zzsong.job.scheduler.api.pojo.JobView;
 import com.zzsong.job.scheduler.core.admin.db.entity.JobInstanceDo;
-import com.zzsong.job.scheduler.core.admin.pojo.JobView;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

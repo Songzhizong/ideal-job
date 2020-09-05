@@ -1,4 +1,4 @@
-package com.zzsong.job.scheduler.core.admin.pojo;
+package com.zzsong.job.scheduler.api.pojo;
 
 import com.zzsong.job.common.constants.BlockStrategyEnum;
 import com.zzsong.job.common.constants.ExecuteTypeEnum;
