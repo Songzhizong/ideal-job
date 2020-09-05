@@ -1,15 +1,30 @@
 ###
-POST http://{{ip}}:{{port}}/executor/create
+POST http://127.0.0.1:8804/executor/create
 Content-Type: application/json
 
 {
-  "appName": "SAMPLE-EXECUTOR",
-  "title": "示例执行器"
+  "appName": "SAMPLE-EXECUTOR3",
+  "title": "示例执行器3"
 }
 
+###
+POST http://127.0.0.1:8804/executor/update
+Content-Type: application/json
+
+{
+  "workerId": 133567630177992704,
+  "appName": "SAMPLE-EXECUTOR2",
+  "title": "示例执行器22222"
+}
 
 ###
-POST  http://{{ip}}:{{port}}/executor/query?page=1&size=10
+POST http://127.0.0.1:8804/executor/delete
+Content-Type: application/x-www-form-urlencoded
+
+workerId=133567630177992704
+
+###
+POST  http://127.0.0.1:8804/executor/query?page=1&size=10
 Content-Type: application/json
 
 {

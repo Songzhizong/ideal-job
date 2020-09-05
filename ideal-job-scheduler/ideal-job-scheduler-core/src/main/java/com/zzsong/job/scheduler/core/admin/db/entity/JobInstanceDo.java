@@ -1,4 +1,4 @@
-package com.zzsong.job.scheduler.core.admin.entity;
+package com.zzsong.job.scheduler.core.admin.db.entity;
 
 import com.zzsong.job.common.constants.DBDefaults;
 import com.zzsong.job.common.constants.HandleStatusEnum;
@@ -36,7 +36,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @org.hibernate.annotations.Table(appliesTo = "ideal_job_instance", comment = "任务实例")
 @EntityListeners(AuditingEntityListener.class)
-public class JobInstance {
+public class JobInstanceDo {
   public static final int STATUS_FAIL = 0;
   public static final int STATUS_SUCCESS = 1;
 
@@ -174,8 +174,8 @@ public class JobInstance {
   private LocalDateTime updateTime;
 
   @Nonnull
-  public static JobInstance createInitialized() {
-    JobInstance instance = new JobInstance();
+  public static JobInstanceDo createInitialized() {
+    JobInstanceDo instance = new JobInstanceDo();
     instance.parentId = DBDefaults.DEFAULT_LONG_VALUE;
     instance.executorInstance = DBDefaults.DEFAULT_STRING_VALUE;
     instance.executorHandler = DBDefaults.DEFAULT_STRING_VALUE;

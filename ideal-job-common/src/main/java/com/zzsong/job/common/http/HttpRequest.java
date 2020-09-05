@@ -6,8 +6,6 @@ import org.springframework.http.HttpHeaders;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 
 /**
  * @author 宋志宗
@@ -20,14 +18,14 @@ public class HttpRequest {
      * 请求方法
      */
     @Nonnull
-    @NotNull(message = "HttpMethod不能为空")
+//    @NotNull(message = "HttpMethod不能为空")
     private HttpMethod method;
 
     /**
      * 请求地址
      */
     @Nonnull
-    @NotBlank(message = "请求地址不能为空")
+//    @NotBlank(message = "请求地址不能为空")
     private String url;
     /**
      * Query string

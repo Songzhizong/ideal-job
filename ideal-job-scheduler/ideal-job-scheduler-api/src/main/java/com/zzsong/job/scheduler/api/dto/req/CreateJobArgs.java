@@ -4,11 +4,11 @@ import com.zzsong.job.common.constants.BlockStrategyEnum;
 import com.zzsong.job.common.constants.DBDefaults;
 import com.zzsong.job.common.constants.ExecuteTypeEnum;
 import com.zzsong.job.common.constants.RouteStrategyEnum;
+import com.zzsong.job.common.exception.VisibleException;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.annotation.Nonnull;
-import javax.validation.constraints.NotNull;
 
 /**
  * @author 宋志宗
@@ -24,15 +24,12 @@ public class CreateJobArgs {
     /**
      * 所属执行器Id
      */
-    @Nonnull
-    @NotNull(message = "所属执行器id不能为空")
-    private Long executorId;
+    private long executorId = -1L;
     /**
      * 执行模式
      */
     @Nonnull
-    @NotNull(message = "执行模式不能为空")
-    private ExecuteTypeEnum executeType;
+    private ExecuteTypeEnum executeType = ExecuteTypeEnum.JOB_HANDLER;
     /**
      * JobHandler
      */
@@ -100,4 +97,11 @@ public class CreateJobArgs {
      */
     @Nonnull
     private String businessId = DBDefaults.DEFAULT_STRING_VALUE;
+
+    public CreateJobArgs checkArgs() {
+        if (this.executorId < 1) {
+            throw new VisibleException("所属执行器id不合法");
+        }
+        return this;
+    }
 }

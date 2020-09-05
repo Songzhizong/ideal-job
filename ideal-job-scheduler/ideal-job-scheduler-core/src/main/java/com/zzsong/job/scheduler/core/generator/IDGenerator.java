@@ -6,5 +6,5 @@ package com.zzsong.job.scheduler.core.generator;
  */
 public interface IDGenerator {
 
-    long generate();
+  long generate();
 }

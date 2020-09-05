@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ThreadPoolProperties {
-    private int corePoolSize = -1;
-    private int maximumPoolSize = -1;
-    private int workQueueSize = 200;
+  private int corePoolSize = -1;
+  private int maximumPoolSize = -1;
+  private int workQueueSize = 200;
 }

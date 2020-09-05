@@ -1,4 +1,4 @@
-package com.zzsong.job.scheduler.core.admin.entity.vo;
+package com.zzsong.job.scheduler.api.pojo;
 
 import com.zzsong.job.common.constants.BlockStrategyEnum;
 import com.zzsong.job.common.constants.ExecuteTypeEnum;
@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
 @SuppressWarnings("unused")
 @Getter
 @Setter
-public class DispatchJobView {
+public class JobView {
     /**
      * 任务Id
      */
@@ -68,14 +68,14 @@ public class DispatchJobView {
      */
     private long nextTriggerTime;
 
-    public DispatchJobView() {
+    public JobView() {
     }
 
-    public DispatchJobView(long jobId, long executorId, @Nonnull String cron,
-                           @Nonnull RouteStrategyEnum routeStrategy,
-                           @Nonnull ExecuteTypeEnum executeType, @Nonnull String executorHandler,
-                           @Nonnull String executeParam, @Nonnull BlockStrategyEnum blockStrategy,
-                           int retryCount, int jobStatus, long lastTriggerTime, long nextTriggerTime) {
+    public JobView(long jobId, long executorId, @Nonnull String cron,
+                   @Nonnull RouteStrategyEnum routeStrategy,
+                   @Nonnull ExecuteTypeEnum executeType, @Nonnull String executorHandler,
+                   @Nonnull String executeParam, @Nonnull BlockStrategyEnum blockStrategy,
+                   int retryCount, int jobStatus, long lastTriggerTime, long nextTriggerTime) {
         this.jobId = jobId;
         this.executorId = executorId;
         this.cron = cron;

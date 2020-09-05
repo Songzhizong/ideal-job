@@ -3,8 +3,7 @@ package com.zzsong.job.scheduler.api.dto.req;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.annotation.Nonnull;
-import javax.validation.constraints.NotBlank;
+import javax.annotation.Nullable;
 
 /**
  * @author 宋志宗
@@ -12,17 +11,15 @@ import javax.validation.constraints.NotBlank;
  */
 @Getter
 @Setter
-public class CreateExecutorArgs {
+public class QueryWorkerArgs {
     /**
      * 执行器AppName
      */
-    @Nonnull
-    @NotBlank(message = "appName不能为空")
+    @Nullable
     private String appName;
     /**
      * 执行器名称
      */
-    @Nonnull
-    @NotBlank(message = "执行器名称不能为空")
+    @Nullable
     private String title;
 }
