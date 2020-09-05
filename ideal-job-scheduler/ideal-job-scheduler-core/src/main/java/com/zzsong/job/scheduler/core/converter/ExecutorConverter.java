@@ -1,7 +1,7 @@
 package com.zzsong.job.scheduler.core.converter;
 
 import com.zzsong.job.scheduler.api.dto.rsp.ExecutorInfoRsp;
-import com.zzsong.job.scheduler.core.admin.entity.JobExecutor;
+import com.zzsong.job.scheduler.core.admin.db.entity.JobExecutorDo;
 
 import javax.annotation.Nonnull;
 
@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
  */
 public final class ExecutorConverter {
     @Nonnull
-    public static ExecutorInfoRsp toExecutorInfoRsp(@Nonnull JobExecutor executor) {
+    public static ExecutorInfoRsp toExecutorInfoRsp(@Nonnull JobExecutorDo executor) {
         ExecutorInfoRsp executorInfoRsp = new ExecutorInfoRsp();
         executorInfoRsp.setExecutorId(executor.getExecutorId());
         executorInfoRsp.setAppName(executor.getAppName());

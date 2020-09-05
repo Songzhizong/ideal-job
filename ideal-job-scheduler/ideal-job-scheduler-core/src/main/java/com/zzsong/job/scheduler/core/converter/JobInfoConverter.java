@@ -4,7 +4,7 @@ import com.zzsong.job.common.constants.DBDefaults;
 import com.zzsong.job.common.utils.DateTimes;
 import com.zzsong.job.scheduler.api.dto.req.CreateJobArgs;
 import com.zzsong.job.scheduler.api.dto.rsp.JobInfoRsp;
-import com.zzsong.job.scheduler.core.admin.entity.JobInfo;
+import com.zzsong.job.scheduler.core.admin.db.entity.JobInfoDo;
 
 import javax.annotation.Nonnull;
 
@@ -15,8 +15,8 @@ import javax.annotation.Nonnull;
 public final class JobInfoConverter {
 
     @Nonnull
-    public static JobInfo fromCreateJobArgs(@Nonnull CreateJobArgs createJobArgs) {
-        JobInfo jobInfo = new JobInfo();
+    public static JobInfoDo fromCreateJobArgs(@Nonnull CreateJobArgs createJobArgs) {
+        JobInfoDo jobInfo = new JobInfoDo();
 //        jobInfo.setJobId();
         jobInfo.setExecutorId(createJobArgs.getExecutorId());
         jobInfo.setCron(createJobArgs.getCron());
@@ -28,7 +28,7 @@ public final class JobInfoConverter {
         jobInfo.setExecuteParam(createJobArgs.getExecuteParam());
         jobInfo.setBlockStrategy(createJobArgs.getBlockStrategy());
         jobInfo.setRetryCount(createJobArgs.getRetryCount());
-        jobInfo.setJobStatus(JobInfo.JOB_STOP);
+        jobInfo.setJobStatus(JobInfoDo.JOB_STOP);
         jobInfo.setLastTriggerTime(DBDefaults.DEFAULT_LONG_VALUE);
         jobInfo.setNextTriggerTime(DBDefaults.DEFAULT_LONG_VALUE);
         jobInfo.setApplication(createJobArgs.getApplication());
@@ -43,7 +43,7 @@ public final class JobInfoConverter {
     }
 
     @Nonnull
-    public static JobInfoRsp toJobInfoRsp(@Nonnull JobInfo jobInfo) {
+    public static JobInfoRsp toJobInfoRsp(@Nonnull JobInfoDo jobInfo) {
         JobInfoRsp jobInfoRsp = new JobInfoRsp();
         jobInfoRsp.setJobId(jobInfo.getJobId());
         jobInfoRsp.setApplication(jobInfo.getApplication());

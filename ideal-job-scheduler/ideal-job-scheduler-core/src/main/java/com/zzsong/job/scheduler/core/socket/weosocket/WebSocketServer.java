@@ -6,7 +6,6 @@ import com.zzsong.job.common.loadbalancer.LbServerHolder;
 import com.zzsong.job.common.message.MessageType;
 import com.zzsong.job.common.message.SocketMessage;
 import com.zzsong.job.common.worker.TaskWorker;
-import com.zzsong.job.scheduler.core.conf.JobSchedulerProperties;
 import com.zzsong.job.scheduler.core.socket.weosocket.handler.MessageHandler;
 import com.zzsong.job.scheduler.core.socket.weosocket.handler.MessageHandlerFactory;
 import org.slf4j.Logger;
@@ -28,16 +27,10 @@ import javax.websocket.server.ServerEndpoint;
 public class WebSocketServer {
     private static final Logger log = LoggerFactory.getLogger(WebSocketServer.class);
     private static LbFactory<TaskWorker> lbFactory;
-    private static JobSchedulerProperties properties;
 
     @Autowired
     public void setLbFactory(LbFactory<TaskWorker> lbFactory) {
         WebSocketServer.lbFactory = lbFactory;
-    }
-
-    @Autowired
-    public void setProperties(JobSchedulerProperties properties) {
-        WebSocketServer.properties = properties;
     }
 
     private Session session;
@@ -48,8 +41,6 @@ public class WebSocketServer {
                        @PathParam("appName") String appName,
                        @PathParam("instanceId") String instanceId) {
         WebsocketTaskWorker worker = new WebsocketTaskWorker(appName, instanceId, session);
-        int weightRegisterSeconds = properties.getWeightRegisterSeconds();
-        worker.setWeightRegisterSeconds(weightRegisterSeconds);
         this.session = session;
         this.websocketTaskWorker = worker;
         log.info("app: {}, instanceId: {}, sessionId: {} 已建立连接",

@@ -6,10 +6,9 @@ import com.zzsong.job.scheduler.api.dto.req.CreateExecutorArgs;
 import com.zzsong.job.scheduler.api.dto.req.QueryExecutorArgs;
 import com.zzsong.job.scheduler.api.dto.req.UpdateExecutorArgs;
 import com.zzsong.job.scheduler.api.dto.rsp.ExecutorInfoRsp;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -29,7 +28,7 @@ public interface ExecutorClient {
      * @date 2020/8/26 23:41
      */
     @Nonnull
-    Res<Long> create(@Nonnull CreateExecutorArgs args);
+    Mono<Res<Long>> create(@Nonnull CreateExecutorArgs args);
 
     /**
      * 更新执行器信息
@@ -40,7 +39,7 @@ public interface ExecutorClient {
      * @date 2020/8/26 23:42
      */
     @Nonnull
-    Res<Void> update(@Nonnull UpdateExecutorArgs args);
+    Mono<Res<Void>> update(@Nonnull UpdateExecutorArgs args);
 
     /**
      * 删除执行器
@@ -51,8 +50,7 @@ public interface ExecutorClient {
      * @date 2020/8/26 23:43
      */
     @Nonnull
-    Res<Void> delete(@NotNull(message = "执行器ID不能为空")
-                     @Nonnull Long executorId);
+    Mono<Res<Void>> delete(long executorId);
 
     /**
      * 查询执行器列表
@@ -64,6 +62,6 @@ public interface ExecutorClient {
      * @date 2020/8/26 23:45
      */
     @Nonnull
-    Res<List<ExecutorInfoRsp>> query(@Nullable QueryExecutorArgs args,
-                                     @Nullable Paging paging);
+    Mono<Res<List<ExecutorInfoRsp>>> query(@Nonnull QueryExecutorArgs args,
+                                           @Nonnull Paging paging);
 }

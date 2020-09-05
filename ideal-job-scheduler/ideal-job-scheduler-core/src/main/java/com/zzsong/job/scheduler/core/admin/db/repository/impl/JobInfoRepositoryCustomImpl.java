@@ -1,8 +1,8 @@
-package com.zzsong.job.scheduler.core.admin.repository.impl;
+package com.zzsong.job.scheduler.core.admin.db.repository.impl;
 
 import com.zzsong.job.common.utils.DateTimes;
-import com.zzsong.job.scheduler.core.admin.entity.vo.DispatchJobView;
-import com.zzsong.job.scheduler.core.admin.repository.JobInfoRepositoryCustom;
+import com.zzsong.job.scheduler.core.admin.pojo.JobView;
+import com.zzsong.job.scheduler.core.admin.db.repository.JobInfoRepositoryCustom;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -24,7 +24,7 @@ public class JobInfoRepositoryCustomImpl implements JobInfoRepositoryCustom {
     }
 
     @Override
-    public void batchUpdateTriggerInfo(Collection<DispatchJobView> jobInfos) {
+    public void batchUpdateTriggerInfo(Collection<JobView> jobInfos) {
         final String sql = "update ideal_job_info" +
                 " set job_status = ?," +
                 " last_trigger_time = ?," +

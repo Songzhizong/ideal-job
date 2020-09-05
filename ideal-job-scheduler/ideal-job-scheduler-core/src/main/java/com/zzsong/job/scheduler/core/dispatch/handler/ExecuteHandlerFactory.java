@@ -24,6 +24,4 @@ public final class ExecuteHandlerFactory {
     public static ExecuteHandler getHandler(@Nonnull ExecuteTypeEnum type) {
         return handlerMapper.get(type);
     }
-
-
 }

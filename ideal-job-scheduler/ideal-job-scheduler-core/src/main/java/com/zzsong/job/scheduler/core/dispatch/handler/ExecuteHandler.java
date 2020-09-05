@@ -1,8 +1,8 @@
 package com.zzsong.job.scheduler.core.dispatch.handler;
 
 import com.zzsong.job.common.constants.TriggerTypeEnum;
-import com.zzsong.job.scheduler.core.admin.entity.JobInstance;
-import com.zzsong.job.scheduler.core.admin.entity.vo.DispatchJobView;
+import com.zzsong.job.scheduler.core.admin.db.entity.JobInstanceDo;
+import com.zzsong.job.scheduler.core.admin.pojo.JobView;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -22,8 +22,8 @@ public interface ExecuteHandler {
      * @author 宋志宗
      * @date 2020/8/28 10:23 下午
      */
-    void execute(@Nonnull JobInstance instance,
-                 @Nonnull DispatchJobView jobView,
+    void execute(@Nonnull JobInstanceDo instance,
+                 @Nonnull JobView jobView,
                  @Nonnull TriggerTypeEnum triggerType,
                  @Nullable String customExecuteParam);
 }

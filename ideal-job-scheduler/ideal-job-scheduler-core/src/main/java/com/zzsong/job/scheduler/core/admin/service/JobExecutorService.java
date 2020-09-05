@@ -8,8 +8,8 @@ import com.zzsong.job.scheduler.api.dto.req.CreateExecutorArgs;
 import com.zzsong.job.scheduler.api.dto.req.QueryExecutorArgs;
 import com.zzsong.job.scheduler.api.dto.req.UpdateExecutorArgs;
 import com.zzsong.job.scheduler.api.dto.rsp.ExecutorInfoRsp;
-import com.zzsong.job.scheduler.core.admin.entity.JobExecutor;
-import com.zzsong.job.scheduler.core.admin.repository.JobExecutorRepository;
+import com.zzsong.job.scheduler.core.admin.db.entity.JobExecutorDo;
+import com.zzsong.job.scheduler.core.admin.db.repository.JobExecutorRepository;
 import com.zzsong.job.scheduler.core.converter.ExecutorConverter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -47,14 +47,15 @@ public class JobExecutorService {
 
     @Nonnull
     @CachePut(value = CACHE_NAME, key = "#result.executorId")
-    public JobExecutor create(@Nonnull CreateExecutorArgs args) {
+    public JobExecutorDo create(@Nonnull CreateExecutorArgs args) {
         String appName = args.getAppName();
         String title = args.getTitle();
-        JobExecutor byAppName = jobExecutorRepository.findTopByAppName(appName);
+        JobExecutorDo byAppName = jobExecutorRepository.findTopByAppName(appName);
         if (byAppName != null) {
+            log.info("appName: {} 已存在", appName);
             throw new VisibleException("appName已存在");
         }
-        JobExecutor jobExecutor = new JobExecutor();
+        JobExecutorDo jobExecutor = new JobExecutorDo();
         jobExecutor.setAppName(appName);
         jobExecutor.setTitle(title);
         jobExecutorRepository.save(jobExecutor);
@@ -63,16 +64,16 @@ public class JobExecutorService {
 
     @Nonnull
     @CachePut(value = CACHE_NAME, key = "#updateArgs.executorId")
-    public JobExecutor update(@Nonnull UpdateExecutorArgs updateArgs) {
+    public JobExecutorDo update(@Nonnull UpdateExecutorArgs updateArgs) {
         Long executorId = updateArgs.getExecutorId();
         String appName = updateArgs.getAppName();
         String title = updateArgs.getTitle();
-        JobExecutor byAppName = jobExecutorRepository.findTopByAppName(appName);
+        JobExecutorDo byAppName = jobExecutorRepository.findTopByAppName(appName);
         if (byAppName != null && !byAppName.getExecutorId().equals(executorId)) {
             log.info("appName: {} 已被: {} 使用", appName, byAppName.getExecutorId());
             throw new VisibleException("appName已被使用");
         }
-        JobExecutor executor = jobExecutorRepository.findById(executorId)
+        JobExecutorDo executor = jobExecutorRepository.findById(executorId)
                 .orElseThrow(() -> {
                     log.info("执行器: {} 不存在", executorId);
                     return new VisibleException("执行器不存在");
@@ -89,7 +90,7 @@ public class JobExecutorService {
         if (exists) {
             throw new VisibleException("该执行器存在定时任务");
         }
-        JobExecutor jobExecutor = jobExecutorRepository
+        JobExecutorDo jobExecutor = jobExecutorRepository
                 .findById(executorId).orElse(null);
         if (jobExecutor != null) {
             jobExecutorRepository.delete(jobExecutor);
@@ -103,7 +104,7 @@ public class JobExecutorService {
                                             @Nonnull Paging paging) {
         String appName = args.getAppName();
         String title = args.getTitle();
-        Page<JobExecutor> page = jobExecutorRepository.findAll((root, cq, cb) -> {
+        Page<JobExecutorDo> page = jobExecutorRepository.findAll((root, cq, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (StringUtils.isNotBlank(appName)) {
                 predicates.add(cb.like(root.get("appName"), appName + "%"));
@@ -118,7 +119,7 @@ public class JobExecutorService {
 
     @Nullable
     @Cacheable(value = CACHE_NAME, key = "#executorId")
-    public JobExecutor loadById(long executorId) {
+    public JobExecutorDo loadById(long executorId) {
         return jobExecutorRepository.findById(executorId).orElse(null);
     }
 }

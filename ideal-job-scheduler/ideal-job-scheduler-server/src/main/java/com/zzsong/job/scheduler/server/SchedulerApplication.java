@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @EnableJpaRepositories(basePackages = {"com.zzsong.job.scheduler.core"})
 @EntityScan(basePackages = {"com.zzsong.job.scheduler.core"})
-@SpringBootApplication(scanBasePackages = "com.zzsong")
+@SpringBootApplication(scanBasePackages = "com.zzsong.job")
 @EnableCaching
 public class SchedulerApplication {
     public static void main(String[] args) {

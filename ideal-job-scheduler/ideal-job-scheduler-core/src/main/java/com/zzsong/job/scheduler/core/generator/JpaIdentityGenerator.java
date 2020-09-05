@@ -11,12 +11,10 @@ import java.io.Serializable;
  * @author 宋志宗
  * @date 2020/7/14
  */
-@Component
 public class JpaIdentityGenerator extends IdentityGenerator {
     private static IDGenerator idGenerator;
 
-    @Autowired
-    public void setIDGenerator(IDGenerator idGenerator) {
+    public static void setIDGenerator(IDGenerator idGenerator) {
         JpaIdentityGenerator.idGenerator = idGenerator;
     }
 

@@ -10,10 +10,10 @@ import com.zzsong.job.scheduler.api.dto.req.CreateJobArgs;
 import com.zzsong.job.scheduler.api.dto.req.QueryJobArgs;
 import com.zzsong.job.scheduler.api.dto.req.UpdateJobArgs;
 import com.zzsong.job.scheduler.api.dto.rsp.JobInfoRsp;
-import com.zzsong.job.scheduler.core.admin.entity.JobExecutor;
-import com.zzsong.job.scheduler.core.admin.entity.JobInfo;
-import com.zzsong.job.scheduler.core.admin.entity.vo.DispatchJobView;
-import com.zzsong.job.scheduler.core.admin.repository.JobInfoRepository;
+import com.zzsong.job.scheduler.core.admin.db.entity.JobExecutorDo;
+import com.zzsong.job.scheduler.core.admin.db.entity.JobInfoDo;
+import com.zzsong.job.scheduler.core.admin.pojo.JobView;
+import com.zzsong.job.scheduler.core.admin.db.repository.JobInfoRepository;
 import com.zzsong.job.scheduler.core.converter.JobInfoConverter;
 import com.zzsong.job.scheduler.core.dispatch.JobDispatch;
 import com.zzsong.job.scheduler.core.utils.CronExpression;
@@ -68,12 +68,12 @@ public class JobService {
         long executorId = createJobArgs.getExecutorId();
         boolean autoStart = createJobArgs.isAutoStart();
         String cron = createJobArgs.getCron();
-        JobExecutor jobExecutor = jobExecutorService.loadById(executorId);
+        JobExecutorDo jobExecutor = jobExecutorService.loadById(executorId);
         if (jobExecutor == null) {
             log.info("新建任务失败, 执行器: {} 不存在", executorId);
             throw new VisibleException(CommonResMsg.NOT_FOUND, "执行器不存在");
         }
-        JobInfo jobInfo = JobInfoConverter.fromCreateJobArgs(createJobArgs);
+        JobInfoDo jobInfo = JobInfoConverter.fromCreateJobArgs(createJobArgs);
         if (StringUtils.isNotBlank(cron)) {
             boolean validExpression = CronExpression.isValidExpression(cron);
             if (!validExpression) {
@@ -81,7 +81,7 @@ public class JobService {
             }
             if (autoStart) {
                 long nextTriggerTime = getNextTriggerTime(cron);
-                jobInfo.setJobStatus(JobInfo.JOB_START);
+                jobInfo.setJobStatus(JobInfoDo.JOB_START);
                 jobInfo.setNextTriggerTime(nextTriggerTime);
             }
         }
@@ -99,7 +99,7 @@ public class JobService {
     public void updateJob(@Nonnull UpdateJobArgs args) {
         long jobId = args.getJobId();
         String cron = args.getCron();
-        JobInfo jobInfo = jobInfoRepository.findById(jobId)
+        JobInfoDo jobInfo = jobInfoRepository.findById(jobId)
                 .orElseThrow(() -> {
                     log.info("任务: {} 不存在", jobId);
                     return new VisibleException(CommonResMsg.NOT_FOUND, "任务不存在");
@@ -110,12 +110,12 @@ public class JobService {
             if (!validExpression) {
                 throw new VisibleException(CommonResMsg.BAD_REQUEST, "cron表达式不合法");
             }
-            if (jobInfo.getJobStatus() == JobInfo.JOB_START) {
+            if (jobInfo.getJobStatus() == JobInfoDo.JOB_START) {
                 long nextTriggerTime = getNextTriggerTime(cron);
                 jobInfo.setNextTriggerTime(nextTriggerTime);
             }
         } else {
-            jobInfo.setJobStatus(JobInfo.JOB_STOP);
+            jobInfo.setJobStatus(JobInfoDo.JOB_STOP);
         }
         jobInfoRepository.save(jobInfo);
     }
@@ -128,7 +128,7 @@ public class JobService {
      * @date 2020/8/26 8:49 下午
      */
     public void removeJob(long jobId) {
-        JobInfo jobInfo = jobInfoRepository.findById(jobId).orElse(null);
+        JobInfoDo jobInfo = jobInfoRepository.findById(jobId).orElse(null);
         if (jobInfo == null) {
             log.info("任务: {} 不存在", jobId);
             return;
@@ -157,7 +157,7 @@ public class JobService {
         String customTag = args.getCustomTag();
         String businessId = args.getBusinessId();
 
-        Page<JobInfo> page = jobInfoRepository.findAll((root, cq, cb) -> {
+        Page<JobInfoDo> page = jobInfoRepository.findAll((root, cq, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (executorId != null) {
                 predicates.add(cb.equal(root.get("executorId"), executorId));
@@ -199,12 +199,12 @@ public class JobService {
      * @date 2020/8/20 4:38 下午
      */
     public void enableJob(long jobId) {
-        JobInfo jobInfo = jobInfoRepository.findById(jobId)
+        JobInfoDo jobInfo = jobInfoRepository.findById(jobId)
                 .orElseThrow(() -> {
                     log.info("任务: {} 不存在", jobId);
                     return new VisibleException(CommonResMsg.NOT_FOUND, "任务不存在");
                 });
-        if (jobInfo.getJobStatus() == JobInfo.JOB_START) {
+        if (jobInfo.getJobStatus() == JobInfoDo.JOB_START) {
             log.info("任务: {} 正在在运行中", jobId);
             return;
         }
@@ -214,7 +214,7 @@ public class JobService {
             throw new VisibleException(CommonResMsg.BAD_REQUEST, "cron表达式为空");
         }
         long nextTriggerTime = getNextTriggerTime(cron);
-        jobInfo.setJobStatus(JobInfo.JOB_START);
+        jobInfo.setJobStatus(JobInfoDo.JOB_START);
         jobInfo.setLastTriggerTime(0);
         jobInfo.setNextTriggerTime(nextTriggerTime);
         jobInfoRepository.save(jobInfo);
@@ -228,23 +228,23 @@ public class JobService {
      * @date 2020/8/20 4:38 下午
      */
     public void disableJob(long jobId) {
-        JobInfo jobInfo = jobInfoRepository.findById(jobId)
+        JobInfoDo jobInfo = jobInfoRepository.findById(jobId)
                 .orElseThrow(() -> {
                     log.info("任务: {} 不存在", jobId);
                     return new VisibleException(CommonResMsg.NOT_FOUND, "任务不存在");
                 });
-        if (jobInfo.getJobStatus() == JobInfo.JOB_STOP) {
+        if (jobInfo.getJobStatus() == JobInfoDo.JOB_STOP) {
             log.info("任务: {} 为停止状态", jobId);
             return;
         }
-        jobInfo.setJobStatus(JobInfo.JOB_STOP);
+        jobInfo.setJobStatus(JobInfoDo.JOB_STOP);
         jobInfo.setLastTriggerTime(0);
         jobInfo.setNextTriggerTime(0);
         jobInfoRepository.save(jobInfo);
     }
 
     public void triggerJob(long jobId, @Nullable String customExecuteParam) {
-        DispatchJobView dispatchJobView = jobInfoRepository.findDispatchJobViewById(jobId);
+        JobView dispatchJobView = jobInfoRepository.findDispatchJobViewById(jobId);
         if (dispatchJobView == null) {
             log.info("任务: {} 不存在", jobId);
             throw new VisibleException(CommonResMsg.NOT_FOUND, "任务不存在");
@@ -260,10 +260,10 @@ public class JobService {
      * @return 待执行任务列表
      * @date 2020/8/24 8:46 下午
      */
-    public List<DispatchJobView> loadScheduleJobViews(long maxNextTime, int count) {
+    public List<JobView> loadScheduleJobViews(long maxNextTime, int count) {
         Sort sort = Sort.by("jobId").ascending();
         PageRequest pageRequest = PageRequest.of(0, count, sort);
-        int jobStart = JobInfo.JOB_START;
+        int jobStart = JobInfoDo.JOB_START;
         return jobInfoRepository.loadScheduleJobViews(jobStart, maxNextTime, pageRequest);
     }
 
@@ -271,7 +271,7 @@ public class JobService {
         return jobInfoRepository.existsByExecutorId(executorId);
     }
 
-    public void batchUpdateTriggerInfo(List<DispatchJobView> viewList) {
+    public void batchUpdateTriggerInfo(List<JobView> viewList) {
         jobInfoRepository.batchUpdateTriggerInfo(viewList);
     }
 

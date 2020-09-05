@@ -3,6 +3,7 @@ package com.zzsong.job.worker.socket.rsocket;
 import com.zzsong.job.common.message.payload.LoginMessage;
 import com.zzsong.job.common.message.payload.TaskCallback;
 import com.zzsong.job.common.message.payload.TaskParam;
+import com.zzsong.job.common.utils.JsonUtils;
 import com.zzsong.job.common.worker.RemoteTaskWorker;
 import io.rsocket.SocketAcceptor;
 import lombok.Getter;
@@ -75,10 +76,6 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
         this.weight = Math.max(weight, 1);
     }
 
-    public void startWorker() {
-        this.start();
-    }
-
     private synchronized void startSocket() {
         if (destroyed) {
             log.info("RSocketRemoteTaskWorker is destroyed, schedulerAddress: {}:{}", ip, port);
@@ -146,6 +143,14 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
         running = true;
     }
 
+    public void startWorker() {
+        this.start();
+    }
+
+    private void restartSocket() {
+        restartNoticeQueue.offer(true);
+    }
+
     @Override
     public void run() {
         startSocket();
@@ -170,8 +175,9 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
     }
 
     @Override
+    @MessageMapping("execute")
     public void execute(@Nonnull TaskParam param) {
-
+        log.info("execute: {}", JsonUtils.toJsonString(param));
     }
 
     @Nonnull
@@ -188,18 +194,15 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
                 && !rsocketRequester.rsocket().isDisposed();
     }
 
-
-
-
-    private void restartSocket() {
-        restartNoticeQueue.offer(true);
-    }
-
-
-    @MessageMapping("client-status")
-    public Flux<String> statusUpdate(String status) {
-        log.info("Connection {}", status);
-        return Flux.interval(Duration.ofSeconds(5)).map(index -> String.valueOf(Runtime.getRuntime().freeMemory()));
+    @Override
+    public void destroy() {
+        if (destroyed) {
+            return;
+        }
+        destroyed = true;
+        rsocketRequester.rsocket().dispose();
+        this.interrupt();
+        log.info("RSocketRemoteTaskWorker destroy, schedulerAddress: {}:{}", ip, port);
     }
 
     @MessageMapping("interrupt")

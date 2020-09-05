@@ -1,5 +1,6 @@
 package com.zzsong.job.scheduler.core.admin.controller;
 
+import com.zzsong.job.common.exception.VisibleException;
 import com.zzsong.job.common.transfer.Paging;
 import com.zzsong.job.scheduler.api.dto.req.CreateJobArgs;
 import com.zzsong.job.scheduler.api.dto.req.QueryJobArgs;
@@ -8,11 +9,15 @@ import com.zzsong.job.scheduler.api.dto.rsp.JobInfoRsp;
 import com.zzsong.job.scheduler.core.admin.service.JobService;
 import com.zzsong.job.common.transfer.Res;
 import com.zzsong.job.scheduler.api.client.JobClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -24,15 +29,18 @@ import java.util.List;
  * @author 宋志宗
  * @date 2020/8/20
  */
-@Validated
 @RestController
 @RequestMapping("/job")
 public class JobController implements JobClient {
+    private static final Logger log = LoggerFactory.getLogger(JobController.class);
 
     private final JobService jobService;
+    private final Scheduler blockScheduler;
 
-    public JobController(JobService jobService) {
+    public JobController(JobService jobService,
+                         Scheduler blockScheduler) {
         this.jobService = jobService;
+        this.blockScheduler = blockScheduler;
     }
 
     /**
@@ -46,10 +54,16 @@ public class JobController implements JobClient {
     @Nonnull
     @Override
     @PostMapping("/create")
-    public Res<Long> create(@Validated @RequestBody
-                            @Nonnull CreateJobArgs createJobArgs) {
-        long jobId = jobService.createJob(createJobArgs);
-        return Res.data(jobId);
+    public Mono<Res<Long>> create(@RequestBody @Nonnull CreateJobArgs createJobArgs) {
+        return Mono.just(createJobArgs).publishOn(blockScheduler)
+                .map(a -> {
+                    long jobId = jobService.createJob(a.checkArgs());
+                    return Res.data(jobId);
+                })
+                .onErrorResume(throwable -> {
+                    log.info("exception: {}", throwable.getMessage());
+                    return Mono.just(Res.err(throwable.getMessage()));
+                });
     }
 
     /**
@@ -63,10 +77,17 @@ public class JobController implements JobClient {
     @Nonnull
     @Override
     @PostMapping("/update")
-    public Res<Void> update(@Validated @RequestBody
-                            @Nonnull UpdateJobArgs updateJobArgs) {
-        jobService.updateJob(updateJobArgs);
-        return Res.success();
+    public Mono<Res<Void>> update(@Validated @RequestBody
+                                  @Nonnull UpdateJobArgs updateJobArgs) {
+        return Mono.just(updateJobArgs).publishOn(blockScheduler)
+                .map(a -> {
+                    jobService.updateJob(a.checkArgs());
+                    return Res.<Void>success();
+                })
+                .onErrorResume(throwable -> {
+                    log.info("exception: {}", throwable.getMessage());
+                    return Mono.just(Res.err(throwable.getMessage()));
+                });
     }
 
     /**
@@ -80,9 +101,19 @@ public class JobController implements JobClient {
     @Nonnull
     @Override
     @PostMapping("/remove")
-    public Res<Void> remove(@Nonnull Long jobId) {
-        jobService.removeJob(jobId);
-        return Res.success();
+    public Mono<Res<Void>> remove(long jobId) {
+        return Mono.just(jobId).publishOn(blockScheduler)
+                .map(id -> {
+                    if (id < 1) {
+                        throw new VisibleException("任务id不合法");
+                    }
+                    jobService.removeJob(id);
+                    return Res.<Void>success();
+                })
+                .onErrorResume(throwable -> {
+                    log.info("exception: {}", throwable.getMessage());
+                    return Mono.just(Res.err(throwable.getMessage()));
+                });
     }
 
     /**
@@ -97,17 +128,16 @@ public class JobController implements JobClient {
     @Nonnull
     @Override
     @PostMapping("/query")
-    public Res<List<JobInfoRsp>> query(@RequestBody @Nullable QueryJobArgs args,
-                                       @Nullable Paging paging) {
-        if (args == null) {
-            args = new QueryJobArgs();
-        }
-        if (paging == null) {
-            paging = Paging.of(1, 10);
-        }
+    public Mono<Res<List<JobInfoRsp>>> query(@RequestBody @Nonnull QueryJobArgs args,
+                                             @Nonnull Paging paging) {
         paging.cleanOrders();
         paging.descBy("jobId");
-        return jobService.query(args, paging);
+        return Mono.just(args).publishOn(blockScheduler)
+                .map(e -> jobService.query(args, paging))
+                .onErrorResume(throwable -> {
+                    log.info("exception: {}", throwable.getMessage());
+                    return Mono.just(Res.err(throwable.getMessage()));
+                });
     }
 
     /**
@@ -121,9 +151,19 @@ public class JobController implements JobClient {
     @Nonnull
     @Override
     @PostMapping("/enable")
-    public Res<Void> enable(@Nonnull Long jobId) {
-        jobService.enableJob(jobId);
-        return Res.success();
+    public Mono<Res<Void>> enable(long jobId) {
+        return Mono.just(jobId).publishOn(blockScheduler)
+                .map(id -> {
+                    if (id < 1) {
+                        throw new VisibleException("任务id不合法");
+                    }
+                    jobService.enableJob(id);
+                    return Res.<Void>success();
+                })
+                .onErrorResume(throwable -> {
+                    log.info("exception: {}", throwable.getMessage());
+                    return Mono.just(Res.err(throwable.getMessage()));
+                });
     }
 
     /**
@@ -137,9 +177,19 @@ public class JobController implements JobClient {
     @Nonnull
     @Override
     @PostMapping("/disable")
-    public Res<Void> disable(@Nonnull Long jobId) {
-        jobService.disableJob(jobId);
-        return Res.success();
+    public Mono<Res<Void>> disable(long jobId) {
+        return Mono.just(jobId).publishOn(blockScheduler)
+                .map(id -> {
+                    if (id < 1) {
+                        throw new VisibleException("任务id不合法");
+                    }
+                    jobService.disableJob(id);
+                    return Res.<Void>success();
+                })
+                .onErrorResume(throwable -> {
+                    log.info("exception: {}", throwable.getMessage());
+                    return Mono.just(Res.err(throwable.getMessage()));
+                });
     }
 
     /**
@@ -154,8 +204,20 @@ public class JobController implements JobClient {
     @Nonnull
     @Override
     @PostMapping("/trigger")
-    public Res<Void> trigger(@Nonnull Long jobId, @Nullable String executeParam) {
+    public Mono<Res<Void>> trigger(long jobId, @Nullable String executeParam) {
         jobService.triggerJob(jobId, executeParam);
-        return Res.success();
+
+        return Mono.just(jobId).publishOn(blockScheduler)
+                .map(id -> {
+                    if (id < 1) {
+                        throw new VisibleException("任务id不合法");
+                    }
+                    jobService.triggerJob(id, executeParam);
+                    return Res.<Void>success();
+                })
+                .onErrorResume(throwable -> {
+                    log.info("exception: {}", throwable.getMessage());
+                    return Mono.just(Res.err(throwable.getMessage()));
+                });
     }
 }

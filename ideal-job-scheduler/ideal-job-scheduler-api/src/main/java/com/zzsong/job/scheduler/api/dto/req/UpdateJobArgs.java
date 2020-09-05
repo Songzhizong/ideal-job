@@ -3,11 +3,11 @@ package com.zzsong.job.scheduler.api.dto.req;
 import com.zzsong.job.common.constants.BlockStrategyEnum;
 import com.zzsong.job.common.constants.DBDefaults;
 import com.zzsong.job.common.constants.RouteStrategyEnum;
+import com.zzsong.job.common.exception.VisibleException;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.annotation.Nonnull;
-import javax.validation.constraints.NotNull;
 
 /**
  * @author 宋志宗
@@ -20,15 +20,11 @@ public class UpdateJobArgs {
     /**
      * 任务ID
      */
-    @Nonnull
-    @NotNull(message = "jobId不能为空")
-    private Long jobId;
+    private long jobId = -1;
     /**
      * 所属执行器Id
      */
-    @Nonnull
-    @NotNull(message = "所属执行器id不能为空")
-    private Long executorId;
+    private long executorId = -1;
     /**
      * JobHandler
      */
@@ -68,4 +64,15 @@ public class UpdateJobArgs {
      */
     @Nonnull
     private String alarmEmail = DBDefaults.DEFAULT_STRING_VALUE;
+
+
+    public UpdateJobArgs checkArgs() {
+        if (jobId < 1) {
+            throw new VisibleException("jobId不合法");
+        }
+        if (executorId < 1) {
+            throw new VisibleException("executorId不合法");
+        }
+        return this;
+    }
 }

@@ -1,7 +1,7 @@
 package com.zzsong.job.scheduler.core.admin.service;
 
-import com.zzsong.job.scheduler.core.admin.entity.JobInstance;
-import com.zzsong.job.scheduler.core.admin.repository.JobInstanceRepository;
+import com.zzsong.job.scheduler.core.admin.db.entity.JobInstanceDo;
+import com.zzsong.job.scheduler.core.admin.db.repository.JobInstanceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ public class JobInstanceService {
     }
 
     @Nonnull
-    public JobInstance saveInstance(@Nonnull JobInstance instance) {
+    public JobInstanceDo saveInstance(@Nonnull JobInstanceDo instance) {
         String result = instance.getResult();
         if (result.length() > MAX_RESULT_LENGTH) {
             instance.setResult(result.substring(0, MAX_RESULT_LENGTH - 3) + "...");
@@ -35,15 +35,15 @@ public class JobInstanceService {
     }
 
     @Nullable
-    public JobInstance getJobInstance(long instanceId) {
+    public JobInstanceDo getJobInstance(long instanceId) {
         return jobInstanceRepository.findById(instanceId).orElse(null);
     }
 
-    public void updateDispatchInfo(@Nonnull JobInstance instance) {
+    public void updateDispatchInfo(@Nonnull JobInstanceDo instance) {
         jobInstanceRepository.updateDispatchInfo(instance);
     }
 
-    public int updateWhenTriggerCallback(@Nonnull JobInstance instance) {
+    public int updateWhenTriggerCallback(@Nonnull JobInstanceDo instance) {
         return jobInstanceRepository.updateWhenTriggerCallback(instance);
     }
 

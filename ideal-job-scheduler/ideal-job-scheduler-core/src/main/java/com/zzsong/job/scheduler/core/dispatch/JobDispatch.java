@@ -6,8 +6,8 @@ import com.zzsong.job.common.constants.TriggerTypeEnum;
 import com.zzsong.job.common.exception.VisibleException;
 import com.zzsong.job.common.message.payload.TaskCallback;
 import com.zzsong.job.common.utils.DateTimes;
-import com.zzsong.job.scheduler.core.admin.entity.JobInstance;
-import com.zzsong.job.scheduler.core.admin.entity.vo.DispatchJobView;
+import com.zzsong.job.scheduler.core.admin.db.entity.JobInstanceDo;
+import com.zzsong.job.scheduler.core.admin.pojo.JobView;
 import com.zzsong.job.scheduler.core.admin.service.JobInstanceService;
 import com.zzsong.job.scheduler.core.conf.JobSchedulerConfig;
 import com.zzsong.job.scheduler.core.dispatch.handler.ExecuteHandler;
@@ -37,16 +37,16 @@ public class JobDispatch {
         this.jobSchedulerConfig = jobSchedulerConfig;
     }
 
-    public void dispatch(@Nonnull DispatchJobView jobView,
+    public void dispatch(@Nonnull JobView jobView,
                          @Nonnull TriggerTypeEnum triggerType,
                          @Nullable String customExecuteParam) {
         ExecuteTypeEnum executeType = jobView.getExecuteType();
         ExecuteHandler handler = ExecuteHandlerFactory.getHandler(executeType);
         if (handler == null) {
-            log.error("triggerType: {} 没有对应的执行处理器", triggerType);
-            throw new VisibleException("triggerType: $triggerType 没有对应的执行处理器");
+            log.error("triggerType: {} 没有对应的执行处理器", executeType);
+            throw new VisibleException("triggerType: " + executeType + " 没有对应的执行处理器");
         }
-        JobInstance instance = JobInstance.createInitialized();
+        JobInstanceDo instance = JobInstanceDo.createInitialized();
         instance.setJobId(jobView.getJobId());
         instance.setExecutorId(jobView.getExecutorId());
         instance.setTriggerType(triggerType);
@@ -62,7 +62,7 @@ public class JobDispatch {
             handler.execute(instance, jobView, triggerType, customExecuteParam);
         } catch (Exception e) {
             String errMsg = e.getClass().getName() + ": " + e.getMessage();
-            instance.setDispatchStatus(JobInstance.STATUS_FAIL);
+            instance.setDispatchStatus(JobInstanceDo.STATUS_FAIL);
             instance.setDispatchMsg(errMsg);
             log.info("任务: {} 调度异常: {}", jobView.getJobId(), errMsg);
         } finally {
@@ -75,7 +75,7 @@ public class JobDispatch {
         // triggerLog 设置参数务必和上述方法中的参数一致
         // 收到执行回调直接更新日志中变化的部分即可
         int handleStatus = taskCallback.getHandleStatus();
-        JobInstance instance = new JobInstance();
+        JobInstanceDo instance = new JobInstanceDo();
         instance.setInstanceId(taskCallback.getInstanceId());
         instance.setHandleTime(taskCallback.getHandleTime());
         instance.setFinishedTime(taskCallback.getFinishedTime());

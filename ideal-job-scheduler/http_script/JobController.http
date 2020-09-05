@@ -1,10 +1,11 @@
 ### 新建任务
-POST http://{{ip}}:{{port}}/job/create
+POST http://127.0.0.1:8804/job/create
 Content-Type: application/json
 
 {
-  "autoStart": true,
-  "executorId": 131039063519002624,
+  "autoStart": false,
+  "executorId": 133458998882992128,
+  "executeType": "JOB_HANDLER",
   "executorHandler": "demoJobHandler",
   "executeParam": "test",
   "routeStrategy": "CONSISTENT_HASH",
@@ -57,7 +58,7 @@ jobId=130478053187919872
 
 
 ### 触发任务
-POST http://{{ip}}:{{port}}/job/trigger
+POST http://127.0.0.1:8804/job/trigger
 Content-Type: application/x-www-form-urlencoded
 
-executeParam=sadsaasdfds&jobId=130479384879439872
+executeParam=sadsaasdfds&jobId=133459025143529472

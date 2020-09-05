@@ -29,6 +29,8 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.web.socket.server.standard.ServerEndpointExporter;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
@@ -189,5 +191,10 @@ public class JobSchedulerConfig {
                         .SerializationPair.fromSerializer(serializer))
                 .entryTtl(Duration.ofHours(36));
         return new RedisCacheManager(redisCacheWriter, redisCacheConfiguration);
+    }
+
+    @Bean
+    public Scheduler blockScheduler(ExecutorService jobCallbackThreadPool) {
+        return Schedulers.fromExecutorService(jobCallbackThreadPool);
     }
 }

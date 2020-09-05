@@ -6,10 +6,10 @@ import com.zzsong.job.scheduler.api.dto.req.CreateJobArgs;
 import com.zzsong.job.scheduler.api.dto.req.QueryJobArgs;
 import com.zzsong.job.scheduler.api.dto.req.UpdateJobArgs;
 import com.zzsong.job.scheduler.api.dto.rsp.JobInfoRsp;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -29,7 +29,7 @@ public interface JobClient {
      * @date 2020/8/26 7:36 下午
      */
     @Nonnull
-    Res<Long> create(@Nonnull CreateJobArgs createJobArgs);
+    Mono<Res<Long>> create(@Nonnull CreateJobArgs createJobArgs);
 
     /**
      * 更新任务信息
@@ -40,7 +40,7 @@ public interface JobClient {
      * @date 2020/8/26 8:48 下午
      */
     @Nonnull
-    Res<Void> update(@Nonnull UpdateJobArgs updateJobArgs);
+    Mono<Res<Void>> update(@Nonnull UpdateJobArgs updateJobArgs);
 
     /**
      * 移除任务
@@ -51,7 +51,7 @@ public interface JobClient {
      * @date 2020/8/26 8:49 下午
      */
     @Nonnull
-    Res<Void> remove(@NotNull(message = "任务id不能为空") @Nonnull Long jobId);
+    Mono<Res<Void>> remove(long jobId);
 
     /**
      * 查询任务信息
@@ -63,8 +63,8 @@ public interface JobClient {
      * @date 2020/8/26 8:51 下午
      */
     @Nonnull
-    Res<List<JobInfoRsp>> query(@Nullable QueryJobArgs args,
-                                @Nullable Paging paging);
+    Mono<Res<List<JobInfoRsp>>> query(@Nonnull QueryJobArgs args,
+                                      @Nonnull Paging paging);
 
     /**
      * 启用任务
@@ -75,7 +75,7 @@ public interface JobClient {
      * @date 2020/8/20 4:38 下午
      */
     @Nonnull
-    Res<Void> enable(@NotNull(message = "任务id不能为空") @Nonnull Long jobId);
+    Mono<Res<Void>> enable(long jobId);
 
     /**
      * 停用任务
@@ -86,7 +86,7 @@ public interface JobClient {
      * @date 2020/8/20 4:38 下午
      */
     @Nonnull
-    Res<Void> disable(@NotNull(message = "任务id不能为空") @Nonnull Long jobId);
+    Mono<Res<Void>> disable(long jobId);
 
     /**
      * 触发任务
@@ -98,7 +98,5 @@ public interface JobClient {
      * @date 2020/8/20 4:18 下午
      */
     @Nonnull
-    Res<Void> trigger(@NotNull(message = "任务id不能为空")
-                      @Nonnull Long jobId,
-                      @Nullable String executeParam);
+    Mono<Res<Void>> trigger(long jobId, @Nullable String executeParam);
 }

@@ -1,6 +1,6 @@
-package com.zzsong.job.scheduler.core.admin.repository;
+package com.zzsong.job.scheduler.core.admin.db.repository;
 
-import com.zzsong.job.scheduler.core.admin.entity.JobExecutor;
+import com.zzsong.job.scheduler.core.admin.db.entity.JobExecutorDo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.lang.Nullable;
@@ -12,9 +12,9 @@ import javax.annotation.Nonnull;
  * @date 2020/9/2
  */
 public interface JobExecutorRepository
-        extends JpaRepository<JobExecutor, Long>,
-        JpaSpecificationExecutor<JobExecutor> {
+        extends JpaRepository<JobExecutorDo, Long>,
+        JpaSpecificationExecutor<JobExecutorDo> {
 
     @Nullable
-    JobExecutor findTopByAppName(@Nonnull String appName);
+    JobExecutorDo findTopByAppName(@Nonnull String appName);
 }

@@ -9,8 +9,8 @@ import com.zzsong.job.common.http.HttpRequest;
 import com.zzsong.job.common.http.HttpScriptUtils;
 import com.zzsong.job.common.utils.JsonUtils;
 import com.zzsong.job.common.utils.ReactorUtils;
-import com.zzsong.job.scheduler.core.admin.entity.JobInstance;
-import com.zzsong.job.scheduler.core.admin.entity.vo.DispatchJobView;
+import com.zzsong.job.scheduler.core.admin.db.entity.JobInstanceDo;
+import com.zzsong.job.scheduler.core.admin.pojo.JobView;
 import com.zzsong.job.scheduler.core.admin.service.JobInstanceService;
 import com.zzsong.job.scheduler.core.dispatch.handler.ExecuteHandler;
 import org.apache.commons.lang3.StringUtils;
@@ -51,8 +51,8 @@ public abstract class BaseHttpExecuteHandler implements ExecuteHandler {
 
     @SuppressWarnings("DuplicatedCode")
     @Override
-    public final void execute(@Nonnull JobInstance instance,
-                              @Nonnull DispatchJobView jobView,
+    public final void execute(@Nonnull JobInstanceDo instance,
+                              @Nonnull JobView jobView,
                               @Nonnull TriggerTypeEnum triggerType,
                               @Nullable String customExecuteParam) {
         String executeParam = customExecuteParam;
@@ -113,7 +113,7 @@ public abstract class BaseHttpExecuteHandler implements ExecuteHandler {
             subscriptResponse(bodyToMono, instance, handleTime);
         } else {
             for (String uri : chooseServer) {
-                JobInstance jobInstance = JobInstance.createInitialized();
+                JobInstanceDo jobInstance = JobInstanceDo.createInitialized();
                 jobInstance.setParentId(instance.getInstanceId());
                 jobInstance.setJobId(jobView.getJobId());
                 jobInstance.setExecutorId(jobView.getExecutorId());
@@ -133,7 +133,7 @@ public abstract class BaseHttpExecuteHandler implements ExecuteHandler {
     }
 
     private void subscriptResponse(@Nonnull Mono<String> bodyToMono,
-                                   @Nonnull JobInstance jobInstance,
+                                   @Nonnull JobInstanceDo jobInstance,
                                    long handleTime) {
         bodyToMono.onErrorResume(e -> {
             String errMsg = e.getClass().getName() + ": " + e.getMessage();

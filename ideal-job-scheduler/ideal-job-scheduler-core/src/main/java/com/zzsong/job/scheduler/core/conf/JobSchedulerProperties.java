@@ -21,10 +21,6 @@ public class JobSchedulerProperties {
      * 任务实例保存天数
      */
     private int jobInstanceStorageDay = 30;
-    /**
-     * 建立连接后等待客户端注册的时间
-     */
-    private int weightRegisterSeconds = 10;
     @Nonnull
     private String accessToken = "";
 

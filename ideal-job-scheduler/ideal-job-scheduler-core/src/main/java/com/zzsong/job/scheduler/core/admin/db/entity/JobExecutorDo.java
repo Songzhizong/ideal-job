@@ -1,4 +1,4 @@
-package com.zzsong.job.scheduler.core.admin.entity;
+package com.zzsong.job.scheduler.core.admin.db.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,7 +36,7 @@ import java.time.LocalDateTime;
 @SQLDelete(sql = "update ideal_job_executor set deleted = 1 where executor_id = ?")
 @Where(clause = "deleted = 0")
 @EntityListeners(AuditingEntityListener.class)
-public class JobExecutor {
+public class JobExecutorDo {
     /**
      * 执行器Id
      */

@@ -1,7 +1,7 @@
-package com.zzsong.job.scheduler.core.admin.repository;
+package com.zzsong.job.scheduler.core.admin.db.repository;
 
-import com.zzsong.job.scheduler.core.admin.entity.JobInfo;
-import com.zzsong.job.scheduler.core.admin.entity.vo.DispatchJobView;
+import com.zzsong.job.scheduler.core.admin.db.entity.JobInfoDo;
+import com.zzsong.job.scheduler.core.admin.pojo.JobView;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -17,8 +17,8 @@ import java.util.List;
  * @date 2020/9/2
  */
 public interface JobInfoRepository
-        extends JpaRepository<JobInfo, Long>,
-        JpaSpecificationExecutor<JobInfo>, JobInfoRepositoryCustom {
+        extends JpaRepository<JobInfoDo, Long>,
+        JpaSpecificationExecutor<JobInfoDo>, JobInfoRepositoryCustom {
 
 
     @Nullable
@@ -26,20 +26,20 @@ public interface JobInfoRepository
             "job.jobId, job.executorId, job.cron, job.routeStrategy, job.executeType, " +
             "job.executorHandler, job.executeParam, job.blockStrategy, job.retryCount, " +
             "job.jobStatus,job.lastTriggerTime,job.nextTriggerTime)" +
-            " from JobInfo job" +
+            " from JobInfoDo job" +
             " where job.jobId = :jobId")
-    DispatchJobView findDispatchJobViewById(@Param("jobId") long jobId);
+    JobView findDispatchJobViewById(@Param("jobId") long jobId);
 
     @Nonnull
     @Query("select new com.zzsong.job.scheduler.core.admin.entity.vo.DispatchJobView(" +
             "job.jobId, job.executorId, job.cron, job.routeStrategy, job.executeType, " +
             "job.executorHandler, job.executeParam, job.blockStrategy, job.retryCount, " +
             "job.jobStatus,job.lastTriggerTime,job.nextTriggerTime)" +
-            " from JobInfo job " +
+            " from JobInfoDo job " +
             " where job.jobStatus = :jobStatus and job.nextTriggerTime <= :maxNextTime")
-    List<DispatchJobView> loadScheduleJobViews(@Param("jobStatus") int jobStatus,
-                                               @Param("maxNextTime") long maxNextTime,
-                                               @Param("pageable") Pageable pageable);
+    List<JobView> loadScheduleJobViews(@Param("jobStatus") int jobStatus,
+                                       @Param("maxNextTime") long maxNextTime,
+                                       @Param("pageable") Pageable pageable);
 
     boolean existsByExecutorId(@Param("executorId") long executorId);
 }

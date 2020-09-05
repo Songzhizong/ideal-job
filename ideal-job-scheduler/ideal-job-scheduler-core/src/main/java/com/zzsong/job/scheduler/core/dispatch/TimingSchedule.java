@@ -1,19 +1,15 @@
 package com.zzsong.job.scheduler.core.dispatch;
 
 import com.zzsong.job.common.constants.TriggerTypeEnum;
-import com.zzsong.job.scheduler.core.admin.entity.JobInfo;
-import com.zzsong.job.scheduler.core.admin.entity.vo.DispatchJobView;
+import com.zzsong.job.scheduler.core.admin.db.entity.JobInfoDo;
+import com.zzsong.job.scheduler.core.admin.pojo.JobView;
 import com.zzsong.job.scheduler.core.admin.service.JobService;
 import com.zzsong.job.scheduler.core.utils.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,15 +29,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @date 2020/9/3
  */
 @Component
-@WebListener
-public class TimingSchedule implements ServletContextListener, InitializingBean {
+public class TimingSchedule{
     public static final Logger log = LoggerFactory.getLogger(TimingSchedule.class);
     private static final String LOCK_SQL
             = "select lock_name from ideal_job_lock where lock_name = 'schedule_lock' for update";
     private static final int preReadCount = 500;
     private static final long preReadMills = 5000L;
 
-    private final ConcurrentMap<Integer, List<DispatchJobView>> ringData
+    private final ConcurrentMap<Integer, List<JobView>> ringData
             = new ConcurrentHashMap<>();
     private Thread scheduleThread;
     private Thread ringThread;
@@ -67,18 +62,6 @@ public class TimingSchedule implements ServletContextListener, InitializingBean 
         this.cronJobThreadPool = cronJobThreadPool;
     }
 
-
-    @Override
-    public void contextDestroyed(ServletContextEvent sce) {
-        // web容器销毁前先销毁定时调度器, 防止websocket连接先一步断开导致时间轮的消息没能发送出去
-        stop();
-    }
-
-    @Override
-    public void afterPropertiesSet() throws Exception {
-        start();
-    }
-
     public void start() {
         scheduleThread = new Thread(() -> {
             try {
@@ -94,13 +77,13 @@ public class TimingSchedule implements ServletContextListener, InitializingBean 
                 AtomicBoolean preReadSuc = new AtomicBoolean(true);
                 dbLock(() -> {
                     long nowTime = System.currentTimeMillis();
-                    List<DispatchJobView> jobViews = jobService
+                    List<JobView> jobViews = jobService
                             .loadScheduleJobViews(nowTime + preReadMills, preReadCount);
                     if (jobViews.isEmpty()) {
                         preReadSuc.set(false);
                     } else {
                         Date nowDate = new Date();
-                        for (DispatchJobView jobView : jobViews) {
+                        for (JobView jobView : jobViews) {
                             long nextTriggerTime = jobView.getNextTriggerTime();
                             if (nowTime > nextTriggerTime + preReadMills) {
                                 log.warn("过期任务: {}", jobView.getJobId());
@@ -109,7 +92,7 @@ public class TimingSchedule implements ServletContextListener, InitializingBean 
                                 triggerJob(jobView);
                                 refreshNextValidTime(jobView, nowDate);
                                 long newNextTriggerTime = jobView.getNextTriggerTime();
-                                if (jobView.getJobStatus() == JobInfo.JOB_START
+                                if (jobView.getJobStatus() == JobInfoDo.JOB_START
                                         && nowTime + preReadMills > newNextTriggerTime) {
                                     int ringSecond = (int) (newNextTriggerTime / 1000 % 60);
                                     pushTimeRing(ringSecond, jobView);
@@ -159,7 +142,7 @@ public class TimingSchedule implements ServletContextListener, InitializingBean 
                 int nowSecond = Calendar.getInstance().get(Calendar.SECOND);
                 for (int i = 0; i < 2; i++) {
                     int second = (nowSecond + 60 - i) % 60;
-                    List<DispatchJobView> tmpData = ringData.remove(second);
+                    List<JobView> tmpData = ringData.remove(second);
                     if (tmpData != null) {
                         tmpData.forEach(this::triggerJob);
                         tmpData.clear();
@@ -206,7 +189,7 @@ public class TimingSchedule implements ServletContextListener, InitializingBean 
         boolean hasRingData = false;
         if (!ringData.isEmpty()) {
             for (Integer second : ringData.keySet()) {
-                List<DispatchJobView> viewList = ringData.get(second);
+                List<JobView> viewList = ringData.get(second);
                 if (viewList != null && viewList.size() > 0) {
                     hasRingData = true;
                     break;
@@ -282,19 +265,19 @@ public class TimingSchedule implements ServletContextListener, InitializingBean 
         }
     }
 
-    private void pushTimeRing(int ringSecond, DispatchJobView jobView) {
-        List<DispatchJobView> viewList
+    private void pushTimeRing(int ringSecond, JobView jobView) {
+        List<JobView> viewList
                 = ringData.computeIfAbsent(ringSecond, k -> new ArrayList<>());
         viewList.add(jobView);
     }
 
-    private void triggerJob(DispatchJobView jobView) {
+    private void triggerJob(JobView jobView) {
         cronJobThreadPool.execute(() ->
                 jobDispatch.dispatch(jobView, TriggerTypeEnum.CRON, null)
         );
     }
 
-    private void refreshNextValidTime(DispatchJobView jobView, Date date) {
+    private void refreshNextValidTime(JobView jobView, Date date) {
         String cron = jobView.getCron();
         Date nextValidTimeAfter;
         try {
@@ -308,7 +291,7 @@ public class TimingSchedule implements ServletContextListener, InitializingBean 
             jobView.setLastTriggerTime(jobView.getNextTriggerTime());
             jobView.setNextTriggerTime(nextValidTimeAfter.getTime());
         } else {
-            jobView.setJobStatus(JobInfo.JOB_STOP);
+            jobView.setJobStatus(JobInfoDo.JOB_STOP);
             jobView.setLastTriggerTime(0);
             jobView.setNextTriggerTime(0);
         }

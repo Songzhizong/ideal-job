@@ -1,4 +1,4 @@
-package com.zzsong.job.scheduler.core.admin.entity;
+package com.zzsong.job.scheduler.core.admin.db.entity;
 
 import com.zzsong.job.common.constants.BlockStrategyEnum;
 import com.zzsong.job.common.constants.ExecuteTypeEnum;
@@ -46,7 +46,7 @@ import java.time.LocalDateTime;
 @SQLDelete(sql = "update ideal_job_info set deleted = 1 where job_id = ?")
 @Where(clause = "deleted = 0")
 @EntityListeners(AuditingEntityListener.class)
-public class JobInfo {
+public class JobInfoDo {
     public static final int JOB_START = 1;
     public static final int JOB_STOP = 0;
     /**

@@ -6,6 +6,7 @@ import com.zzsong.job.scheduler.core.dispatch.handler.ExecuteHandlerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
+import javax.annotation.PostConstruct;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -13,7 +14,7 @@ import java.util.concurrent.ExecutorService;
  * @date 2020/9/3
  */
 @Component("httpExecuteHandler")
-public class HttpExecuteHandler extends BaseHttpExecuteHandler {
+public final class HttpExecuteHandler extends BaseHttpExecuteHandler {
 
     public HttpExecuteHandler(@Nonnull JobInstanceService instanceService,
                               @Nonnull ExecutorService jobCallbackThreadPool) {

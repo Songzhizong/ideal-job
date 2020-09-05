@@ -32,17 +32,15 @@ public class RSocketTaskWorker implements TaskWorker {
         this.appName = appName;
         this.instanceId = instanceId;
         this.requester = requester;
-
-        this.requester.route("client-status")
-                .data("OPEN")
-                .retrieveFlux(String.class)
-                .doOnNext(s -> log.info("Client: {} Free Memory: {}.", instanceId, s))
-                .subscribe();
     }
 
     @Override
     public void execute(@Nonnull TaskParam param) {
-
+        requester.route("execute")
+                .data(param)
+                .retrieveMono(String.class)
+                .doOnNext(log::info)
+                .block();
     }
 
     @Nonnull

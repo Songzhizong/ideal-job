@@ -1,5 +1,6 @@
 package com.zzsong.job.scheduler.core.admin.controller;
 
+import com.zzsong.job.common.exception.VisibleException;
 import com.zzsong.job.common.transfer.Paging;
 import com.zzsong.job.common.transfer.Res;
 import com.zzsong.job.scheduler.api.client.ExecutorClient;
@@ -7,26 +8,31 @@ import com.zzsong.job.scheduler.api.dto.req.CreateExecutorArgs;
 import com.zzsong.job.scheduler.api.dto.req.QueryExecutorArgs;
 import com.zzsong.job.scheduler.api.dto.req.UpdateExecutorArgs;
 import com.zzsong.job.scheduler.api.dto.rsp.ExecutorInfoRsp;
-import com.zzsong.job.scheduler.core.admin.entity.JobExecutor;
+import com.zzsong.job.scheduler.core.admin.db.entity.JobExecutorDo;
 import com.zzsong.job.scheduler.core.admin.service.JobExecutorService;
-import org.springframework.validation.annotation.Validated;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 
 /**
  * @author 宋志宗
  * @date 2020/8/20
  */
-@Validated
 @RestController
 @RequestMapping("/executor")
 public class JobExecutorController implements ExecutorClient {
+    private static final Logger log = LoggerFactory.getLogger(JobExecutorController.class);
+    private final Scheduler blockScheduler;
     private final JobExecutorService service;
 
-    public JobExecutorController(JobExecutorService service) {
+    public JobExecutorController(Scheduler blockScheduler,
+                                 JobExecutorService service) {
+        this.blockScheduler = blockScheduler;
         this.service = service;
     }
 
@@ -41,11 +47,16 @@ public class JobExecutorController implements ExecutorClient {
     @Nonnull
     @Override
     @PostMapping("/create")
-    public Res<Long> create(@Validated @RequestBody
-                            @Nonnull CreateExecutorArgs args) {
-        final JobExecutor executor = service.create(args);
-        final Long executorId = executor.getExecutorId();
-        return Res.data(executorId);
+    public Mono<Res<Long>> create(@RequestBody @Nonnull CreateExecutorArgs args) {
+        return Mono.just(args).publishOn(blockScheduler)
+                .map(a -> {
+                    JobExecutorDo jobExecutor = service.create(a.checkArgs());
+                    return Res.data(jobExecutor.getExecutorId());
+                })
+                .onErrorResume(throwable -> {
+                    log.info("exception: {}", throwable.getMessage());
+                    return Mono.just(Res.err(throwable.getMessage()));
+                });
     }
 
     /**
@@ -59,10 +70,16 @@ public class JobExecutorController implements ExecutorClient {
     @Nonnull
     @Override
     @PostMapping("/update")
-    public Res<Void> update(@Validated @RequestBody
-                            @Nonnull UpdateExecutorArgs args) {
-        service.update(args);
-        return Res.success();
+    public Mono<Res<Void>> update(@RequestBody @Nonnull UpdateExecutorArgs args) {
+        return Mono.just(args).publishOn(blockScheduler)
+                .map(a -> {
+                    service.update(a.checkArgs());
+                    return Res.<Void>success();
+                })
+                .onErrorResume(throwable -> {
+                    log.info("exception: {}", throwable.getMessage());
+                    return Mono.just(Res.err(throwable.getMessage()));
+                });
     }
 
     /**
@@ -76,9 +93,19 @@ public class JobExecutorController implements ExecutorClient {
     @Nonnull
     @Override
     @PostMapping("/delete")
-    public Res<Void> delete(@Nonnull Long executorId) {
-        service.delete(executorId);
-        return Res.success();
+    public Mono<Res<Void>> delete(long executorId) {
+        return Mono.just(executorId).publishOn(blockScheduler)
+                .map(id -> {
+                    if (id < 1) {
+                        throw new VisibleException("执行器id不合法");
+                    }
+                    service.delete(id);
+                    return Res.<Void>success();
+                })
+                .onErrorResume(throwable -> {
+                    log.info("exception: {}", throwable.getMessage());
+                    return Mono.just(Res.err(throwable.getMessage()));
+                });
     }
 
     /**
@@ -93,17 +120,15 @@ public class JobExecutorController implements ExecutorClient {
     @Nonnull
     @Override
     @PostMapping("/query")
-    public Res<List<ExecutorInfoRsp>> query(@RequestBody @Nullable QueryExecutorArgs args,
-                                            @Nullable Paging paging) {
-
-        if (args == null) {
-            args = new QueryExecutorArgs();
-        }
-        if (paging == null) {
-            paging = Paging.of(1, 10);
-        }
+    public Mono<Res<List<ExecutorInfoRsp>>> query(@RequestBody @Nonnull QueryExecutorArgs args,
+                                                  @Nonnull Paging paging) {
         paging.cleanOrders();
         paging.descBy("executorId");
-        return service.query(args, paging);
+        return Mono.just(args).publishOn(blockScheduler)
+                .map(e -> service.query(args, paging))
+                .onErrorResume(throwable -> {
+                    log.info("exception: {}", throwable.getMessage());
+                    return Mono.just(Res.err(throwable.getMessage()));
+                });
     }
 }

@@ -11,9 +11,9 @@ import com.zzsong.job.common.loadbalancer.LoadBalancer;
 import com.zzsong.job.common.message.payload.TaskParam;
 import com.zzsong.job.common.transfer.CommonResMsg;
 import com.zzsong.job.common.worker.TaskWorker;
-import com.zzsong.job.scheduler.core.admin.entity.JobExecutor;
-import com.zzsong.job.scheduler.core.admin.entity.JobInstance;
-import com.zzsong.job.scheduler.core.admin.entity.vo.DispatchJobView;
+import com.zzsong.job.scheduler.core.admin.db.entity.JobExecutorDo;
+import com.zzsong.job.scheduler.core.admin.db.entity.JobInstanceDo;
+import com.zzsong.job.scheduler.core.admin.pojo.JobView;
 import com.zzsong.job.scheduler.core.admin.service.JobExecutorService;
 import com.zzsong.job.scheduler.core.admin.service.JobInstanceService;
 import com.zzsong.job.scheduler.core.dispatch.handler.ExecuteHandler;
@@ -52,8 +52,8 @@ public final class JobHandlerExecuteHandler implements ExecuteHandler {
     }
 
     @Override
-    public void execute(@Nonnull JobInstance instance,
-                        @Nonnull DispatchJobView jobView,
+    public void execute(@Nonnull JobInstanceDo instance,
+                        @Nonnull JobView jobView,
                         @Nonnull TriggerTypeEnum triggerType,
                         @Nullable String customExecuteParam) {
         List<TaskWorker> chooseWorkers = chooseWorkers(jobView);
@@ -80,7 +80,7 @@ public final class JobHandlerExecuteHandler implements ExecuteHandler {
             }
         } else {
             for (TaskWorker worker : chooseWorkers) {
-                JobInstance jobInstance = JobInstance.createInitialized();
+                JobInstanceDo jobInstance = JobInstanceDo.createInitialized();
                 jobInstance.setParentId(instance.getInstanceId());
                 jobInstance.setJobId(jobView.getJobId());
                 jobInstance.setExecutorId(jobView.getExecutorId());
@@ -101,7 +101,7 @@ public final class JobHandlerExecuteHandler implements ExecuteHandler {
                     worker.execute(taskParam);
                 } catch (Exception e) {
                     String errMsg = e.getClass().getName() + ": " + e.getMessage();
-                    instance.setDispatchStatus(JobInstance.STATUS_FAIL);
+                    instance.setDispatchStatus(JobInstanceDo.STATUS_FAIL);
                     jobInstance.setDispatchMsg(errMsg);
                     log.info("远程服务: {} 调用异常: {}", worker.getInstanceId(), errMsg);
                 }
@@ -110,12 +110,12 @@ public final class JobHandlerExecuteHandler implements ExecuteHandler {
     }
 
     @Nonnull
-    private List<TaskWorker> chooseWorkers(@Nonnull DispatchJobView jobView) {
+    private List<TaskWorker> chooseWorkers(@Nonnull JobView jobView) {
         long jobId = jobView.getJobId();
         long executorId = jobView.getExecutorId();
         String executorHandler = jobView.getExecutorHandler();
         RouteStrategyEnum routeStrategy = jobView.getRouteStrategy();
-        JobExecutor executor = jobExecutorService.loadById(executorId);
+        JobExecutorDo executor = jobExecutorService.loadById(executorId);
         if (executor == null) {
             log.info("任务: {} 调度失败, 执行器: {} 不存在", jobId, executorId);
             throw new VisibleException(CommonResMsg.NOT_FOUND, "执行器不存在");
