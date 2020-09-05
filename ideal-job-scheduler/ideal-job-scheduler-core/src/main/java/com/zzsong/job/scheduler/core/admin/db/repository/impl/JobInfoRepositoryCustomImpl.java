@@ -17,26 +17,26 @@ import java.util.stream.Collectors;
  */
 @Repository
 public class JobInfoRepositoryCustomImpl implements JobInfoRepositoryCustom {
-    private final JdbcTemplate jdbcTemplate;
+  private final JdbcTemplate jdbcTemplate;
 
-    public JobInfoRepositoryCustomImpl(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+  public JobInfoRepositoryCustomImpl(JdbcTemplate jdbcTemplate) {
+    this.jdbcTemplate = jdbcTemplate;
+  }
 
-    @Override
-    public void batchUpdateTriggerInfo(Collection<JobView> jobInfos) {
-        final String sql = "update ideal_job_info" +
-                " set job_status = ?," +
-                " last_trigger_time = ?," +
-                " next_trigger_time = ?," +
-                " update_time = ?" +
-                " where job_id = ?";
-        final LocalDateTime now = DateTimes.now();
-        List<Object[]> list = jobInfos.stream()
-                .map(v -> new Object[]{v.getJobStatus(), v.getLastTriggerTime(),
-                        v.getNextTriggerTime(), now, v.getJobId()})
-                .collect(Collectors.toList());
-        jdbcTemplate.batchUpdate(sql, list);
+  @Override
+  public void batchUpdateTriggerInfo(Collection<JobView> jobInfos) {
+    final String sql = "update ideal_job_info" +
+        " set job_status = ?," +
+        " last_trigger_time = ?," +
+        " next_trigger_time = ?," +
+        " update_time = ?" +
+        " where job_id = ?";
+    final LocalDateTime now = DateTimes.now();
+    List<Object[]> list = jobInfos.stream()
+        .map(v -> new Object[]{v.getJobStatus(), v.getLastTriggerTime(),
+            v.getNextTriggerTime(), now, v.getJobId()})
+        .collect(Collectors.toList());
+    jdbcTemplate.batchUpdate(sql, list);
 
-    }
+  }
 }

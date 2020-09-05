@@ -7,6 +7,7 @@ import com.zzsong.job.common.loadbalancer.LbFactory;
 import com.zzsong.job.common.loadbalancer.SimpleLbFactory;
 import com.zzsong.job.common.utils.IpUtil;
 import com.zzsong.job.scheduler.core.generator.IDGenerator;
+import com.zzsong.job.scheduler.core.generator.JpaIdentityGenerator;
 import com.zzsong.job.scheduler.core.generator.ReactiveRedisRegisterSnowFlake;
 import com.zzsong.job.scheduler.core.dispatch.TimingSchedule;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -83,10 +84,10 @@ public class JobSchedulerConfig {
 
   @Bean
   public IDGenerator idGenerator(ReactiveStringRedisTemplate reactiveStringRedisTemplate) {
-    ReactiveRedisRegisterSnowFlake snowFlake = new ReactiveRedisRegisterSnowFlake(
-        0, 300, 60,
-        applicationName, reactiveStringRedisTemplate);
-    log.debug("test SnowFlake generate: " + snowFlake.generate());
+    ReactiveRedisRegisterSnowFlake snowFlake
+        = new ReactiveRedisRegisterSnowFlake(applicationName, reactiveStringRedisTemplate);
+    log.debug("Test SnowFlake: {}", snowFlake.generate());
+    JpaIdentityGenerator.setIDGenerator(snowFlake);
     return snowFlake;
   }
 

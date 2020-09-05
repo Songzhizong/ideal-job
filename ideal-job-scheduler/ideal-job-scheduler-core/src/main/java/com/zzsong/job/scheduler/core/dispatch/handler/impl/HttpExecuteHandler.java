@@ -16,9 +16,9 @@ import java.util.concurrent.ExecutorService;
 @Component("httpExecuteHandler")
 public final class HttpExecuteHandler extends BaseHttpExecuteHandler {
 
-    public HttpExecuteHandler(@Nonnull JobInstanceService instanceService,
-                              @Nonnull ExecutorService jobCallbackThreadPool) {
-        super(instanceService, jobCallbackThreadPool);
-        ExecuteHandlerFactory.register(ExecuteTypeEnum.HTTP_SCRIPT, this);
-    }
+  public HttpExecuteHandler(@Nonnull JobInstanceService instanceService,
+                            @Nonnull ExecutorService jobCallbackThreadPool) {
+    super(instanceService, jobCallbackThreadPool);
+    ExecuteHandlerFactory.register(ExecuteTypeEnum.HTTP_SCRIPT, this);
+  }
 }

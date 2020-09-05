@@ -13,15 +13,15 @@ import java.util.Map;
  */
 public final class ExecuteHandlerFactory {
 
-    private static final Map<ExecuteTypeEnum, ExecuteHandler> handlerMapper = new HashMap<>();
+  private static final Map<ExecuteTypeEnum, ExecuteHandler> handlerMapper = new HashMap<>();
 
-    public static void register(@Nonnull ExecuteTypeEnum type,
-                                @Nonnull ExecuteHandler handler) {
-        handlerMapper.put(type, handler);
-    }
+  public static void register(@Nonnull ExecuteTypeEnum type,
+                              @Nonnull ExecuteHandler handler) {
+    handlerMapper.put(type, handler);
+  }
 
-    @Nullable
-    public static ExecuteHandler getHandler(@Nonnull ExecuteTypeEnum type) {
-        return handlerMapper.get(type);
-    }
+  @Nullable
+  public static ExecuteHandler getHandler(@Nonnull ExecuteTypeEnum type) {
+    return handlerMapper.get(type);
+  }
 }

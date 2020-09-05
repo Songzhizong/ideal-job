@@ -17,29 +17,29 @@ import java.util.List;
  * @date 2020/9/2
  */
 public interface JobInfoRepository
-        extends JpaRepository<JobInfoDo, Long>,
-        JpaSpecificationExecutor<JobInfoDo>, JobInfoRepositoryCustom {
+    extends JpaRepository<JobInfoDo, Long>,
+    JpaSpecificationExecutor<JobInfoDo>, JobInfoRepositoryCustom {
 
 
-    @Nullable
-    @Query("select new com.zzsong.job.scheduler.api.pojo.JobView(" +
-            "job.jobId, job.executorId, job.cron, job.routeStrategy, job.executeType, " +
-            "job.executorHandler, job.executeParam, job.blockStrategy, job.retryCount, " +
-            "job.jobStatus,job.lastTriggerTime,job.nextTriggerTime)" +
-            " from JobInfoDo job" +
-            " where job.jobId = :jobId")
-    JobView findDispatchJobViewById(@Param("jobId") long jobId);
+  @Nullable
+  @Query("select new com.zzsong.job.scheduler.api.pojo.JobView(" +
+      "job.jobId, job.executorId, job.cron, job.routeStrategy, job.executeType, " +
+      "job.executorHandler, job.executeParam, job.blockStrategy, job.retryCount, " +
+      "job.jobStatus,job.lastTriggerTime,job.nextTriggerTime)" +
+      " from JobInfoDo job" +
+      " where job.jobId = :jobId")
+  JobView findDispatchJobViewById(@Param("jobId") long jobId);
 
-    @Nonnull
-    @Query("select new com.zzsong.job.scheduler.api.pojo.JobView(" +
-            "job.jobId, job.executorId, job.cron, job.routeStrategy, job.executeType, " +
-            "job.executorHandler, job.executeParam, job.blockStrategy, job.retryCount, " +
-            "job.jobStatus,job.lastTriggerTime,job.nextTriggerTime)" +
-            " from JobInfoDo job " +
-            " where job.jobStatus = :jobStatus and job.nextTriggerTime <= :maxNextTime")
-    List<JobView> loadScheduleJobViews(@Param("jobStatus") int jobStatus,
-                                       @Param("maxNextTime") long maxNextTime,
-                                       @Param("pageable") Pageable pageable);
+  @Nonnull
+  @Query("select new com.zzsong.job.scheduler.api.pojo.JobView(" +
+      "job.jobId, job.executorId, job.cron, job.routeStrategy, job.executeType, " +
+      "job.executorHandler, job.executeParam, job.blockStrategy, job.retryCount, " +
+      "job.jobStatus,job.lastTriggerTime,job.nextTriggerTime)" +
+      " from JobInfoDo job " +
+      " where job.jobStatus = :jobStatus and job.nextTriggerTime <= :maxNextTime")
+  List<JobView> loadScheduleJobViews(@Param("jobStatus") int jobStatus,
+                                     @Param("maxNextTime") long maxNextTime,
+                                     @Param("pageable") Pageable pageable);
 
-    boolean existsByExecutorId(@Param("executorId") long executorId);
+  boolean existsByExecutorId(@Param("executorId") long executorId);
 }

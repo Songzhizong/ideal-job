@@ -7,8 +7,8 @@ import reactor.core.publisher.Mono;
  * @date 2020/9/5
  */
 public interface JobInfoStorage {
-    /**
-     * 执行器是否存在任务
-     */
-    Mono<Boolean> existsByWorkerId(long workerId);
+  /**
+   * 执行器是否存在任务
+   */
+  Mono<Boolean> existsByWorkerId(long workerId);
 }

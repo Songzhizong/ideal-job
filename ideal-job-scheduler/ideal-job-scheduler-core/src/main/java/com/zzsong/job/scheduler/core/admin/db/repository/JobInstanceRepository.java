@@ -16,30 +16,30 @@ import java.time.LocalDateTime;
 @SuppressWarnings("UnusedReturnValue")
 public interface JobInstanceRepository extends JpaRepository<JobInstanceDo, Long> {
 
-    @Modifying
-    @Transactional(rollbackFor = Exception.class)
-    @Query("update JobInstanceDo ins " +
-            "set ins.handleTime = :#{#instance.handleTime}, " +
-            "    ins.finishedTime = :#{#instance.finishedTime}, " +
-            "    ins.handleStatus = :#{#instance.handleStatus}, " +
-            "    ins.result = :#{#instance.result}, " +
-            "    ins.sequence = :#{#instance.sequence}, " +
-            "    ins.updateTime = :#{#instance.updateTime} " +
-            "where ins.instanceId = :#{#instance.instanceId} " +
-            "    and ins.sequence < :#{#instance.sequence}")
-    int updateWhenTriggerCallback(@Param("instance") JobInstanceDo instance);
+  @Modifying
+  @Transactional(rollbackFor = Exception.class)
+  @Query("update JobInstanceDo ins " +
+      "set ins.handleTime = :#{#instance.handleTime}, " +
+      "    ins.finishedTime = :#{#instance.finishedTime}, " +
+      "    ins.handleStatus = :#{#instance.handleStatus}, " +
+      "    ins.result = :#{#instance.result}, " +
+      "    ins.sequence = :#{#instance.sequence}, " +
+      "    ins.updateTime = :#{#instance.updateTime} " +
+      "where ins.instanceId = :#{#instance.instanceId} " +
+      "    and ins.sequence < :#{#instance.sequence}")
+  int updateWhenTriggerCallback(@Param("instance") JobInstanceDo instance);
 
-    @Modifying
-    @Transactional(rollbackFor = Exception.class)
-    @Query("update JobInstanceDo ins " +
-            "set ins.dispatchStatus = :#{#instance.dispatchStatus}, " +
-            "    ins.dispatchMsg = :#{#instance.dispatchMsg}, " +
-            "    ins.executorInstance = :#{#instance.executorInstance} " +
-            "where ins.instanceId = :#{#instance.instanceId}")
-    int updateDispatchInfo(@Param("instance") JobInstanceDo instance);
+  @Modifying
+  @Transactional(rollbackFor = Exception.class)
+  @Query("update JobInstanceDo ins " +
+      "set ins.dispatchStatus = :#{#instance.dispatchStatus}, " +
+      "    ins.dispatchMsg = :#{#instance.dispatchMsg}, " +
+      "    ins.executorInstance = :#{#instance.executorInstance} " +
+      "where ins.instanceId = :#{#instance.instanceId}")
+  int updateDispatchInfo(@Param("instance") JobInstanceDo instance);
 
-    @Modifying
-    @Transactional(rollbackFor = Exception.class)
-    @Query("delete from JobInstanceDo where createdTime < :time")
-    int deleteAllByCreatedTimeLessThan(@Param("time") LocalDateTime time);
+  @Modifying
+  @Transactional(rollbackFor = Exception.class)
+  @Query("delete from JobInstanceDo where createdTime < :time")
+  int deleteAllByCreatedTimeLessThan(@Param("time") LocalDateTime time);
 }

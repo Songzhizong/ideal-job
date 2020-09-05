@@ -15,62 +15,62 @@ import javax.annotation.Nullable;
  * @date 2020/9/1
  */
 public class RSocketTaskWorker implements TaskWorker {
-    private static final Logger log = LoggerFactory.getLogger(RSocketTaskWorker.class);
-    @Nonnull
-    private final String appName;
-    @Nonnull
-    private final String instanceId;
-    @Nonnull
-    private final RSocketRequester requester;
-    @Setter
-    private int weight = 1;
-    private volatile boolean destroyed = false;
+  private static final Logger log = LoggerFactory.getLogger(RSocketTaskWorker.class);
+  @Nonnull
+  private final String appName;
+  @Nonnull
+  private final String instanceId;
+  @Nonnull
+  private final RSocketRequester requester;
+  @Setter
+  private int weight = 1;
+  private volatile boolean destroyed = false;
 
-    public RSocketTaskWorker(@Nonnull String appName,
-                             @Nonnull String instanceId,
-                             @Nonnull RSocketRequester requester) {
-        this.appName = appName;
-        this.instanceId = instanceId;
-        this.requester = requester;
-    }
+  public RSocketTaskWorker(@Nonnull String appName,
+                           @Nonnull String instanceId,
+                           @Nonnull RSocketRequester requester) {
+    this.appName = appName;
+    this.instanceId = instanceId;
+    this.requester = requester;
+  }
 
-    @Override
-    public void execute(@Nonnull TaskParam param) {
-        requester.route("execute")
-                .data(param)
-                .retrieveMono(String.class)
-                .doOnNext(log::info)
-                .block();
-    }
+  @Override
+  public void execute(@Nonnull TaskParam param) {
+    requester.route("execute")
+        .data(param)
+        .retrieveMono(String.class)
+        .doOnNext(log::info)
+        .block();
+  }
 
-    @Nonnull
-    @Override
-    public String getInstanceId() {
-        return instanceId;
-    }
+  @Nonnull
+  @Override
+  public String getInstanceId() {
+    return instanceId;
+  }
 
-    @Override
-    public boolean heartbeat() {
-        return !requester.rsocket().isDisposed();
-    }
+  @Override
+  public boolean heartbeat() {
+    return !requester.rsocket().isDisposed();
+  }
 
-    @Override
-    public int getWeight() {
-        return weight;
-    }
+  @Override
+  public int getWeight() {
+    return weight;
+  }
 
-    @Override
-    public int idleBeat(@Nullable Object key) {
-        return 0;
-    }
+  @Override
+  public int idleBeat(@Nullable Object key) {
+    return 0;
+  }
 
-    @Override
-    public void destroy() {
-        if (destroyed) {
-            return;
-        }
-        requester.rsocket().dispose();
-        log.info("{} -> {} destroy.", appName, instanceId);
-        destroyed = true;
+  @Override
+  public void destroy() {
+    if (destroyed) {
+      return;
     }
+    requester.rsocket().dispose();
+    log.info("{} -> {} destroy.", appName, instanceId);
+    destroyed = true;
+  }
 }

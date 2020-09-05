@@ -12,14 +12,14 @@ import java.io.Serializable;
  * @date 2020/7/14
  */
 public class JpaIdentityGenerator extends IdentityGenerator {
-    private static IDGenerator idGenerator;
+  private static IDGenerator idGenerator;
 
-    public static void setIDGenerator(IDGenerator idGenerator) {
-        JpaIdentityGenerator.idGenerator = idGenerator;
-    }
+  public static void setIDGenerator(IDGenerator idGenerator) {
+    JpaIdentityGenerator.idGenerator = idGenerator;
+  }
 
-    @Override
-    public Serializable generate(SharedSessionContractImplementor s, Object obj) {
-        return idGenerator.generate();
-    }
+  @Override
+  public Serializable generate(SharedSessionContractImplementor s, Object obj) {
+    return idGenerator.generate();
+  }
 }

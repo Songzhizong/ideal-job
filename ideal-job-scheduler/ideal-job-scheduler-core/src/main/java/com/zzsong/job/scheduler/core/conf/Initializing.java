@@ -1,8 +1,6 @@
 package com.zzsong.job.scheduler.core.conf;
 
 import com.zzsong.job.scheduler.core.dispatch.TimingSchedule;
-import com.zzsong.job.scheduler.core.generator.IDGenerator;
-import com.zzsong.job.scheduler.core.generator.JpaIdentityGenerator;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 
@@ -12,18 +10,14 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class Initializing implements InitializingBean {
-  private final IDGenerator idGenerator;
   private final TimingSchedule timingSchedule;
 
-  public Initializing(IDGenerator idGenerator,
-                      TimingSchedule timingSchedule) {
-    this.idGenerator = idGenerator;
+  public Initializing(TimingSchedule timingSchedule) {
     this.timingSchedule = timingSchedule;
   }
 
   @Override
   public void afterPropertiesSet() {
-    JpaIdentityGenerator.setIDGenerator(idGenerator);
     timingSchedule.start();
   }
 

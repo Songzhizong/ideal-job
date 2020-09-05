@@ -23,47 +23,47 @@ import java.util.concurrent.ExecutorService;
  */
 @Component("springCloudHttpExecuteHandler")
 public final class SpringCloudBaseHttpExecuteHandler extends BaseHttpExecuteHandler {
-    private static final Logger log = LoggerFactory
-            .getLogger(SpringCloudBaseHttpExecuteHandler.class);
-    @Nullable
-    private final SpringClientFactory springClientFactory;
-    @Nonnull
-    private final JobExecutorService jobExecutorService;
-    private final ConcurrentMap<String, VirtualHttpServer> virtualServers
-            = new ConcurrentHashMap<>();
+  private static final Logger log = LoggerFactory
+      .getLogger(SpringCloudBaseHttpExecuteHandler.class);
+  @Nullable
+  private final SpringClientFactory springClientFactory;
+  @Nonnull
+  private final JobExecutorService jobExecutorService;
+  private final ConcurrentMap<String, VirtualHttpServer> virtualServers
+      = new ConcurrentHashMap<>();
 
-    protected SpringCloudBaseHttpExecuteHandler(
-            @Nonnull JobInstanceService instanceService,
-            @Nonnull ExecutorService jobCallbackThreadPool,
-            @Nullable SpringClientFactory springClientFactory,
-            @Nonnull JobExecutorService jobExecutorService) {
-        super(instanceService, jobCallbackThreadPool);
-        this.springClientFactory = springClientFactory;
-        this.jobExecutorService = jobExecutorService;
-        ExecuteHandlerFactory.register(ExecuteTypeEnum.LB_HTTP_SCRIPT, this);
+  protected SpringCloudBaseHttpExecuteHandler(
+      @Nonnull JobInstanceService instanceService,
+      @Nonnull ExecutorService jobCallbackThreadPool,
+      @Nullable SpringClientFactory springClientFactory,
+      @Nonnull JobExecutorService jobExecutorService) {
+    super(instanceService, jobCallbackThreadPool);
+    this.springClientFactory = springClientFactory;
+    this.jobExecutorService = jobExecutorService;
+    ExecuteHandlerFactory.register(ExecuteTypeEnum.LB_HTTP_SCRIPT, this);
+  }
+
+  @Override
+  protected List<String> getAddressList(long jobId, @Nonnull String scriptUrl,
+                                        @Nonnull RouteStrategyEnum routeStrategy) {
+    if (springClientFactory == null) {
+      log.error("springClientFactory 为空, 请检查实发配置注册中心, SpringCloud http script 必须配合注册中心使用");
+      throw new UnsupportedOperationException("无法获取spring cloud 注册中心信息");
     }
 
-    @Override
-    protected List<String> getAddressList(long jobId, @Nonnull String scriptUrl,
-                                          @Nonnull RouteStrategyEnum routeStrategy) {
-        if (springClientFactory == null) {
-            log.error("springClientFactory 为空, 请检查实发配置注册中心, SpringCloud http script 必须配合注册中心使用");
-            throw new UnsupportedOperationException("无法获取spring cloud 注册中心信息");
-        }
+    return super.getAddressList(jobId, scriptUrl, routeStrategy);
+  }
 
-        return super.getAddressList(jobId, scriptUrl, routeStrategy);
+  static class VirtualHttpServer {
+    private final String hostPort;
+
+    VirtualHttpServer(String hostPort) {
+      this.hostPort = hostPort;
     }
 
-    static class VirtualHttpServer {
-        private final String hostPort;
-
-        VirtualHttpServer(String hostPort) {
-            this.hostPort = hostPort;
-        }
-
-        public String getHostPort() {
-            return hostPort;
-        }
+    public String getHostPort() {
+      return hostPort;
     }
+  }
 
 }

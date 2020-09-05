@@ -23,11 +23,11 @@ import java.time.LocalDateTime;
 @SuppressWarnings("unused")
 @Entity
 @Table(
-        name = "ideal_job_executor",
-        indexes = {
-                @Index(name = "uk_app_name", columnList = "appName", unique = true),
-                @Index(name = "title", columnList = "title"),
-        }
+    name = "ideal_job_executor",
+    indexes = {
+        @Index(name = "uk_app_name", columnList = "appName", unique = true),
+        @Index(name = "title", columnList = "title"),
+    }
 )
 @Data
 @NoArgsConstructor
@@ -36,50 +36,50 @@ import java.time.LocalDateTime;
 @SQLDelete(sql = "update ideal_job_executor set deleted = 1 where executor_id = ?")
 @Where(clause = "deleted = 0")
 public class JobExecutorDo {
-    /**
-     * 执行器Id
-     */
-    @Id
-    @Nonnull
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "job_executor_generator")
-    @GenericGenerator(name = "job_executor_generator",
-            strategy = "com.zzsong.job.scheduler.core.generator.JpaIdentityGenerator")
-    @Column(nullable = false, updatable = false)
-    private Long executorId;
+  /**
+   * 执行器Id
+   */
+  @Id
+  @Nonnull
+  @GeneratedValue(strategy = GenerationType.AUTO, generator = "job_executor_generator")
+  @GenericGenerator(name = "job_executor_generator",
+      strategy = "com.zzsong.job.scheduler.core.generator.JpaIdentityGenerator")
+  @Column(nullable = false, updatable = false)
+  private Long executorId;
 
-    /**
-     * 执行器AppName
-     */
-    @Nonnull
-    @Column(nullable = false, length = 64)
-    private String appName;
+  /**
+   * 执行器AppName
+   */
+  @Nonnull
+  @Column(nullable = false, length = 64)
+  private String appName;
 
-    /**
-     * 执行器名称
-     */
-    @Nonnull
-    @Column(nullable = false, length = 32)
-    private String title;
+  /**
+   * 执行器名称
+   */
+  @Nonnull
+  @Column(nullable = false, length = 32)
+  private String title;
 
-    /**
-     * 创建时间
-     */
-    @Nonnull
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdTime;
+  /**
+   * 创建时间
+   */
+  @Nonnull
+  @Column(nullable = false, updatable = false)
+  private LocalDateTime createdTime;
 
-    /**
-     * 更新时间
-     */
-    @Nonnull
-    @Column(nullable = false)
-    private LocalDateTime updateTime;
+  /**
+   * 更新时间
+   */
+  @Nonnull
+  @Column(nullable = false)
+  private LocalDateTime updateTime;
 
-    /**
-     * 删除状态:0未删除,1删除
-     */
-    @Column(nullable = false)
-    private int deleted;
+  /**
+   * 删除状态:0未删除,1删除
+   */
+  @Column(nullable = false)
+  private int deleted;
 }
 
 
