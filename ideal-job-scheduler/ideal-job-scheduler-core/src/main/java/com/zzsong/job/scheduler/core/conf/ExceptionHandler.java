@@ -26,11 +26,11 @@ public final class ExceptionHandler {
    * @return Res
    */
   @Nonnull
-  public static <T> Mono<? extends Res<T>> disposeResult(Throwable throwable) {
+  public static <T> Mono<? extends Res<T>> resultException(Throwable throwable) {
     if (throwable instanceof VisibleException) {
       //VisibleException
       VisibleException visibleException = (VisibleException) throwable;
-      log.info("exception: {}", visibleException.getMessage());
+      log.info("exception: ", visibleException);
       ResMsg resMsg = visibleException.getResMsg();
       if (resMsg == null) {
         return Mono.just(Res.err(throwable.getMessage()));

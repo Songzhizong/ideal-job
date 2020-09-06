@@ -25,8 +25,5 @@ public class JobSchedulerProperties {
   private String accessToken = "";
 
   @NestedConfigurationProperty
-  private ThreadPoolProperties executeJobCallbackPool = new ThreadPoolProperties();
-
-  @NestedConfigurationProperty
-  private ThreadPoolProperties cronJobTriggerPool = new ThreadPoolProperties();
+  private ThreadPoolProperties blockPool = new ThreadPoolProperties();
 }

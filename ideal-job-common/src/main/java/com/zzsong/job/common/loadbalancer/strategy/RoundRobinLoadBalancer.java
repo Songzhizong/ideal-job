@@ -18,27 +18,27 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @date 2020/8/19
  */
 public class RoundRobinLoadBalancer<Server extends LbServer> implements LoadBalancer<Server> {
-    private final AtomicInteger defaultCounter
-            = new AtomicInteger(ThreadLocalRandom.current().nextInt(100));
-    private final ConcurrentMap<Object, AtomicInteger> counterMap = new ConcurrentHashMap<>();
+  private final AtomicInteger defaultCounter
+      = new AtomicInteger(ThreadLocalRandom.current().nextInt(100));
+  private final ConcurrentMap<Object, AtomicInteger> counterMap = new ConcurrentHashMap<>();
 
-    @Override
-    @Nullable
-    public Server chooseServer(@Nullable Object key,
-                               @Nonnull List<Server> servers) {
-        if (servers.isEmpty()) {
-            return null;
-        }
-        int size = servers.size();
-        if (size == 1) {
-            return servers.get(0);
-        }
-        AtomicInteger counter = defaultCounter;
-        if (key != null) {
-            counter = counterMap.computeIfAbsent(key,
-                    (k) -> new AtomicInteger(ThreadLocalRandom.current().nextInt(100)));
-        }
-        int abs = Math.abs(counter.incrementAndGet());
-        return servers.get(abs % size);
+  @Override
+  @Nullable
+  public Server chooseServer(@Nullable Object key,
+                             @Nonnull List<Server> servers) {
+    if (servers.isEmpty()) {
+      return null;
     }
+    int size = servers.size();
+    if (size == 1) {
+      return servers.get(0);
+    }
+    AtomicInteger counter = defaultCounter;
+    if (key != null) {
+      counter = counterMap.computeIfAbsent(key,
+          (k) -> new AtomicInteger(ThreadLocalRandom.current().nextInt(100)));
+    }
+    int abs = Math.abs(counter.incrementAndGet());
+    return servers.get(abs % size);
+  }
 }

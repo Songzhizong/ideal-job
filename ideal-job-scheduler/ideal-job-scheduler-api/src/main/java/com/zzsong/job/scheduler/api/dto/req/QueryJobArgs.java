@@ -16,7 +16,7 @@ public class QueryJobArgs {
      * 所属执行器Id
      */
     @Nullable
-    private Long executorId;
+    private Long workerId;
     /**
      * 任务名称
      */

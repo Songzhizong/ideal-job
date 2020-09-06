@@ -19,29 +19,29 @@ import javax.annotation.Nonnull;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginMessage {
-    public static String typeCode = MessageType.REGISTER.getCode();
-    @Nonnull
-    private String appName;
-    @Nonnull
-    private String instanceId;
-    /**
-     * 鉴权token
-     */
-    private String accessToken;
-    /**
-     * 权重
-     */
-    private int weight = 1;
+  public static String typeCode = MessageType.REGISTER.getCode();
+  @Nonnull
+  private String appName;
+  @Nonnull
+  private String instanceId;
+  /**
+   * 鉴权token
+   */
+  private String accessToken;
+  /**
+   * 权重
+   */
+  private int weight = 1;
 
-    public String toMessageString() {
-        return JsonUtils.toJsonString(this);
-    }
+  public String toMessageString() {
+    return JsonUtils.toJsonString(this);
+  }
 
-    public static LoginMessage parseMessage(@Nonnull String message) throws ParseException {
-        try {
-            return JsonUtils.parseJson(message, LoginMessage.class);
-        } catch (Exception exception) {
-            throw new ParseException(exception);
-        }
+  public static LoginMessage parseMessage(@Nonnull String message) throws ParseException {
+    try {
+      return JsonUtils.parseJson(message, LoginMessage.class);
+    } catch (Exception exception) {
+      throw new ParseException(exception);
     }
+  }
 }

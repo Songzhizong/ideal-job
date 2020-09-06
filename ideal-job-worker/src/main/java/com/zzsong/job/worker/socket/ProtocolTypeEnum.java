@@ -5,9 +5,9 @@ package com.zzsong.job.worker.socket;
  * @date 2020/9/4
  */
 public enum ProtocolTypeEnum {
-    WEBSOCKET,
-    @SuppressWarnings("SpellCheckingInspection")
-    RSOCKET,
-    HTTP,
-    ;
+  WEBSOCKET,
+  @SuppressWarnings("SpellCheckingInspection")
+  RSOCKET,
+  HTTP,
+  ;
 }

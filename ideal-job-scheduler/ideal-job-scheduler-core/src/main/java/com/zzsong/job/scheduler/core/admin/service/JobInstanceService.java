@@ -1,14 +1,17 @@
 package com.zzsong.job.scheduler.core.admin.service;
 
-import com.zzsong.job.scheduler.core.admin.db.entity.JobInstanceDo;
-import com.zzsong.job.scheduler.core.admin.db.repository.JobInstanceRepository;
+import com.zzsong.job.scheduler.core.admin.storage.JobInstanceStorage;
+import com.zzsong.job.scheduler.core.admin.storage.param.TaskResult;
+import com.zzsong.job.scheduler.core.pojo.JobInstance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 /**
  * @author 宋志宗
@@ -19,39 +22,31 @@ import java.time.LocalDateTime;
 public class JobInstanceService {
   private static final Logger log = LoggerFactory.getLogger(JobInstanceService.class);
   private static final int MAX_RESULT_LENGTH = 10000;
-  private final JobInstanceRepository jobInstanceRepository;
+  private final JobInstanceStorage jobInstanceStorage;
 
-  public JobInstanceService(JobInstanceRepository jobInstanceRepository) {
-    this.jobInstanceRepository = jobInstanceRepository;
+  public JobInstanceService(JobInstanceStorage jobInstanceStorage) {
+    this.jobInstanceStorage = jobInstanceStorage;
   }
 
   @Nonnull
-  public JobInstanceDo saveInstance(@Nonnull JobInstanceDo instance) {
+  public Mono<JobInstance> saveInstance(@Nonnull JobInstance instance) {
     String result = instance.getResult();
     if (result.length() > MAX_RESULT_LENGTH) {
       instance.setResult(result.substring(0, MAX_RESULT_LENGTH - 3) + "...");
     }
-    return jobInstanceRepository.save(instance);
+    return jobInstanceStorage.save(instance);
   }
 
   @Nullable
-  public JobInstanceDo getJobInstance(long instanceId) {
-    return jobInstanceRepository.findById(instanceId).orElse(null);
+  public Mono<Optional<JobInstance>> getJobInstance(long instanceId) {
+    return jobInstanceStorage.findById(instanceId);
   }
 
-  public void updateDispatchInfo(@Nonnull JobInstanceDo instance) {
-    jobInstanceRepository.updateDispatchInfo(instance);
+  public Mono<Integer> updateByTaskResult(@Nonnull TaskResult param) {
+    return jobInstanceStorage.updateByTaskResult(param);
   }
 
-  public int updateWhenTriggerCallback(@Nonnull JobInstanceDo instance) {
-    return jobInstanceRepository.updateWhenTriggerCallback(instance);
-  }
-
-  public int deleteAllByCreatedTimeLessThan(LocalDateTime time) {
-    return jobInstanceRepository.deleteAllByCreatedTimeLessThan(time);
-  }
-
-  public void flush() {
-    jobInstanceRepository.flush();
+  public Mono<Integer> deleteAllByCreatedTimeLessThan(LocalDateTime time) {
+    return jobInstanceStorage.deleteAllByCreatedTimeLessThan(time);
   }
 }

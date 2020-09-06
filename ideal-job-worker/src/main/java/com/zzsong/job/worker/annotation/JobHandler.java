@@ -11,8 +11,8 @@ import java.lang.annotation.*;
 @Inherited
 public @interface JobHandler {
 
-    /**
-     * job handler name
-     */
-    String value();
+  /**
+   * job handler name
+   */
+  String value();
 }

@@ -9,10 +9,11 @@ import com.zzsong.job.common.utils.JsonUtils;
 import com.zzsong.job.scheduler.api.dto.req.CreateWorkerArgs;
 import com.zzsong.job.scheduler.api.dto.req.QueryWorkerArgs;
 import com.zzsong.job.scheduler.api.dto.req.UpdateWorkerArgs;
-import com.zzsong.job.scheduler.api.dto.rsp.ExecutorInfoRsp;
-import com.zzsong.job.scheduler.api.pojo.JobWorker;
+import com.zzsong.job.scheduler.api.dto.rsp.JobWorkerRsp;
+import com.zzsong.job.scheduler.core.pojo.JobWorker;
 import com.zzsong.job.scheduler.core.admin.storage.JobInfoStorage;
 import com.zzsong.job.scheduler.core.admin.storage.JobWorkerStorage;
+import com.zzsong.job.scheduler.core.converter.JobWorkerConverter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author 宋志宗
@@ -31,8 +33,8 @@ import java.util.Optional;
  */
 @SuppressWarnings("DuplicatedCode")
 @Service
-public class JobExecutorService {
-  private static final Logger log = LoggerFactory.getLogger(JobExecutorService.class);
+public class JobWorkerService {
+  private static final Logger log = LoggerFactory.getLogger(JobWorkerService.class);
   private static final String CACHE_NAME = "ideal:job:cache:worker:";
   private static final String UN_CACHE_VALUE = "UN_CACHE";
   private static final Duration CACHE_EXPIRE = Duration.ofDays(1);
@@ -42,15 +44,15 @@ public class JobExecutorService {
   private final JobInfoStorage jobInfoStorage;
   private final JobWorkerStorage jobWorkerStorage;
 
-  public JobExecutorService(ReactiveCache reactiveCache,
-                            JobInfoStorage jobInfoStorage,
-                            JobWorkerStorage jobWorkerStorage) {
+  public JobWorkerService(ReactiveCache reactiveCache,
+                          JobInfoStorage jobInfoStorage,
+                          JobWorkerStorage jobWorkerStorage) {
     this.reactiveCache = reactiveCache;
     this.jobInfoStorage = jobInfoStorage;
     this.jobWorkerStorage = jobWorkerStorage;
   }
 
-  public Mono<JobWorker> create(@Nonnull CreateWorkerArgs args) {
+  public Mono<JobWorkerRsp> create(@Nonnull CreateWorkerArgs args) {
     String appName = args.getAppName();
     String title = args.getTitle();
     return jobWorkerStorage.findByAppName(appName)
@@ -72,30 +74,30 @@ public class JobExecutorService {
                   String value = JsonUtils.toJsonString(savedWorker);
                   log.debug("新增执行器: {}", value);
                   return reactiveCache.set(key, value, CACHE_EXPIRE)
-                      .map(b -> savedWorker);
+                      .map(b -> JobWorkerConverter.toJobWorkerRsp(savedWorker));
                 });
           }
         });
   }
 
   @Nonnull
-  public Mono<JobWorker> update(@Nonnull UpdateWorkerArgs updateArgs) {
-    Long executorId = updateArgs.getWorkerId();
+  public Mono<JobWorkerRsp> update(@Nonnull UpdateWorkerArgs updateArgs) {
+    Long workerId = updateArgs.getWorkerId();
     String appName = updateArgs.getAppName();
     String title = updateArgs.getTitle();
     Mono<Optional<JobWorker>> byAppName = jobWorkerStorage.findByAppName(appName);
-    Mono<Optional<JobWorker>> byId = jobWorkerStorage.findById(executorId);
+    Mono<Optional<JobWorker>> byId = jobWorkerStorage.findById(workerId);
     return Mono.zip(byAppName, byId)
         .flatMap(t -> {
           Optional<Long> byAppNameId = t.getT1().map(JobWorker::getWorkerId);
           Optional<JobWorker> jobWorkerOptional = t.getT2();
           Long a;
-          if (byAppNameId.isPresent() && (a = byAppNameId.get()).equals(executorId)) {
+          if (byAppNameId.isPresent() && (a = byAppNameId.get()).equals(workerId)) {
             log.info("appName: {} 已被: {} 使用", appName, a);
             return Mono.error(new VisibleException("appName已被使用"));
           }
           if (!jobWorkerOptional.isPresent()) {
-            log.info("执行器: {} 不存在", executorId);
+            log.info("执行器: {} 不存在", workerId);
             return Mono.error(new VisibleException("执行器不存在"));
           }
           LocalDateTime now = LocalDateTime.now();
@@ -105,11 +107,10 @@ public class JobExecutorService {
           worker.setUpdateTime(now);
           return jobWorkerStorage.save(worker)
               .flatMap(savedWorker -> {
-                long workerId = savedWorker.getWorkerId();
                 String key = CACHE_NAME + workerId;
                 String value = JsonUtils.toJsonString(savedWorker);
                 return reactiveCache.set(key, value, CACHE_EXPIRE)
-                    .map(b -> worker);
+                    .map(b -> JobWorkerConverter.toJobWorkerRsp(worker));
               });
         });
   }
@@ -145,9 +146,16 @@ public class JobExecutorService {
   }
 
   @Nonnull
-  public Mono<Res<List<ExecutorInfoRsp>>> query(@Nonnull QueryWorkerArgs args,
-                                                @Nonnull Paging paging) {
-    return jobWorkerStorage.query(args, paging);
+  public Mono<Res<List<JobWorkerRsp>>> query(@Nonnull QueryWorkerArgs args,
+                                             @Nonnull Paging paging) {
+    return jobWorkerStorage.query(args, paging)
+        .map(listRes ->
+            listRes.convertNewRes(list ->
+                list.stream()
+                    .map(JobWorkerConverter::toJobWorkerRsp)
+                    .collect(Collectors.toList())
+            )
+        );
   }
 
   @Nonnull

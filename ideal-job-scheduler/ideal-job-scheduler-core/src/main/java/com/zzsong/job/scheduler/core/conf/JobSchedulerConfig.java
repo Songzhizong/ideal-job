@@ -9,7 +9,6 @@ import com.zzsong.job.common.utils.IpUtil;
 import com.zzsong.job.scheduler.core.generator.IDGenerator;
 import com.zzsong.job.scheduler.core.generator.JpaIdentityGenerator;
 import com.zzsong.job.scheduler.core.generator.ReactiveRedisRegisterSnowFlake;
-import com.zzsong.job.scheduler.core.dispatch.TimingSchedule;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -97,9 +96,9 @@ public class JobSchedulerConfig {
   }
 
   @Bean
-  public ExecutorService jobCallbackThreadPool() {
+  public ExecutorService blockThreadPool() {
     int processors = Runtime.getRuntime().availableProcessors();
-    ThreadPoolProperties properties = schedulerProperties.getExecuteJobCallbackPool();
+    ThreadPoolProperties properties = schedulerProperties.getBlockPool();
     int corePoolSize = properties.getCorePoolSize();
     if (corePoolSize < 0) {
       corePoolSize = processors << 1;
@@ -127,44 +126,7 @@ public class JobSchedulerConfig {
   }
 
   @Bean
-  public ExecutorService cronJobThreadPool() {
-    int processors = Runtime.getRuntime().availableProcessors();
-    ThreadPoolProperties properties = schedulerProperties.getCronJobTriggerPool();
-    int corePoolSize = properties.getCorePoolSize();
-    if (corePoolSize < 0) {
-      corePoolSize = processors << 3;
-    }
-    int maximumPoolSize = properties.getMaximumPoolSize();
-    if (maximumPoolSize < 1) {
-      maximumPoolSize = processors << 5;
-    }
-    BlockingQueue<Runnable> workQueue;
-    int workQueueSize = properties.getWorkQueueSize();
-    if (workQueueSize < 1) {
-      workQueue = new SynchronousQueue<>();
-    } else {
-      workQueue = new ArrayBlockingQueue<>(workQueueSize);
-    }
-    int finalCorePoolSize = corePoolSize;
-    int finalMaximumPoolSize = maximumPoolSize;
-    final ThreadPoolExecutor poolExecutor
-        = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
-        60, TimeUnit.SECONDS, workQueue,
-        new ThreadFactoryBuilder().setNameFormat("cron-job-pool-%d").build(),
-        (runnable, executor) -> {
-          if (!executor.isShutdown()) {
-            final Logger log = TimingSchedule.log;
-            log.error("cron-job-pool 无法接受新任务 已在调用线程执行, corePoolSize={}, maximumPoolSize={}, workQueueSize={}",
-                finalCorePoolSize, finalMaximumPoolSize, workQueueSize);
-            runnable.run();
-          }
-        });
-    poolExecutor.allowCoreThreadTimeOut(true);
-    return poolExecutor;
-  }
-
-  @Bean
-  public Scheduler blockScheduler(ExecutorService jobCallbackThreadPool) {
-    return Schedulers.fromExecutorService(jobCallbackThreadPool, "blockScheduler");
+  public Scheduler blockScheduler(ExecutorService blockThreadPool) {
+    return Schedulers.fromExecutorService(blockThreadPool, "blockScheduler");
   }
 }

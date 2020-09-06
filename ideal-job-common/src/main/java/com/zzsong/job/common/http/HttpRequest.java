@@ -14,33 +14,44 @@ import javax.annotation.Nullable;
 @Getter
 @Setter
 public class HttpRequest {
-    /**
-     * 请求方法
-     */
-    @Nonnull
-//    @NotNull(message = "HttpMethod不能为空")
-    private HttpMethod method;
-
-    /**
-     * 请求地址
-     */
-    @Nonnull
-//    @NotBlank(message = "请求地址不能为空")
-    private String url;
-    /**
-     * Query string
-     */
-    @Nullable
-    private String queryString;
-    /**
-     * 请求头
-     */
-    @Nullable
-    private HttpHeaders headers;
-
-    /**
-     * body
-     */
-    @Nullable
-    private String body;
+  /**
+   * 请求方法
+   */
+  @Nonnull
+  private HttpMethod method;
+  /**
+   * 请求地址, http://127.0.0.1:8080/hello_world
+   */
+  @Nonnull
+  private String url;
+  /**
+   * http or https
+   */
+  @Nonnull
+  private String schema;
+  /**
+   * ip:port or domain:port, 127.0.0.1:8080
+   */
+  @Nonnull
+  private String ipPort;
+  /**
+   * /hello_world
+   */
+  @Nonnull
+  private String uri = "";
+  /**
+   * Query string
+   */
+  @Nullable
+  private String queryString;
+  /**
+   * 请求头
+   */
+  @Nullable
+  private HttpHeaders headers;
+  /**
+   * body
+   */
+  @Nullable
+  private String body;
 }

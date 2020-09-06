@@ -1,4 +1,4 @@
-package com.zzsong.job.scheduler.core.admin.db.entity;
+package com.zzsong.job.scheduler.core.admin.storage.db.entity;
 
 import com.zzsong.job.common.constants.BlockStrategyEnum;
 import com.zzsong.job.common.constants.ExecuteTypeEnum;
@@ -9,9 +9,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -30,7 +27,7 @@ import java.time.LocalDateTime;
     indexes = {
         @Index(name = "application", columnList = "application"),
         @Index(name = "tenant_id", columnList = "tenantId"),
-        @Index(name = "executor_id", columnList = "executorId"),
+        @Index(name = "worker_id", columnList = "workerId"),
         @Index(name = "biz_type", columnList = "bizType"),
         @Index(name = "custom_tag", columnList = "customTag"),
         @Index(name = "business_id", columnList = "businessId"),
@@ -45,10 +42,7 @@ import java.time.LocalDateTime;
 @org.hibernate.annotations.Table(appliesTo = "ideal_job_info", comment = "任务信息")
 @SQLDelete(sql = "update ideal_job_info set deleted = 1 where job_id = ?")
 @Where(clause = "deleted = 0")
-@EntityListeners(AuditingEntityListener.class)
 public class JobInfoDo {
-  public static final int JOB_START = 1;
-  public static final int JOB_STOP = 0;
   /**
    * 任务Id
    */
@@ -64,7 +58,7 @@ public class JobInfoDo {
    * 所属执行器Id
    */
   @Column(nullable = false)
-  private long executorId;
+  private long workerId;
 
   /**
    * 任务执行CRON
@@ -195,7 +189,6 @@ public class JobInfoDo {
    * 创建时间
    */
   @Nonnull
-  @CreatedDate
   @Column(nullable = false, updatable = false)
   private LocalDateTime createdTime;
 
@@ -203,7 +196,6 @@ public class JobInfoDo {
    * 更新时间
    */
   @Nonnull
-  @LastModifiedDate
   @Column(nullable = false)
   private LocalDateTime updateTime;
 

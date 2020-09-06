@@ -3,8 +3,7 @@ package com.zzsong.job.scheduler.core.admin.storage;
 import com.zzsong.job.common.transfer.Paging;
 import com.zzsong.job.common.transfer.Res;
 import com.zzsong.job.scheduler.api.dto.req.QueryWorkerArgs;
-import com.zzsong.job.scheduler.api.dto.rsp.ExecutorInfoRsp;
-import com.zzsong.job.scheduler.api.pojo.JobWorker;
+import com.zzsong.job.scheduler.core.pojo.JobWorker;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
@@ -24,5 +23,5 @@ public interface JobWorkerStorage {
 
   Mono<Integer> delete(long workerId);
 
-  Mono<Res<List<ExecutorInfoRsp>>> query(QueryWorkerArgs args, Paging paging);
+  Mono<Res<List<JobWorker>>> query(QueryWorkerArgs args, Paging paging);
 }

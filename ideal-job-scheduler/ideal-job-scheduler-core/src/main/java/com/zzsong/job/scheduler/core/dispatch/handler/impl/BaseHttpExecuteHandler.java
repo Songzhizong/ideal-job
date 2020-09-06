@@ -1,5 +1,6 @@
 package com.zzsong.job.scheduler.core.dispatch.handler.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.zzsong.job.common.constants.HandleStatusEnum;
 import com.zzsong.job.common.constants.RouteStrategyEnum;
 import com.zzsong.job.common.constants.TriggerTypeEnum;
@@ -7,10 +8,13 @@ import com.zzsong.job.common.exception.VisibleException;
 import com.zzsong.job.common.http.HttpMethod;
 import com.zzsong.job.common.http.HttpRequest;
 import com.zzsong.job.common.http.HttpScriptUtils;
+import com.zzsong.job.common.loadbalancer.LbServer;
+import com.zzsong.job.common.utils.DateTimes;
 import com.zzsong.job.common.utils.JsonUtils;
 import com.zzsong.job.common.utils.ReactorUtils;
-import com.zzsong.job.scheduler.api.pojo.JobView;
-import com.zzsong.job.scheduler.core.admin.db.entity.JobInstanceDo;
+import com.zzsong.job.scheduler.core.admin.storage.param.TaskResult;
+import com.zzsong.job.scheduler.core.pojo.JobInstance;
+import com.zzsong.job.scheduler.core.pojo.JobView;
 import com.zzsong.job.scheduler.core.admin.service.JobInstanceService;
 import com.zzsong.job.scheduler.core.dispatch.handler.ExecuteHandler;
 import org.apache.commons.lang3.StringUtils;
@@ -25,9 +29,11 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author 宋志宗
@@ -35,54 +41,34 @@ import java.util.concurrent.ExecutorService;
  */
 public abstract class BaseHttpExecuteHandler implements ExecuteHandler {
   private static final Logger log = LoggerFactory.getLogger(BaseHttpExecuteHandler.class);
+  private static final ConcurrentMap<String, VirtualHttpServer> VIRTUAL_SERVER_MAP
+      = new ConcurrentHashMap<>();
+  // 超时时间5分钟
+  private static final Duration READ_TIMEOUT = Duration.ofSeconds(5);
   private final WebClient webClient = ReactorUtils
-      .createWebClient(400, 400, 120_000);
+      .createWebClient(400, 400, READ_TIMEOUT.toMillis());
   @Nonnull
   private final JobInstanceService instanceService;
-  @Nonnull
-  private final ExecutorService jobCallbackThreadPool;
 
-  protected BaseHttpExecuteHandler(@Nonnull JobInstanceService instanceService,
-                                   @Nonnull ExecutorService jobCallbackThreadPool) {
+  protected BaseHttpExecuteHandler(@Nonnull JobInstanceService instanceService) {
 
     this.instanceService = instanceService;
-    this.jobCallbackThreadPool = jobCallbackThreadPool;
   }
 
   @SuppressWarnings("DuplicatedCode")
   @Override
-  public final void execute(@Nonnull JobInstanceDo instance,
-                            @Nonnull JobView jobView,
-                            @Nonnull TriggerTypeEnum triggerType,
-                            @Nullable String customExecuteParam) {
-    String executeParam = customExecuteParam;
-    if (executeParam == null) {
-      executeParam = jobView.getExecuteParam();
-    }
-    if (StringUtils.isBlank(executeParam)) {
-      log.info("任务: {} Http script为空", jobView.getJobId());
-      throw new VisibleException("Http script为空");
-    }
-    HttpRequest httpRequest;
-    try {
-      httpRequest = HttpScriptUtils.parse(executeParam);
-    } catch (HttpScriptUtils.HttpScriptParseException e) {
-      log.info("任务: {} http script解析异常: {}", jobView.getJobId(), e.getMessage());
-      throw new VisibleException("http script解析异常: ${e.message}");
-    }
-    RouteStrategyEnum routeStrategy = jobView.getRouteStrategy();
-    String url = httpRequest.getUrl();
-    List<String> chooseServer = getAddressList(jobView.getJobId(), url, routeStrategy);
-    if (chooseServer.isEmpty()) {
-      log.info("任务: {} 选取远程服务为空", jobView.getJobId());
-      throw new VisibleException("选取远程服务为空");
-    }
-    MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-    Object requestBody = null;
+  public final Mono<Boolean> execute(@Nonnull JobInstance instance,
+                                     @Nonnull JobView jobView,
+                                     @Nonnull TriggerTypeEnum triggerType,
+                                     @Nonnull Object executeParam) {
+    HttpRequest httpRequest = converterParam(executeParam);
     HttpMethod method = httpRequest.getMethod();
     HttpHeaders headers = httpRequest.getHeaders();
     String body = httpRequest.getBody();
-    String queryString = httpRequest.getQueryString();
+
+    // 获取请求body
+    MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+    Object requestBody = null;
     if (StringUtils.isNoneBlank(body)) {
       if ((StringUtils.startsWith(body, "{")
           && StringUtils.endsWith(body, "}"))
@@ -97,60 +83,74 @@ public abstract class BaseHttpExecuteHandler implements ExecuteHandler {
           if (sp.length == 2) {
             formData.add(sp[0], sp[1]);
           } else {
-            log.info("任务: {} http script body不合法", jobView.getJobId());
+            log.warn("任务: {} http script body不合法", jobView.getJobId());
           }
         }
       }
     }
-    long handleTime = System.currentTimeMillis();
-    if (chooseServer.size() == 1) {
-      String uri = chooseServer.get(0);
-      String requestUri = StringUtils.isNoneBlank(queryString)
-          ? uri + "?" + queryString : uri;
-      WebClient.RequestHeadersSpec<?> clientSpec
-          = buildWebClientSpec(method, requestUri, requestBody, headers, formData);
-      Mono<String> bodyToMono = clientSpec.retrieve().bodyToMono(String.class);
-      subscriptResponse(bodyToMono, instance, handleTime);
-    } else {
-      for (String uri : chooseServer) {
-        JobInstanceDo jobInstance = JobInstanceDo.createInitialized();
-        jobInstance.setParentId(instance.getInstanceId());
-        jobInstance.setJobId(jobView.getJobId());
-        jobInstance.setExecutorId(jobView.getExecutorId());
-        jobInstance.setTriggerType(triggerType);
-        jobInstance.setSchedulerInstance(instance.getSchedulerInstance());
-        jobInstance.setExecutorHandler(jobView.getExecutorHandler());
-        jobInstance.setExecuteParam(executeParam);
-        jobInstance.setExecutorInstance(uri);
-        String requestUri = StringUtils.isNoneBlank(queryString)
-            ? uri + "?" + queryString : uri;
-        WebClient.RequestHeadersSpec<?> clientSpec
-            = buildWebClientSpec(method, requestUri, requestBody, headers, formData);
-        Mono<String> bodyToMono = clientSpec.retrieve().bodyToMono(String.class);
-        subscriptResponse(bodyToMono, instance, handleTime);
-      }
+
+    String schema = httpRequest.getSchema();
+    String ipPort = httpRequest.getIpPort();
+    String uri = httpRequest.getUri();
+    String queryString = httpRequest.getQueryString();
+    StringBuilder urlSb = new StringBuilder(schema)
+        .append("://").append(ipPort).append(uri);
+    if (StringUtils.isNotBlank(queryString)) {
+      urlSb.append("?").append(queryString);
     }
+    String requestUri = urlSb.toString();
+
+    TaskResult taskResult = new TaskResult();
+    taskResult.setInstanceId(instance.getInstanceId());
+    taskResult.setHandleTime(System.currentTimeMillis());
+    taskResult.setHandleStatus(HandleStatusEnum.COMPLETE);
+    taskResult.setSequence(2);
+
+    WebClient.RequestHeadersSpec<?> clientSpec
+        = buildWebClientSpec(method, requestUri, requestBody, headers, formData);
+    return clientSpec.retrieve().bodyToMono(String.class)
+        .onErrorResume(e -> {
+          String errMsg = e.getClass().getName() + ": " + e.getMessage();
+          taskResult.setHandleStatus(HandleStatusEnum.ABNORMAL);
+          return Mono.just(errMsg);
+        })
+        .flatMap(result -> {
+          log.debug("http result = {}", result);
+          taskResult.setFinishedTime(System.currentTimeMillis());
+          taskResult.setResult(result);
+          taskResult.setUpdateTime(DateTimes.now());
+          return instanceService.updateByTaskResult(taskResult)
+              .map(i -> taskResult.getHandleStatus() == HandleStatusEnum.COMPLETE);
+        });
   }
 
-  private void subscriptResponse(@Nonnull Mono<String> bodyToMono,
-                                 @Nonnull JobInstanceDo jobInstance,
-                                 long handleTime) {
-    bodyToMono.onErrorResume(e -> {
-      String errMsg = e.getClass().getName() + ": " + e.getMessage();
-      log.info("http调度异常: {}", errMsg);
-      jobInstance.setHandleStatus(HandleStatusEnum.ABNORMAL);
-      return Mono.just(errMsg);
-    }).doOnNext(result -> {
-      jobInstance.setResult(result);
-      if (jobInstance.getHandleStatus() != HandleStatusEnum.ABNORMAL) {
-        jobInstance.setHandleStatus(HandleStatusEnum.COMPLETE);
-      }
-    }).doFinally(signalType -> {
-      jobInstance.setHandleTime(handleTime);
-      jobInstance.setFinishedTime(System.currentTimeMillis());
-      jobInstance.setSequence(2);
-      jobCallbackThreadPool.execute(() -> instanceService.saveInstance(jobInstance));
-    }).subscribe();
+  @Override
+  public Mono<Object> parseExecuteParam(@Nonnull String executeParam) {
+    if (StringUtils.isBlank(executeParam)) {
+      return Mono.error(new VisibleException("Http script为空"));
+    }
+    HttpRequest httpRequest;
+    try {
+      httpRequest = HttpScriptUtils.parse(executeParam);
+    } catch (HttpScriptUtils.HttpScriptParseException e) {
+      String errMsg = "http script解析异常: " + e.getMessage();
+      return Mono.error(new VisibleException(errMsg));
+    }
+    return Mono.just(httpRequest);
+  }
+
+  @Override
+  public List<? extends LbServer> chooseWorkers(@Nonnull JobView jobView,
+                                                @Nonnull Object executeParam) {
+    HttpRequest httpRequest = converterParam(executeParam);
+    String ipPort = httpRequest.getIpPort();
+    VirtualHttpServer httpServer = VIRTUAL_SERVER_MAP
+        .computeIfAbsent(ipPort, k -> new VirtualHttpServer(ipPort));
+    return ImmutableList.of(httpServer);
+  }
+
+  private HttpRequest converterParam(@Nonnull Object executeParam) {
+    return (HttpRequest) executeParam;
   }
 
   private WebClient.RequestHeadersSpec<?> buildWebClientSpec(
@@ -212,8 +212,32 @@ public abstract class BaseHttpExecuteHandler implements ExecuteHandler {
     return client;
   }
 
-  protected List<String> getAddressList(long jobId, @Nonnull String scriptUrl,
-                                        @Nonnull RouteStrategyEnum routeStrategy) {
-    return Collections.singletonList(scriptUrl);
+  static class VirtualHttpServer implements LbServer {
+    private final String hostPort;
+
+    VirtualHttpServer(String hostPort) {
+      this.hostPort = hostPort;
+    }
+
+    @SuppressWarnings("unused")
+    public String getHostPort() {
+      return hostPort;
+    }
+
+    @Nonnull
+    @Override
+    public String getInstanceId() {
+      return hostPort;
+    }
+
+    @Override
+    public boolean heartbeat() {
+      return true;
+    }
+
+    @Override
+    public int idleBeat(@Nullable Object key) {
+      return 0;
+    }
   }
 }

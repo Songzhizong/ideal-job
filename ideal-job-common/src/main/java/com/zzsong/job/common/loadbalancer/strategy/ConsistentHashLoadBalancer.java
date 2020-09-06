@@ -23,62 +23,62 @@ import java.util.concurrent.ThreadLocalRandom;
 public class ConsistentHashLoadBalancer<Server extends LbServer> implements LoadBalancer<Server> {
 
 
-    private static long hash(@Nonnull Object key) {
-        // md5 byte
-        MessageDigest md5;
-        try {
-            md5 = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("MD5 not supported", e);
-        }
-        md5.reset();
-        byte[] keyBytes = key.toString().getBytes(StandardCharsets.UTF_8);
-        md5.update(keyBytes);
-        byte[] digest = md5.digest();
-        // hash code, Truncate to 32-bits
-        long hashCode = ((long) (digest[3] & 0xFF) << 24)
-                | ((long) (digest[2] & 0xFF) << 16)
-                | ((long) (digest[1] & 0xFF) << 8)
-                | (digest[0] & 0xFF);
-        return hashCode & 0xffffffffL;
+  private static long hash(@Nonnull Object key) {
+    // md5 byte
+    MessageDigest md5;
+    try {
+      md5 = MessageDigest.getInstance("MD5");
+    } catch (NoSuchAlgorithmException e) {
+      throw new RuntimeException("MD5 not supported", e);
     }
+    md5.reset();
+    byte[] keyBytes = key.toString().getBytes(StandardCharsets.UTF_8);
+    md5.update(keyBytes);
+    byte[] digest = md5.digest();
+    // hash code, Truncate to 32-bits
+    long hashCode = ((long) (digest[3] & 0xFF) << 24)
+        | ((long) (digest[2] & 0xFF) << 16)
+        | ((long) (digest[1] & 0xFF) << 8)
+        | (digest[0] & 0xFF);
+    return hashCode & 0xffffffffL;
+  }
 
-    /**
-     * 如果key为null, 则采用随机算法
-     *
-     * @param key     负载均衡器可以使用该对象来确定返回哪个服务
-     * @param servers 可达服务列表
-     * @return LbServer
-     */
-    @Override
-    @Nullable
-    public Server chooseServer(@Nullable Object key,
-                               @Nonnull List<Server> servers) {
-        final int virtualNodeNum = 100;
-        if (servers.isEmpty()) {
-            return null;
-        }
-        int size = servers.size();
-        if (size == 1) {
-            return servers.get(0);
-        }
-        if (key == null) {
-            int random = ThreadLocalRandom.current().nextInt(size);
-            return servers.get(random);
-        }
-        TreeMap<Long, Server> addressRing = new TreeMap<>();
-        for (Server server : servers) {
-            final String instanceId = server.getInstanceId();
-            for (int i = 0; i < virtualNodeNum; i++) {
-                long addressHash = hash("SHARD-" + instanceId + "-NODE-" + i);
-                addressRing.put(addressHash, server);
-            }
-        }
-        long keyHash = hash(String.valueOf(key));
-        SortedMap<Long, Server> lastRing = addressRing.tailMap(keyHash);
-        if (lastRing.isEmpty()) {
-            return addressRing.firstEntry().getValue();
-        }
-        return lastRing.get(lastRing.firstKey());
+  /**
+   * 如果key为null, 则采用随机算法
+   *
+   * @param key     负载均衡器可以使用该对象来确定返回哪个服务
+   * @param servers 可达服务列表
+   * @return LbServer
+   */
+  @Override
+  @Nullable
+  public Server chooseServer(@Nullable Object key,
+                             @Nonnull List<Server> servers) {
+    final int virtualNodeNum = 100;
+    if (servers.isEmpty()) {
+      return null;
     }
+    int size = servers.size();
+    if (size == 1) {
+      return servers.get(0);
+    }
+    if (key == null) {
+      int random = ThreadLocalRandom.current().nextInt(size);
+      return servers.get(random);
+    }
+    TreeMap<Long, Server> addressRing = new TreeMap<>();
+    for (Server server : servers) {
+      final String instanceId = server.getInstanceId();
+      for (int i = 0; i < virtualNodeNum; i++) {
+        long addressHash = hash("SHARD-" + instanceId + "-NODE-" + i);
+        addressRing.put(addressHash, server);
+      }
+    }
+    long keyHash = hash(String.valueOf(key));
+    SortedMap<Long, Server> lastRing = addressRing.tailMap(keyHash);
+    if (lastRing.isEmpty()) {
+      return addressRing.firstEntry().getValue();
+    }
+    return lastRing.get(lastRing.firstKey());
+  }
 }

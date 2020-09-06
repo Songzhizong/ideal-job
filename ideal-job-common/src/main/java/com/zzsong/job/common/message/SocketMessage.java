@@ -19,35 +19,35 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SocketMessage {
-    /**
-     * 消息唯一ID
-     */
-    private String messageId = UUID.randomUUID().toString();
-    /**
-     * 消息类型
-     */
-    @Nonnull
-    private String messageType;
-    /**
-     * 消息主体
-     */
-    @Nonnull
-    private String payload = "";
+  /**
+   * 消息唯一ID
+   */
+  private String messageId = UUID.randomUUID().toString();
+  /**
+   * 消息类型
+   */
+  @Nonnull
+  private String messageType;
+  /**
+   * 消息主体
+   */
+  @Nonnull
+  private String payload = "";
 
-    public SocketMessage(@Nonnull String messageType, @Nonnull String payload) {
-        this.messageType = messageType;
-        this.payload = payload;
-    }
+  public SocketMessage(@Nonnull String messageType, @Nonnull String payload) {
+    this.messageType = messageType;
+    this.payload = payload;
+  }
 
-    public String toMessageString() {
-        return JsonUtils.toJsonString(this);
-    }
+  public String toMessageString() {
+    return JsonUtils.toJsonString(this);
+  }
 
-    public static SocketMessage parseMessage(@Nonnull String message) throws ParseException {
-        try {
-            return JsonUtils.parseJson(message, SocketMessage.class);
-        } catch (Exception exception) {
-            throw new ParseException(exception);
-        }
+  public static SocketMessage parseMessage(@Nonnull String message) throws ParseException {
+    try {
+      return JsonUtils.parseJson(message, SocketMessage.class);
+    } catch (Exception exception) {
+      throw new ParseException(exception);
     }
+  }
 }

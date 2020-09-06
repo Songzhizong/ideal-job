@@ -46,7 +46,7 @@ public class JobInfoRsp {
     /**
      * 所属执行器Id
      */
-    private long executorId;
+    private long workerId;
     /**
      * 任务执行CRON
      */

@@ -15,33 +15,33 @@ import java.util.List;
  */
 public class BusyTransferLoadBalancer<Server extends LbServer> implements LoadBalancer<Server> {
 
-    public BusyTransferLoadBalancer() {
+  public BusyTransferLoadBalancer() {
+  }
+
+  @Override
+  @Nullable
+  public Server chooseServer(@Nullable Object key,
+                             @Nonnull List<Server> servers) {
+    if (servers.isEmpty()) {
+      return null;
+    }
+    int size = servers.size();
+    if (size == 1) {
+      return servers.get(0);
     }
 
-    @Override
-    @Nullable
-    public Server chooseServer(@Nullable Object key,
-                               @Nonnull List<Server> servers) {
-        if (servers.isEmpty()) {
-            return null;
-        }
-        int size = servers.size();
-        if (size == 1) {
-            return servers.get(0);
-        }
-
-        Server selected = null;
-        Integer minIdleLevel = null;
-        for (Server server : servers) {
-            int idleLevel = server.idleBeat(key);
-            if (idleLevel < 1) {
-                return server;
-            }
-            if (minIdleLevel == null || idleLevel < minIdleLevel) {
-                minIdleLevel = idleLevel;
-                selected = server;
-            }
-        }
-        return selected;
+    Server selected = null;
+    Integer minIdleLevel = null;
+    for (Server server : servers) {
+      int idleLevel = server.idleBeat(key);
+      if (idleLevel < 1) {
+        return server;
+      }
+      if (minIdleLevel == null || idleLevel < minIdleLevel) {
+        minIdleLevel = idleLevel;
+        selected = server;
+      }
     }
+    return selected;
+  }
 }

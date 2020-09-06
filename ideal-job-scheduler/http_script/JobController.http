@@ -1,16 +1,16 @@
 ### 新建任务
-POST http://127.0.0.1:8804/job/create
+POST http://{{ip}}:{{port}}/job/create
 Content-Type: application/json
 
 {
   "autoStart": false,
-  "executorId": 133458998882992128,
-  "executeType": "JOB_HANDLER",
+  "workerId": 133924649984589824,
+  "executeType": "HTTP_SCRIPT",
   "executorHandler": "demoJobHandler",
   "executeParam": "test",
   "routeStrategy": "CONSISTENT_HASH",
   "blockStrategy": "SERIAL",
-  "cron": "0/10 * * * * ?",
+  "cron": "0/30 * * * * ?",
   "retryCount": 0,
   "jobName": "test",
   "alarmEmail": "",
@@ -21,44 +21,48 @@ Content-Type: application/json
   "businessId": ""
 }
 
-###
+### 更新任务
 POST http://{{ip}}:{{port}}/job/update
 Content-Type: application/json
 
 {
-  "jobId": 130301268919844864,
-  "executorId": 130282956815073280,
-  "executorHandler": "demoJobHandler",
-  "executeParam": "demoJobHandler",
-  "routeStrategy": "WEIGHTED_RANDOM",
-  "blockStrategy": "SERIAL",
-  "cron": "0/1 * * * * ?",
+  "jobId": 133800657135075328,
+  "workerId": 133799357949411328,
+  "executorHandler": "",
+  "executeParam": "",
+  "routeStrategy": "WEIGHT_ROUND_ROBIN",
+  "blockStrategy": "PARALLEL",
+  "cron": "0 0/5 * * * ?",
   "retryCount": 0,
   "jobName": "",
   "alarmEmail": ""
 }
 
-###
-POST http://{{ip}}:{{port}}/job/remove
-Content-Type: application/x-www-form-urlencoded
+### 删除任务
+DELETE http://{{ip}}:{{port}}/job/remove/133800657135075328
 
-jobId=130479163176919040
+### 查询
+POST http://{{ip}}:{{port}}/job/query
+Content-Type: application/json
 
-###
-POST http://{{ip}}:{{port}}/job/start
-Content-Type: application/x-www-form-urlencoded
+{
+  "workerId": 0,
+  "jobName": "",
+  "executorHandler": "",
+  "jobStatus": 0,
+  "application": "",
+  "tenantId": "",
+  "bizType": "",
+  "customTag": "",
+  "businessId": ""
+}
 
-jobId=130478053187919872
+### 开启任务
+PUT http://{{ip}}:{{port}}/job/enable/133925036980436992
 
-###
-POST http://{{ip}}:{{port}}/job/stop
-Content-Type: application/x-www-form-urlencoded
-
-jobId=130478053187919872
+### 关闭任务
+PUT http://{{ip}}:{{port}}/job/disable/133800657135075328
 
 
 ### 触发任务
-POST http://127.0.0.1:8804/job/trigger
-Content-Type: application/x-www-form-urlencoded
-
-executeParam=sadsaasdfds&jobId=133459025143529472
+POST http://127.0.0.1:8804/job/trigger/133925036980436992

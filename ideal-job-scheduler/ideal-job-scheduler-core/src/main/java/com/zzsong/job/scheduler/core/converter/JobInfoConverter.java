@@ -1,49 +1,48 @@
 package com.zzsong.job.scheduler.core.converter;
 
-import com.zzsong.job.common.constants.DBDefaults;
 import com.zzsong.job.common.utils.DateTimes;
 import com.zzsong.job.scheduler.api.dto.req.CreateJobArgs;
 import com.zzsong.job.scheduler.api.dto.rsp.JobInfoRsp;
-import com.zzsong.job.scheduler.core.admin.db.entity.JobInfoDo;
+import com.zzsong.job.scheduler.core.pojo.JobInfo;
 
 import javax.annotation.Nonnull;
+import java.time.LocalDateTime;
 
 /**
  * @author 宋志宗
- * @date 2020/8/26
+ * @date 2020/9/6
  */
-public final class JobInfoConverter {
-
+@SuppressWarnings("DuplicatedCode")
+public class JobInfoConverter {
   @Nonnull
-  public static JobInfoDo fromCreateJobArgs(@Nonnull CreateJobArgs createJobArgs) {
-    JobInfoDo jobInfo = new JobInfoDo();
-//        jobInfo.setJobId();
-    jobInfo.setExecutorId(createJobArgs.getExecutorId());
-    jobInfo.setCron(createJobArgs.getCron());
-    jobInfo.setJobName(createJobArgs.getJobName());
-    jobInfo.setAlarmEmail(createJobArgs.getAlarmEmail());
-    jobInfo.setRouteStrategy(createJobArgs.getRouteStrategy());
-    jobInfo.setExecuteType(createJobArgs.getExecuteType());
-    jobInfo.setExecutorHandler(createJobArgs.getExecutorHandler());
-    jobInfo.setExecuteParam(createJobArgs.getExecuteParam());
-    jobInfo.setBlockStrategy(createJobArgs.getBlockStrategy());
-    jobInfo.setRetryCount(createJobArgs.getRetryCount());
-    jobInfo.setJobStatus(JobInfoDo.JOB_STOP);
-    jobInfo.setLastTriggerTime(DBDefaults.DEFAULT_LONG_VALUE);
-    jobInfo.setNextTriggerTime(DBDefaults.DEFAULT_LONG_VALUE);
-    jobInfo.setApplication(createJobArgs.getApplication());
-    jobInfo.setTenantId(createJobArgs.getTenantId());
-    jobInfo.setBizType(createJobArgs.getBizType());
-    jobInfo.setCustomTag(createJobArgs.getCustomTag());
-    jobInfo.setBusinessId(createJobArgs.getBusinessId());
-//        jobInfo.setCreatedTime();
-//        jobInfo.setUpdateTime();
-//        jobInfo.setDeleted();
+  public static JobInfo fromCreateJobArgs(@Nonnull CreateJobArgs args) {
+    JobInfo jobInfo = new JobInfo();
+//    jobInfo.setJobId();
+    jobInfo.setWorkerId(args.getWorkerId());
+    jobInfo.setCron(args.getCron());
+    jobInfo.setJobName(args.getJobName());
+    jobInfo.setAlarmEmail(args.getAlarmEmail());
+    jobInfo.setRouteStrategy(args.getRouteStrategy());
+    jobInfo.setExecuteType(args.getExecuteType());
+    jobInfo.setExecutorHandler(args.getExecutorHandler());
+    jobInfo.setExecuteParam(args.getExecuteParam());
+    jobInfo.setBlockStrategy(args.getBlockStrategy());
+    jobInfo.setRetryCount(args.getRetryCount());
+    jobInfo.setJobStatus(JobInfo.JOB_STOP);
+    jobInfo.setLastTriggerTime(0);
+//      jobInfo.setNextTriggerTime();
+    jobInfo.setApplication(args.getApplication());
+    jobInfo.setTenantId(args.getTenantId());
+    jobInfo.setBizType(args.getBizType());
+    jobInfo.setCustomTag(args.getCustomTag());
+    jobInfo.setBusinessId(args.getBusinessId());
+//      jobInfo.setCreatedTime();
+//      jobInfo.setUpdateTime();
     return jobInfo;
   }
 
   @Nonnull
-  public static JobInfoRsp toJobInfoRsp(@Nonnull JobInfoDo jobInfo) {
+  public static JobInfoRsp toJobInfoRsp(@Nonnull JobInfo jobInfo) {
     JobInfoRsp jobInfoRsp = new JobInfoRsp();
     jobInfoRsp.setJobId(jobInfo.getJobId());
     jobInfoRsp.setApplication(jobInfo.getApplication());
@@ -51,7 +50,7 @@ public final class JobInfoConverter {
     jobInfoRsp.setBizType(jobInfo.getBizType());
     jobInfoRsp.setCustomTag(jobInfo.getCustomTag());
     jobInfoRsp.setBusinessId(jobInfo.getBusinessId());
-    jobInfoRsp.setExecutorId(jobInfo.getExecutorId());
+    jobInfoRsp.setWorkerId(jobInfo.getWorkerId());
     jobInfoRsp.setCron(jobInfo.getCron());
     jobInfoRsp.setJobName(jobInfo.getJobName());
     jobInfoRsp.setAlarmEmail(jobInfo.getAlarmEmail());
@@ -63,11 +62,13 @@ public final class JobInfoConverter {
     jobInfoRsp.setJobStatus(jobInfo.getJobStatus());
     long lastTriggerTime = jobInfo.getLastTriggerTime();
     if (lastTriggerTime > 0) {
-      jobInfoRsp.setLastTriggerTime(DateTimes.parse(lastTriggerTime));
+      LocalDateTime time = DateTimes.parse(lastTriggerTime);
+      jobInfoRsp.setLastTriggerTime(time);
     }
     long nextTriggerTime = jobInfo.getNextTriggerTime();
     if (nextTriggerTime > 0) {
-      jobInfoRsp.setNextTriggerTime(DateTimes.parse(nextTriggerTime));
+      LocalDateTime time = DateTimes.parse(nextTriggerTime);
+      jobInfoRsp.setNextTriggerTime(time);
     }
     jobInfoRsp.setCreatedTime(jobInfo.getCreatedTime());
     jobInfoRsp.setUpdateTime(jobInfo.getUpdateTime());

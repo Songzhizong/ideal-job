@@ -22,7 +22,7 @@ public class TriggerParam {
   /**
    * 执行器ID
    */
-  private long executorId;
+  private long workerId;
   /**
    * 触发类型
    */

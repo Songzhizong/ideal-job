@@ -8,5 +8,5 @@ import org.springframework.messaging.rsocket.RSocketStrategies;
  */
 @FunctionalInterface
 public interface RSocketStrategiesCustomizer {
-    void customize(RSocketStrategies.Builder strategies);
+  void customize(RSocketStrategies.Builder strategies);
 }

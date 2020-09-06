@@ -1,11 +1,15 @@
 package com.zzsong.job.scheduler.core.socket.rsocket;
 
 import com.zzsong.job.common.message.payload.TaskParam;
+import com.zzsong.job.common.transfer.Res;
+import com.zzsong.job.common.utils.JsonUtils;
 import com.zzsong.job.common.worker.TaskWorker;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.messaging.rsocket.RSocketRequester;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -16,6 +20,9 @@ import javax.annotation.Nullable;
  */
 public class RSocketTaskWorker implements TaskWorker {
   private static final Logger log = LoggerFactory.getLogger(RSocketTaskWorker.class);
+  private static final ParameterizedTypeReference<Res<Void>> VOID_RES
+      = new ParameterizedTypeReference<Res<Void>>() {
+  };
   @Nonnull
   private final String appName;
   @Nonnull
@@ -35,12 +42,11 @@ public class RSocketTaskWorker implements TaskWorker {
   }
 
   @Override
-  public void execute(@Nonnull TaskParam param) {
-    requester.route("execute")
+  public Mono<Res<Void>> execute(@Nonnull TaskParam param) {
+    return requester.route("execute")
         .data(param)
-        .retrieveMono(String.class)
-        .doOnNext(log::info)
-        .block();
+        .retrieveMono(VOID_RES)
+        .doOnNext(res -> log.debug("响应信息: {}", JsonUtils.toJsonString(res)));
   }
 
   @Nonnull

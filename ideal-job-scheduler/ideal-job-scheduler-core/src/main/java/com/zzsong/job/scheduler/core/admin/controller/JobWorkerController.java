@@ -3,13 +3,12 @@ package com.zzsong.job.scheduler.core.admin.controller;
 import com.zzsong.job.common.exception.VisibleException;
 import com.zzsong.job.common.transfer.Paging;
 import com.zzsong.job.common.transfer.Res;
-import com.zzsong.job.scheduler.api.client.ExecutorClient;
+import com.zzsong.job.scheduler.api.client.WorkerClient;
 import com.zzsong.job.scheduler.api.dto.req.CreateWorkerArgs;
 import com.zzsong.job.scheduler.api.dto.req.QueryWorkerArgs;
 import com.zzsong.job.scheduler.api.dto.req.UpdateWorkerArgs;
-import com.zzsong.job.scheduler.api.dto.rsp.ExecutorInfoRsp;
-import com.zzsong.job.scheduler.api.pojo.JobWorker;
-import com.zzsong.job.scheduler.core.admin.service.JobExecutorService;
+import com.zzsong.job.scheduler.api.dto.rsp.JobWorkerRsp;
+import com.zzsong.job.scheduler.core.admin.service.JobWorkerService;
 import com.zzsong.job.scheduler.core.conf.ExceptionHandler;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -18,15 +17,17 @@ import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
+ * 任务执行器管理
+ *
  * @author 宋志宗
  * @date 2020/8/20
  */
 @RestController
-@RequestMapping("/executor")
-public class JobExecutorController implements ExecutorClient {
-  private final JobExecutorService service;
+@RequestMapping("/worker")
+public class JobWorkerController implements WorkerClient {
+  private final JobWorkerService service;
 
-  public JobExecutorController(JobExecutorService service) {
+  public JobWorkerController(JobWorkerService service) {
     this.service = service;
   }
 
@@ -41,12 +42,12 @@ public class JobExecutorController implements ExecutorClient {
   @Nonnull
   @Override
   @PostMapping("/create")
-  public Mono<Res<JobWorker>> create(@RequestBody @Nonnull CreateWorkerArgs args) {
+  public Mono<Res<JobWorkerRsp>> create(@RequestBody @Nonnull CreateWorkerArgs args) {
     return Mono.just(args)
-        .map(CreateWorkerArgs::checkArgs)
+        .doOnNext(CreateWorkerArgs::checkArgs)
         .flatMap(service::create)
         .map(Res::data)
-        .onErrorResume(ExceptionHandler::disposeResult);
+        .onErrorResume(ExceptionHandler::resultException);
   }
 
   /**
@@ -60,12 +61,12 @@ public class JobExecutorController implements ExecutorClient {
   @Nonnull
   @Override
   @PostMapping("/update")
-  public Mono<Res<JobWorker>> update(@RequestBody @Nonnull UpdateWorkerArgs args) {
+  public Mono<Res<JobWorkerRsp>> update(@RequestBody @Nonnull UpdateWorkerArgs args) {
     return Mono.just(args)
-        .map(UpdateWorkerArgs::checkArgs)
+        .doOnNext(UpdateWorkerArgs::checkArgs)
         .flatMap(service::update)
         .map(Res::data)
-        .onErrorResume(ExceptionHandler::disposeResult);
+        .onErrorResume(ExceptionHandler::resultException);
   }
 
   /**
@@ -78,13 +79,15 @@ public class JobExecutorController implements ExecutorClient {
    */
   @Nonnull
   @Override
-  @PostMapping("/delete")
-  public Mono<Res<Integer>> delete(long workerId) {
-    if (workerId < 1) {
-      return Mono.error(new VisibleException(("执行器ID不合法")));
-    }
-    return service.delete(workerId).map(Res::data)
-        .onErrorResume(ExceptionHandler::disposeResult);
+  @DeleteMapping("/delete/{workerId}")
+  public Mono<Res<Void>> delete(@PathVariable("workerId") long workerId) {
+    return Mono.just(workerId)
+        .doOnNext(id -> {
+          if (id < 1) throw new VisibleException(("执行器ID不合法"));
+        })
+        .flatMap(service::delete)
+        .map(b -> Res.<Void>success())
+        .onErrorResume(ExceptionHandler::resultException);
   }
 
   /**
@@ -99,11 +102,11 @@ public class JobExecutorController implements ExecutorClient {
   @Nonnull
   @Override
   @PostMapping("/query")
-  public Mono<Res<List<ExecutorInfoRsp>>> query(@RequestBody @Nonnull QueryWorkerArgs args,
-                                                @Nonnull Paging paging) {
+  public Mono<Res<List<JobWorkerRsp>>> query(@RequestBody @Nonnull QueryWorkerArgs args,
+                                             @Nonnull Paging paging) {
     paging.cleanOrders();
-    paging.descBy("executorId");
+    paging.descBy("workerId");
     return service.query(args, paging)
-        .onErrorResume(ExceptionHandler::disposeResult);
+        .onErrorResume(ExceptionHandler::resultException);
   }
 }

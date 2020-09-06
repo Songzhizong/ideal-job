@@ -1,8 +1,8 @@
 package com.zzsong.job.scheduler.core.dispatch;
 
 import com.zzsong.job.common.constants.TriggerTypeEnum;
-import com.zzsong.job.scheduler.api.pojo.JobView;
-import com.zzsong.job.scheduler.core.admin.db.entity.JobInfoDo;
+import com.zzsong.job.scheduler.core.pojo.JobInfo;
+import com.zzsong.job.scheduler.core.pojo.JobView;
 import com.zzsong.job.scheduler.core.admin.service.JobService;
 import com.zzsong.job.scheduler.core.utils.CronExpression;
 import org.slf4j.Logger;
@@ -48,18 +48,18 @@ public class TimingSchedule {
   @Nonnull
   private final JobService jobService;
   @Nonnull
-  private final JobDispatch jobDispatch;
+  private final JobDispatcher jobDispatcher;
   @Nonnull
-  private final ExecutorService cronJobThreadPool;
+  private final ExecutorService blockThreadPool;
 
   public TimingSchedule(@Nonnull DataSource dataSource,
                         @Nonnull JobService jobService,
-                        @Nonnull JobDispatch jobDispatch,
-                        @Nonnull ExecutorService cronJobThreadPool) {
+                        @Nonnull JobDispatcher jobDispatcher,
+                        @Nonnull ExecutorService blockThreadPool) {
     this.dataSource = dataSource;
     this.jobService = jobService;
-    this.jobDispatch = jobDispatch;
-    this.cronJobThreadPool = cronJobThreadPool;
+    this.jobDispatcher = jobDispatcher;
+    this.blockThreadPool = blockThreadPool;
   }
 
   public void start() {
@@ -78,8 +78,9 @@ public class TimingSchedule {
         dbLock(() -> {
           long nowTime = System.currentTimeMillis();
           List<JobView> jobViews = jobService
-              .loadScheduleJobViews(nowTime + preReadMills, preReadCount);
-          if (jobViews.isEmpty()) {
+              .loadScheduleJobViews(nowTime + preReadMills, preReadCount)
+              .collectList().block();
+          if (jobViews == null || jobViews.isEmpty()) {
             preReadSuc.set(false);
           } else {
             Date nowDate = new Date();
@@ -92,7 +93,7 @@ public class TimingSchedule {
                 triggerJob(jobView);
                 refreshNextValidTime(jobView, nowDate);
                 long newNextTriggerTime = jobView.getNextTriggerTime();
-                if (jobView.getJobStatus() == JobInfoDo.JOB_START
+                if (jobView.getJobStatus() == JobInfo.JOB_START
                     && nowTime + preReadMills > newNextTriggerTime) {
                   int ringSecond = (int) (newNextTriggerTime / 1000 % 60);
                   pushTimeRing(ringSecond, jobView);
@@ -105,7 +106,7 @@ public class TimingSchedule {
               }
             }
             // 更新任务信息
-            jobService.batchUpdateTriggerInfo(jobViews);
+            jobService.batchUpdateTriggerInfo(jobViews).block();
           }
         });
         long cost = System.currentTimeMillis() - start;
@@ -230,7 +231,7 @@ public class TimingSchedule {
       connection = dataSource.getConnection();
       tempAutoCommit = connection.getAutoCommit();
       connection.setAutoCommit(false);
-      preparedStatement = connection.prepareStatement("select lock_name from ideal_job_lock where lock_name = 'schedule_lock' for update");
+      preparedStatement = connection.prepareStatement(LOCK_SQL);
       preparedStatement.execute();
       runnable.run();
     } catch (Exception e) {
@@ -272,8 +273,10 @@ public class TimingSchedule {
   }
 
   private void triggerJob(JobView jobView) {
-    cronJobThreadPool.execute(() ->
-        jobDispatch.dispatch(jobView, TriggerTypeEnum.CRON, null)
+    blockThreadPool.execute(() ->
+        jobDispatcher.dispatch(jobView, TriggerTypeEnum.CRON, null)
+            .doOnError(throwable -> log.info("dispatch exception: ", throwable))
+            .subscribe()
     );
   }
 
@@ -291,7 +294,7 @@ public class TimingSchedule {
       jobView.setLastTriggerTime(jobView.getNextTriggerTime());
       jobView.setNextTriggerTime(nextValidTimeAfter.getTime());
     } else {
-      jobView.setJobStatus(JobInfoDo.JOB_STOP);
+      jobView.setJobStatus(JobInfo.JOB_STOP);
       jobView.setLastTriggerTime(0);
       jobView.setNextTriggerTime(0);
     }

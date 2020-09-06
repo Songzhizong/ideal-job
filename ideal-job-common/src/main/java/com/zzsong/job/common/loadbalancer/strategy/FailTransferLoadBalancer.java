@@ -15,23 +15,23 @@ import java.util.List;
  */
 public class FailTransferLoadBalancer<Server extends LbServer> implements LoadBalancer<Server> {
 
-    @Override
-    @Nullable
-    public Server chooseServer(@Nullable Object key,
-                               @Nonnull List<Server> servers) {
-        if (servers.isEmpty()) {
-            return null;
-        }
-        int size = servers.size();
-        if (size == 1) {
-            return servers.get(0);
-        }
-        for (Server reachableServer : servers) {
-            boolean available = reachableServer.heartbeat();
-            if (available) {
-                return reachableServer;
-            }
-        }
-        return null;
+  @Override
+  @Nullable
+  public Server chooseServer(@Nullable Object key,
+                             @Nonnull List<Server> servers) {
+    if (servers.isEmpty()) {
+      return null;
     }
+    int size = servers.size();
+    if (size == 1) {
+      return servers.get(0);
+    }
+    for (Server reachableServer : servers) {
+      boolean available = reachableServer.heartbeat();
+      if (available) {
+        return reachableServer;
+      }
+    }
+    return null;
+  }
 }

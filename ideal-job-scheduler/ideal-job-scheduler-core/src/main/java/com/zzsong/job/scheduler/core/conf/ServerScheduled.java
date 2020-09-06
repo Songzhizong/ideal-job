@@ -34,7 +34,9 @@ public class ServerScheduled {
       storageDay = 30;
     }
     LocalDateTime time = DateTimes.now().minusDays(storageDay);
-    int count = jobInstanceService.deleteAllByCreatedTimeLessThan(time);
-    log.info("delete job instance started, remove count = {}", count);
+    jobInstanceService.deleteAllByCreatedTimeLessThan(time)
+        .doOnNext(count -> log.info("delete job instance started, remove count = {}", count))
+        .subscribe();
+
   }
 }

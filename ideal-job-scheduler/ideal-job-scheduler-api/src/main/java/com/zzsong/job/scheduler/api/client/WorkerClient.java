@@ -5,8 +5,7 @@ import com.zzsong.job.common.transfer.Res;
 import com.zzsong.job.scheduler.api.dto.req.CreateWorkerArgs;
 import com.zzsong.job.scheduler.api.dto.req.QueryWorkerArgs;
 import com.zzsong.job.scheduler.api.dto.req.UpdateWorkerArgs;
-import com.zzsong.job.scheduler.api.dto.rsp.ExecutorInfoRsp;
-import com.zzsong.job.scheduler.api.pojo.JobWorker;
+import com.zzsong.job.scheduler.api.dto.rsp.JobWorkerRsp;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
@@ -18,7 +17,7 @@ import java.util.List;
  * @author 宋志宗
  * @date 2020/8/26
  */
-public interface ExecutorClient {
+public interface WorkerClient {
 
   /**
    * 新增执行器
@@ -29,7 +28,7 @@ public interface ExecutorClient {
    * @date 2020/8/26 23:41
    */
   @Nonnull
-  Mono<Res<JobWorker>> create(@Nonnull CreateWorkerArgs args);
+  Mono<Res<JobWorkerRsp>> create(@Nonnull CreateWorkerArgs args);
 
   /**
    * 更新执行器信息
@@ -40,18 +39,18 @@ public interface ExecutorClient {
    * @date 2020/8/26 23:42
    */
   @Nonnull
-  Mono<Res<JobWorker>> update(@Nonnull UpdateWorkerArgs args);
+  Mono<Res<JobWorkerRsp>> update(@Nonnull UpdateWorkerArgs args);
 
   /**
    * 删除执行器
    *
-   * @param executorId 执行器ID
+   * @param workerId 执行器ID
    * @return 删除结果
    * @author 宋志宗
    * @date 2020/8/26 23:43
    */
   @Nonnull
-  Mono<Res<Integer>> delete(long executorId);
+  Mono<Res<Void>> delete(long workerId);
 
   /**
    * 查询执行器列表
@@ -63,6 +62,6 @@ public interface ExecutorClient {
    * @date 2020/8/26 23:45
    */
   @Nonnull
-  Mono<Res<List<ExecutorInfoRsp>>> query(@Nonnull QueryWorkerArgs args,
-                                         @Nonnull Paging paging);
+  Mono<Res<List<JobWorkerRsp>>> query(@Nonnull QueryWorkerArgs args,
+                                      @Nonnull Paging paging);
 }

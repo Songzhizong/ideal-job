@@ -5,6 +5,5 @@ package com.zzsong.job.scheduler.core.generator;
  * @date 2020/8/20
  */
 public interface IDGenerator {
-
   long generate();
 }

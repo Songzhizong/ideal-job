@@ -1,4 +1,4 @@
-package com.zzsong.job.scheduler.core.admin.db.entity;
+package com.zzsong.job.scheduler.core.admin.storage.db.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -6,9 +6,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.annotation.Nonnull;
 import javax.persistence.*;
@@ -23,7 +20,7 @@ import java.time.LocalDateTime;
 @SuppressWarnings("unused")
 @Entity
 @Table(
-    name = "ideal_job_executor",
+    name = "ideal_job_worker",
     indexes = {
         @Index(name = "uk_app_name", columnList = "appName", unique = true),
         @Index(name = "title", columnList = "title"),
@@ -32,20 +29,20 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@org.hibernate.annotations.Table(appliesTo = "ideal_job_executor", comment = "执行器")
-@SQLDelete(sql = "update ideal_job_executor set deleted = 1 where executor_id = ?")
+@org.hibernate.annotations.Table(appliesTo = "ideal_job_worker", comment = "执行器")
+@SQLDelete(sql = "update ideal_job_worker set deleted = 1 where worker_id = ?")
 @Where(clause = "deleted = 0")
-public class JobExecutorDo {
+public class JobWorkerDo {
   /**
    * 执行器Id
    */
   @Id
   @Nonnull
-  @GeneratedValue(strategy = GenerationType.AUTO, generator = "job_executor_generator")
-  @GenericGenerator(name = "job_executor_generator",
+  @GeneratedValue(strategy = GenerationType.AUTO, generator = "ideal_job_worker_generator")
+  @GenericGenerator(name = "ideal_job_worker_generator",
       strategy = "com.zzsong.job.scheduler.core.generator.JpaIdentityGenerator")
   @Column(nullable = false, updatable = false)
-  private Long executorId;
+  private Long workerId;
 
   /**
    * 执行器AppName

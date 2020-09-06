@@ -8,29 +8,29 @@ import javax.annotation.Nullable;
  * @date 2020/8/28
  */
 public enum HttpMethod {
-    DELETE,
-    GET,
-    POST,
-    PATCH,
-    PUT,
-    ;
+  DELETE,
+  GET,
+  POST,
+  PATCH,
+  PUT,
+  ;
 
-    @Nullable
-    public static HttpMethod valueOfName(@Nonnull String name) {
-        String upperCase = name.toUpperCase();
-        switch (upperCase) {
-            case "DELETE":
-                return DELETE;
-            case "GET":
-                return GET;
-            case "POST":
-                return POST;
-            case "PATCH":
-                return PATCH;
-            case "PUT":
-                return PUT;
-            default:
-                return null;
-        }
+  @Nullable
+  public static HttpMethod valueOfName(@Nonnull String name) {
+    String upperCase = name.toUpperCase();
+    switch (upperCase) {
+      case "DELETE":
+        return DELETE;
+      case "GET":
+        return GET;
+      case "POST":
+        return POST;
+      case "PATCH":
+        return PATCH;
+      case "PUT":
+        return PUT;
+      default:
+        return null;
     }
+  }
 }

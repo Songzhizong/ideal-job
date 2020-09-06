@@ -12,11 +12,11 @@ import java.time.LocalDateTime;
  */
 @Getter
 @Setter
-public class ExecutorInfoRsp {
+public class JobWorkerRsp {
     /**
      * 执行器Id
      */
-    private long executorId;
+    private long workerId;
     /**
      * 执行器AppName
      */
