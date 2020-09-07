@@ -2,8 +2,11 @@
 
 #### 介绍
 
-![GPL3.0](https://img.shields.io/badge/license-GPL%203.0-blue.svg?longCache=true&style=flat-square)
-![springboot](https://img.shields.io/badge/springboot-2.3.3-yellow.svg?style=flat-square)
+![GPL3.0](https://img.shields.io/badge/License-GPL%203.0-blue.svg?longCache=true&style=flat-square)
+![springboot](https://img.shields.io/badge/Spring%20Boot-2.3.3-yellow.svg?style=flat-square)
+![reactor](https://img.shields.io/badge/Project%20Reactor-Dysprosium%20SR11-orange.svg?longCache=true&style=flat-square)
+![rsocket](https://img.shields.io/badge/RSocket-1.0.2-brightgreen.svg?longCache=true&style=flat-square)
+
 
 采用reactive stream技术栈的分布式任务调度平台
 
