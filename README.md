@@ -19,9 +19,7 @@
 2.  xxxx
 3.  xxxx
 
-#### 参与贡献
-
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+#### TODO
+- [ ] 支持基于SpringCloud注册中心的http脚本定时任务.
+- [ ] 建立scheduler和worker连接关系注册表, worker只要连接到任意一个scheduler节点便可保证任务不丢失.
+- [ ] 添加WEB管理平台
