@@ -21,6 +21,7 @@ import reactor.core.scheduler.Scheduler;
 import javax.annotation.Nonnull;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -89,8 +90,8 @@ public class JpaJobInfoStorage implements JobInfoStorage {
   }
 
   @Override
-  public Mono<Integer> batchUpdateTriggerInfo(@Nonnull List<JobView> jobViewList) {
-    return Mono.just(jobViewList)
+  public Mono<Integer> batchUpdateTriggerInfo(@Nonnull Collection<JobView> jobViews) {
+    return Mono.just(jobViews)
         .map(jobInfoRepository::batchUpdateTriggerInfo)
         .subscribeOn(blockScheduler);
   }

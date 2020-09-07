@@ -2,8 +2,6 @@ package com.zzsong.job.scheduler.core.dispatch.handler.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.zzsong.job.common.constants.HandleStatusEnum;
-import com.zzsong.job.common.constants.RouteStrategyEnum;
-import com.zzsong.job.common.constants.TriggerTypeEnum;
 import com.zzsong.job.common.exception.VisibleException;
 import com.zzsong.job.common.http.HttpMethod;
 import com.zzsong.job.common.http.HttpRequest;
@@ -30,7 +28,6 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.Duration;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -57,9 +54,9 @@ public abstract class BaseHttpExecuteHandler implements ExecuteHandler {
 
   @SuppressWarnings("DuplicatedCode")
   @Override
-  public final Mono<Boolean> execute(@Nonnull JobInstance instance,
+  public final Mono<Boolean> execute(@Nonnull LbServer lbServer,
+                                     @Nonnull JobInstance instance,
                                      @Nonnull JobView jobView,
-                                     @Nonnull TriggerTypeEnum triggerType,
                                      @Nonnull Object executeParam) {
     HttpRequest httpRequest = converterParam(executeParam);
     HttpMethod method = httpRequest.getMethod();
@@ -88,13 +85,13 @@ public abstract class BaseHttpExecuteHandler implements ExecuteHandler {
         }
       }
     }
-
+    VirtualHttpServer server = (VirtualHttpServer) lbServer;
+    String hostPort = server.hostPort;
     String schema = httpRequest.getSchema();
-    String ipPort = httpRequest.getIpPort();
     String uri = httpRequest.getUri();
     String queryString = httpRequest.getQueryString();
     StringBuilder urlSb = new StringBuilder(schema)
-        .append("://").append(ipPort).append(uri);
+        .append("://").append(hostPort).append(uri);
     if (StringUtils.isNotBlank(queryString)) {
       urlSb.append("?").append(queryString);
     }
@@ -106,12 +103,14 @@ public abstract class BaseHttpExecuteHandler implements ExecuteHandler {
     taskResult.setHandleStatus(HandleStatusEnum.COMPLETE);
     taskResult.setSequence(2);
 
+    log.debug("任务: {} 调用接口: {}", jobView.getJobId(), requestUri);
     WebClient.RequestHeadersSpec<?> clientSpec
         = buildWebClientSpec(method, requestUri, requestBody, headers, formData);
     return clientSpec.retrieve().bodyToMono(String.class)
         .onErrorResume(e -> {
           String errMsg = e.getClass().getName() + ": " + e.getMessage();
           taskResult.setHandleStatus(HandleStatusEnum.ABNORMAL);
+          log.info("调用 {} 异常: {}", hostPort, errMsg);
           return Mono.just(errMsg);
         })
         .flatMap(result -> {
@@ -125,28 +124,28 @@ public abstract class BaseHttpExecuteHandler implements ExecuteHandler {
   }
 
   @Override
-  public Mono<Object> parseExecuteParam(@Nonnull String executeParam) {
+  public Object parseExecuteParam(@Nonnull String executeParam) {
     if (StringUtils.isBlank(executeParam)) {
-      return Mono.error(new VisibleException("Http script为空"));
+      throw new VisibleException("Http script为空");
     }
     HttpRequest httpRequest;
     try {
       httpRequest = HttpScriptUtils.parse(executeParam);
     } catch (HttpScriptUtils.HttpScriptParseException e) {
       String errMsg = "http script解析异常: " + e.getMessage();
-      return Mono.error(new VisibleException(errMsg));
+      throw new VisibleException(errMsg);
     }
-    return Mono.just(httpRequest);
+    return httpRequest;
   }
 
   @Override
-  public List<? extends LbServer> chooseWorkers(@Nonnull JobView jobView,
-                                                @Nonnull Object executeParam) {
+  public Mono<List<? extends LbServer>> chooseWorkers(@Nonnull JobView jobView,
+                                                      @Nonnull Object executeParam) {
     HttpRequest httpRequest = converterParam(executeParam);
     String ipPort = httpRequest.getIpPort();
     VirtualHttpServer httpServer = VIRTUAL_SERVER_MAP
         .computeIfAbsent(ipPort, k -> new VirtualHttpServer(ipPort));
-    return ImmutableList.of(httpServer);
+    return Mono.just(ImmutableList.of(httpServer));
   }
 
   private HttpRequest converterParam(@Nonnull Object executeParam) {

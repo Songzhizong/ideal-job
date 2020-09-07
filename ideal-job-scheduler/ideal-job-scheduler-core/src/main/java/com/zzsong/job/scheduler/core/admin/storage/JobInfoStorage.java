@@ -9,6 +9,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,7 +33,7 @@ public interface JobInfoStorage {
 
   Flux<JobView> loadScheduleJobViews(long maxNextTime, Paging paging);
 
-  Mono<Integer> batchUpdateTriggerInfo(@Nonnull List<JobView> jobViewList);
+  Mono<Integer> batchUpdateTriggerInfo(@Nonnull Collection<JobView> jobViewList);
 
   Mono<Res<List<JobInfo>>> query(@Nonnull QueryJobArgs args, @Nonnull Paging paging);
 }

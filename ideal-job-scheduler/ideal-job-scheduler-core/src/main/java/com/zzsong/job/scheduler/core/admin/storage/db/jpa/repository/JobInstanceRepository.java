@@ -1,6 +1,5 @@
 package com.zzsong.job.scheduler.core.admin.storage.db.jpa.repository;
 
-import com.zzsong.job.common.message.payload.TaskCallback;
 import com.zzsong.job.scheduler.core.admin.storage.db.entity.JobInstanceDo;
 import com.zzsong.job.scheduler.core.admin.storage.param.TaskResult;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,7 +28,7 @@ public interface JobInstanceRepository extends JpaRepository<JobInstanceDo, Long
       "    ins.updateTime = :#{#param.updateTime} " +
       "where ins.instanceId = :#{#param.instanceId} " +
       "    and ins.sequence < :#{#param.sequence}")
-  int updateWhenTriggerCallback(@Param("param") TaskResult param);
+  int updateByTaskResult(@Param("param") TaskResult param);
 
   @Modifying
   @Transactional(rollbackFor = Exception.class)

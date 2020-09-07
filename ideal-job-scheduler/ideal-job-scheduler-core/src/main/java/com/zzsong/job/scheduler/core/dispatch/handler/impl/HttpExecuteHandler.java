@@ -6,7 +6,6 @@ import com.zzsong.job.scheduler.core.dispatch.handler.ExecuteHandlerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
-import java.util.concurrent.ExecutorService;
 
 /**
  * @author 宋志宗

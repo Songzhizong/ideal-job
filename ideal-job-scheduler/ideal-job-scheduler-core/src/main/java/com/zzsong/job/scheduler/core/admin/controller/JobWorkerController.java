@@ -83,7 +83,9 @@ public class JobWorkerController implements WorkerClient {
   public Mono<Res<Void>> delete(@PathVariable("workerId") long workerId) {
     return Mono.just(workerId)
         .doOnNext(id -> {
-          if (id < 1) throw new VisibleException(("执行器ID不合法"));
+          if (id < 1) {
+            throw new VisibleException(("执行器ID不合法"));
+          }
         })
         .flatMap(service::delete)
         .map(b -> Res.<Void>success())

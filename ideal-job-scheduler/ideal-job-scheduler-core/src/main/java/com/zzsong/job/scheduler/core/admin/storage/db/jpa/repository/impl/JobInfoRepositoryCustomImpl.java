@@ -24,7 +24,7 @@ public class JobInfoRepositoryCustomImpl implements JobInfoRepositoryCustom {
   }
 
   @Override
-  public int batchUpdateTriggerInfo(Collection<JobView> jobInfos) {
+  public int batchUpdateTriggerInfo(Collection<JobView> jobViews) {
     final String sql = "update ideal_job_info" +
         " set job_status = ?," +
         " last_trigger_time = ?," +
@@ -32,7 +32,7 @@ public class JobInfoRepositoryCustomImpl implements JobInfoRepositoryCustom {
         " update_time = ?" +
         " where job_id = ?";
     final LocalDateTime now = DateTimes.now();
-    List<Object[]> list = jobInfos.stream()
+    List<Object[]> list = jobViews.stream()
         .map(v -> new Object[]{v.getJobStatus(), v.getLastTriggerTime(),
             v.getNextTriggerTime(), now, v.getJobId()})
         .collect(Collectors.toList());

@@ -7,6 +7,7 @@ import com.zzsong.job.scheduler.core.admin.service.JobService;
 import com.zzsong.job.scheduler.core.utils.CronExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
@@ -29,7 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @date 2020/9/3
  */
 @Component
-public class TimingSchedule {
+public class TimingSchedule implements SmartInitializingSingleton {
   public static final Logger log = LoggerFactory.getLogger(TimingSchedule.class);
   private static final String LOCK_SQL
       = "select lock_name from ideal_job_lock where lock_name = 'schedule_lock' for update";
@@ -248,19 +249,19 @@ public class TimingSchedule {
         if (preparedStatement != null) {
           try {
             preparedStatement.close();
-          } catch (SQLException throwables) {
-            throwables.printStackTrace();
+          } catch (SQLException exception) {
+            exception.printStackTrace();
           }
         }
         try {
           connection.setAutoCommit(tempAutoCommit);
-        } catch (SQLException throwables) {
-          throwables.printStackTrace();
+        } catch (SQLException exception) {
+          exception.printStackTrace();
         }
         try {
           connection.close();
-        } catch (SQLException throwables) {
-          throwables.printStackTrace();
+        } catch (SQLException exception) {
+          exception.printStackTrace();
         }
       }
     }
@@ -280,7 +281,7 @@ public class TimingSchedule {
     );
   }
 
-  private void refreshNextValidTime(JobView jobView, Date date) {
+  private void refreshNextValidTime(@Nonnull JobView jobView, @Nonnull Date date) {
     String cron = jobView.getCron();
     Date nextValidTimeAfter;
     try {
@@ -298,5 +299,11 @@ public class TimingSchedule {
       jobView.setLastTriggerTime(0);
       jobView.setNextTriggerTime(0);
     }
+  }
+
+  @Override
+  public void afterSingletonsInstantiated() {
+    this.start();
+    Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
   }
 }

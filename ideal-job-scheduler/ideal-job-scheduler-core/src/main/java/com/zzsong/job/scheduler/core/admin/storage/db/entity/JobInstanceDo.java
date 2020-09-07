@@ -1,6 +1,5 @@
 package com.zzsong.job.scheduler.core.admin.storage.db.entity;
 
-import com.zzsong.job.common.constants.DBDefaults;
 import com.zzsong.job.common.constants.HandleStatusEnum;
 import com.zzsong.job.common.constants.TriggerTypeEnum;
 import lombok.AllArgsConstructor;

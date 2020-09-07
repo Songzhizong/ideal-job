@@ -29,6 +29,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.text.ParseException;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -252,8 +253,8 @@ public class JobService {
     return jobInfoStorage.loadScheduleJobViews(maxNextTime, paging);
   }
 
-  public Mono<Integer> batchUpdateTriggerInfo(List<JobView> viewList) {
-    return jobInfoStorage.batchUpdateTriggerInfo(viewList);
+  public Mono<Integer> batchUpdateTriggerInfo(Collection<JobView> jobViews) {
+    return jobInfoStorage.batchUpdateTriggerInfo(jobViews);
   }
 
 

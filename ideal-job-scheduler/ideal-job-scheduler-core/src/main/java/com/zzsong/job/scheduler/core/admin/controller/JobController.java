@@ -88,7 +88,9 @@ public class JobController implements JobClient {
   public Mono<Res<Void>> remove(@PathVariable("jobId") long jobId) {
     return Mono.just(jobId)
         .doOnNext(id -> {
-          if (id < 1) throw new VisibleException("任务id不合法");
+          if (id < 1) {
+            throw new VisibleException("任务id不合法");
+          }
         })
         .flatMap(jobService::removeJob)
         .map(b -> Res.<Void>success())
@@ -128,7 +130,9 @@ public class JobController implements JobClient {
   public Mono<Res<Void>> enable(@PathVariable("jobId") long jobId) {
     return Mono.just(jobId)
         .doOnNext(id -> {
-          if (id < 1) throw new VisibleException("任务id不合法");
+          if (id < 1) {
+            throw new VisibleException("任务id不合法");
+          }
         })
         .flatMap(jobService::enableJob)
         .map(b -> Res.<Void>success())
@@ -149,7 +153,9 @@ public class JobController implements JobClient {
   public Mono<Res<Void>> disable(@PathVariable("jobId") long jobId) {
     return Mono.just(jobId)
         .doOnNext(id -> {
-          if (id < 1) throw new VisibleException("任务id不合法");
+          if (id < 1) {
+            throw new VisibleException("任务id不合法");
+          }
         })
         .flatMap(jobService::disableJob)
         .map(b -> Res.<Void>success())
@@ -172,7 +178,9 @@ public class JobController implements JobClient {
                                  @Nullable String executeParam) {
     return Mono.just(jobId)
         .doOnNext(id -> {
-          if (id < 1) throw new VisibleException("任务id不合法");
+          if (id < 1) {
+            throw new VisibleException("任务id不合法");
+          }
         })
         .flatMap(id -> jobService.triggerJob(id, executeParam))
         .map(b -> Res.<Void>success())

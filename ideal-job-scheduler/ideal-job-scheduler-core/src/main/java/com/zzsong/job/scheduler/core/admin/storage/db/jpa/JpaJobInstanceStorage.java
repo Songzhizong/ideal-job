@@ -51,7 +51,7 @@ public class JpaJobInstanceStorage implements JobInstanceStorage {
   @Override
   public Mono<Integer> updateByTaskResult(@Nonnull TaskResult param) {
     return Mono.just(param)
-        .map(repository::updateWhenTriggerCallback)
+        .map(repository::updateByTaskResult)
         .subscribeOn(blockScheduler);
   }
 

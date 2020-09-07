@@ -21,7 +21,6 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
-import java.util.Collections;
 
 /**
  * @author 宋志宗
@@ -50,56 +49,85 @@ public class JobDispatcher {
       log.error("triggerType: {} 没有对应的执行处理器", executeType);
       return Mono.error(new VisibleException("triggerType: " + executeType + " 没有对应的执行处理器"));
     }
+    // 如果自定义参数不为空则使用自定义参数, 反之使用任务默认参数
     String executeParam;
     if (customExecuteParam == null) {
       executeParam = jobView.getExecuteParam();
     } else {
       executeParam = customExecuteParam;
     }
-    Object[] paramTmp = new Object[1];
+
+    // 解析任务参数
     JobInstance instance = createJobInstance(jobView, triggerType, executeParam);
-    return handler.parseExecuteParam(executeParam)
-        .map(param -> {
-          paramTmp[0] = param;
-          return handler.chooseWorkers(jobView, param);
-        })
+    Object param;
+    try {
+      param = handler.parseExecuteParam(executeParam);
+    } catch (Exception e) {
+      String errMsg = e.getClass().getName() + ": " + e.getMessage();
+      log.info("任务: {} 执行参数解析异常: {}", jobView.getJobId(), errMsg);
+      instance.setDispatchStatus(JobInstance.STATUS_FAIL);
+      instance.setDispatchMsg("执行参数解析异常: " + errMsg);
+      instance.setHandleStatus(HandleStatusEnum.DISCARD);
+      return instanceService.saveInstance(instance)
+          .flatMap(i -> Mono.error(new VisibleException(i.getDispatchMsg())));
+    }
+
+    // 选取服务列表
+    return handler.chooseWorkers(jobView, param)
+        // 选取服务列表异常, 保存任务实例信息并抛出异常
         .onErrorResume(e -> {
           String errMsg = e.getClass().getName() + ": " + e.getMessage();
-          log.info("任务: {} 执行异常: {}", jobView.getJobId(), errMsg);
+          log.info("任务: {} 选取服务列表异常: {}", jobView.getJobId(), errMsg);
           instance.setDispatchStatus(JobInstance.STATUS_FAIL);
-          instance.setDispatchMsg(errMsg);
+          instance.setDispatchMsg("选取服务列表异常: " + errMsg);
           instance.setHandleStatus(HandleStatusEnum.DISCARD);
-          return Mono.just(Collections.emptyList());
+          return instanceService.saveInstance(instance)
+              .flatMap(i -> Mono.error(new VisibleException(i.getDispatchMsg())));
         })
-        .flatMap(servers -> {
-          if (servers.size() == 0) {
-            return instanceService.saveInstance(instance)
-                .flatMap(i -> Mono.error(new VisibleException(i.getDispatchMsg())));
+        .flatMap(lbServers -> {
+          // 服务列表为空, 抛出异常, 不应该到这一步的, chooseWorkers方法应保证返回的列表不为空, 否则应抛出异常
+          if (lbServers.size() == 0) {
+            log.error("任务: {} 选取的服务列表为空", jobView.getJobId());
+            return Mono.error(new VisibleException("选取服务列表为空"));
           }
-          if (servers.size() == 1) {
-            LbServer lbServer = servers.get(0);
+          // 选取服务列表只有一个, 直接执行
+          if (lbServers.size() == 1) {
+            LbServer lbServer = lbServers.get(0);
             String instanceId = lbServer.getInstanceId();
             instance.setExecutorInstance(instanceId);
             return instanceService.saveInstance(instance)
                 .flatMap(savedInstance ->
-                    handler.execute(savedInstance, jobView, triggerType, paramTmp[0])
+                    handler.execute(lbServer, savedInstance, jobView, param)
+                        .doOnError(e -> {
+                          String errMsg = e.getClass().getName() + ": " + e.getMessage();
+                          log.info("任务实例: {} 执行异常: {}",
+                              savedInstance.getInstanceId(), errMsg);
+                        })
                 );
-          } else {
-            return instanceService.saveInstance(instance)
-                .flatMap(savedInstance -> {
-                  Long instanceId = savedInstance.getInstanceId();
-                  return Flux.fromIterable(servers)
-                      .flatMap(server -> {
-                        JobInstance child = createJobInstance(jobView, triggerType, executeParam);
-                        child.setParentId(instanceId);
-                        child.setExecutorInstance(server.getInstanceId());
-                        return instanceService.saveInstance(instance)
-                            .flatMap(savedChild ->
-                                handler.execute(savedChild, jobView, triggerType, paramTmp[0])
-                            );
-                      }).collectList().map(list -> true);
-                });
           }
+          // 选取服务列表为多个, 为每次调用创建任务实例并执行, 先保存父任务实例
+          return instanceService.saveInstance(instance)
+              .flatMap(savedInstance -> {
+                long instanceId = savedInstance.getInstanceId();
+                return Flux.fromIterable(lbServers)
+                    .flatMap(server -> {
+                      // 为每次调用创建任务实例
+                      JobInstance child = createJobInstance(jobView, triggerType, executeParam);
+                      child.setParentId(instanceId);
+                      child.setExecutorInstance(server.getInstanceId());
+                      // 保存任务实例并执行任务调用
+                      return instanceService.saveInstance(instance)
+                          .flatMap(savedChild ->
+                              handler.execute(server, savedChild, jobView, param)
+                                  .onErrorResume(e -> {
+                                    String errMsg = e.getClass().getName() + ": " + e.getMessage();
+                                    log.info("任务实例: {} 执行异常: {}",
+                                        savedChild.getInstanceId(), errMsg);
+                                    return Mono.just(false);
+                                  })
+                          );
+                    }).collectList().map(list -> true);
+              });
         });
   }
 
