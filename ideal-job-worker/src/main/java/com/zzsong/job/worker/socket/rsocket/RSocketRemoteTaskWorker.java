@@ -24,6 +24,7 @@ import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -192,7 +193,13 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
   @MessageMapping("execute")
   public Mono<Res<Void>> execute(@Nonnull TaskParam param) {
     log.debug("execute: {}", JsonUtils.toJsonString(param));
-    return JobExecutor.getExecutor().executeJob(param);
+    return JobExecutor.getExecutor().executeJob(param)
+        .onErrorResume(throwable -> {
+          if (throwable instanceof RejectedExecutionException) {
+            return Mono.just(Res.err("任务: " + param.getJobId() + " 客户端: " + getInstanceId() + " 线程池资源不足"));
+          }
+          return Mono.just(Res.err(throwable.getMessage()));
+        });
   }
 
   @Nonnull

@@ -98,6 +98,7 @@ public class JobDispatcher {
             return instanceService.saveInstance(instance)
                 .flatMap(savedInstance ->
                     handler.execute(lbServer, savedInstance, jobView, param)
+                        // 调度异常应记录到任务实例信息中
                         .doOnError(e -> {
                           String errMsg = e.getClass().getName() + ": " + e.getMessage();
                           log.info("任务实例: {} 执行异常: {}",

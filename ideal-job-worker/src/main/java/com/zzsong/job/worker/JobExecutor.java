@@ -97,7 +97,8 @@ public class JobExecutor {
         60, TimeUnit.SECONDS, workQueue,
         new ThreadFactoryBuilder().setNameFormat("job-executor-pool-%d").build(),
         (r, executor) -> {
-          log.error("任务执行线程池资源不足, 请尝试修改线程数配置");
+          log.error("任务执行线程池资源不足, 请尝试修改线程数配置, 当前核心线程数: {}, 最大线程数: {}, 队列长度: {}",
+              corePoolSize, maximumPoolSize, poolQueueSize);
           throw new RejectedExecutionException("Task " + r.toString() +
               " rejected from Job executor thread pool");
         });
@@ -207,47 +208,51 @@ public class JobExecutor {
       log.error("不存在此jobHandler: {}", handlerName);
       return Mono.just(Res.err("不存在此jobHandler: " + handlerName));
     }
-    executorService.execute(() -> {
-      String jobId = param.getJobId();
-      long instanceId = param.getInstanceId();
-      String executeParam = param.getExecuteParam();
-      long executeTime = System.currentTimeMillis();
+    try {
+      executorService.execute(() -> {
+        String jobId = param.getJobId();
+        long instanceId = param.getInstanceId();
+        String executeParam = param.getExecuteParam();
+        long executeTime = System.currentTimeMillis();
 
-      TaskCallback callback = new TaskCallback();
-      callback.setSequence(2);
-      callback.setJobId(jobId);
-      callback.setInstanceId(instanceId);
-      callback.setHandleStatus(HandleStatusEnum.COMPLETE.getCode());
-      callback.setHandleTime(executeTime);
-      try {
-        Object execute = jobHandler.execute(executeParam);
-        if (execute != null) {
-          String handleMessage = execute.toString();
-          if (StringUtils.isNotBlank(handleMessage)) {
-            callback.setHandleResult(handleMessage);
+        TaskCallback callback = new TaskCallback();
+        callback.setSequence(2);
+        callback.setJobId(jobId);
+        callback.setInstanceId(instanceId);
+        callback.setHandleStatus(HandleStatusEnum.COMPLETE.getCode());
+        callback.setHandleTime(executeTime);
+        try {
+          Object execute = jobHandler.execute(executeParam);
+          if (execute != null) {
+            String handleMessage = execute.toString();
+            if (StringUtils.isNotBlank(handleMessage)) {
+              callback.setHandleResult(handleMessage);
+            }
+          }
+        } catch (Exception exception) {
+          String errMsg = exception.getClass().getSimpleName() + ":" + exception.getMessage();
+          log.info("Job execute exception: {}", errMsg);
+          callback.setHandleStatus(HandleStatusEnum.ABNORMAL.getCode());
+          callback.setHandleResult(errMsg);
+        } finally {
+          callback.setFinishedTime(System.currentTimeMillis());
+          RemoteTaskWorker executor = chooseRemoteJobExecutor(2);
+          // 任务完成时间尽量返回服务端
+          if (executor != null) {
+            executor.taskCallback(callback)
+                .doOnNext(res -> {
+                  // 失败了重试或者暂时缓存起来, 后续批量发送
+                })
+                .subscribe();
+          } else {
+            // 如果当前没有则暂时缓存起来
+            log.warn("当前没有可用的RemoteJobExecutor");
           }
         }
-      } catch (Exception exception) {
-        String errMsg = exception.getClass().getSimpleName() + ":" + exception.getMessage();
-        log.info("Job execute exception: {}", errMsg);
-        callback.setHandleStatus(HandleStatusEnum.ABNORMAL.getCode());
-        callback.setHandleResult(errMsg);
-      } finally {
-        callback.setFinishedTime(System.currentTimeMillis());
-        RemoteTaskWorker executor = chooseRemoteJobExecutor(2);
-        // 任务完成时间尽量返回服务端
-        if (executor != null) {
-          executor.taskCallback(callback)
-              .doOnNext(res -> {
-                // 失败了重试或者暂时缓存起来, 后续批量发送
-              })
-              .subscribe();
-        } else {
-          // 如果当前没有则暂时缓存起来
-          log.warn("当前没有可用的RemoteJobExecutor");
-        }
-      }
-    });
+      });
+    } catch (Exception exception) {
+      return Mono.error(exception);
+    }
     return Mono.just(Res.success());
   }
 
