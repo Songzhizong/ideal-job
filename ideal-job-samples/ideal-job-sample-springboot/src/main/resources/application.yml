@@ -14,5 +14,5 @@ spring:
     default-property-inclusion: non_null
 ideal:
   job:
-    access-token: dsdsfdasfd
-    scheduler-addresses: ws://127.0.0.1:8804
+    access-token: dasdassdfafd
+    scheduler-addresses: 127.0.0.1:9904

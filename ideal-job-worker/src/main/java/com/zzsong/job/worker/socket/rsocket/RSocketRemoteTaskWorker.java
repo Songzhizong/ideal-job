@@ -6,11 +6,13 @@ import com.zzsong.job.common.message.payload.TaskParam;
 import com.zzsong.job.common.transfer.Res;
 import com.zzsong.job.common.utils.JsonUtils;
 import com.zzsong.job.common.worker.RemoteTaskWorker;
+import com.zzsong.job.worker.JobExecutor;
 import io.rsocket.SocketAcceptor;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.rsocket.RSocketStrategies;
@@ -29,8 +31,10 @@ import java.util.concurrent.TimeUnit;
  * @date 2020/9/3
  */
 public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker {
-  private static final Logger log = LoggerFactory
-      .getLogger(RSocketRemoteTaskWorker.class);
+  private static final Logger log = LoggerFactory.getLogger(RSocketRemoteTaskWorker.class);
+  private static final ParameterizedTypeReference<Res<Void>> VOID_RES
+      = new ParameterizedTypeReference<Res<Void>>() {
+  };
 
   private final BlockingQueue<Boolean> restartNoticeQueue = new ArrayBlockingQueue<>(1);
   private final int restartDelay = 10;
@@ -104,7 +108,8 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
             .setupData(messageString)
             .rsocketConnector(connector -> connector.acceptor(responder))
             .connectTcp(ip, port)
-            .doOnError(e -> log.error("Login fail: {}", e.getMessage()))
+            .doOnError(e -> log.warn("Job scheduler {}:{} Login fail: {}", ip, port, e.getMessage()))
+            .doOnNext(r -> log.info("Job scheduler {}:{} login success.", ip, port))
             .block();
       } catch (Exception e) {
         running = false;
@@ -118,7 +123,8 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
             .setupData(messageString)
             .rsocketConnector(connector -> connector.acceptor(responder))
             .connectTcp(ip, port)
-            .doOnError(e -> log.error("Login fail: {}", e.getMessage()))
+            .doOnError(e -> log.warn("Job scheduler {}:{} Login fail: {}", ip, port, e.getMessage()))
+            .doOnNext(r -> log.info("Job scheduler {}:{} login success.", ip, port))
             .block();
       } catch (Exception e) {
         running = false;
@@ -132,13 +138,13 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
         .doOnError(error -> {
           String errMessage = error.getClass().getSimpleName() +
               ": " + error.getMessage();
-          log.info("socket error: {}", errMessage);
+          log.info("Job scheduler socket error: {}", errMessage);
         })
         .doFinally(consumer -> {
           running = false;
-          restartSocket();
-          log.info("{}:{}连接断开: {}, {} 秒后尝试重连...",
+          log.info("Job scheduler {}:{} 连接断开: {}, {} 秒后尝试重连...",
               ip, port, consumer, restartDelay);
+          restartSocket();
         })
         .subscribe();
     running = true;
@@ -171,15 +177,22 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
   }
 
   @Override
-  public void taskCallback(@Nonnull TaskCallback callback) {
-
+  public Mono<Res<Void>> taskCallback(@Nonnull TaskCallback callback) {
+    return rsocketRequester.route("task-callback")
+        .data(callback)
+        .retrieveMono(VOID_RES)
+        .doOnNext(res -> {
+          if (log.isDebugEnabled()) {
+            log.debug("task callback result: {}", JsonUtils.toJsonString(res));
+          }
+        });
   }
 
   @Override
   @MessageMapping("execute")
   public Mono<Res<Void>> execute(@Nonnull TaskParam param) {
-    log.info("execute: {}", JsonUtils.toJsonString(param));
-    return Mono.just(Res.success());
+    log.debug("execute: {}", JsonUtils.toJsonString(param));
+    return JobExecutor.getExecutor().executeJob(param);
   }
 
   @Nonnull
@@ -196,6 +209,7 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
         && !rsocketRequester.rsocket().isDisposed();
   }
 
+  @SuppressWarnings("deprecation")
   @Override
   public void destroy() {
     if (destroyed) {
@@ -209,7 +223,8 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
 
   @MessageMapping("interrupt")
   public Mono<String> interrupt(String status) {
-    log.info("Connection {}", status);
+    log.warn("Job scheduler {}:{} 服务中断: {}, {} 秒后尝试重连...",
+        ip, port, status, restartDelay);
     running = false;
     restartSocket();
     return Mono.just("received...");

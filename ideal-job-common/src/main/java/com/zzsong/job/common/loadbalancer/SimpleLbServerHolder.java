@@ -82,8 +82,9 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
             heartbeatThreadPool.execute(this::heartbeat);
           }
           if (poll != null) {
-            log.debug("可用服务列表发生变化, 更新数据...");
             reachableServers = ImmutableList.copyOf(reachableServerMap.values());
+            log.info("{} 可用服务列表发生变化, 当前总服务数: {}, 当前可达服务数: {}",
+                serverName, allServers.size(), reachableServers.size());
           }
         } catch (InterruptedException e) {
           log.debug("{}", e.getMessage());
@@ -234,13 +235,9 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
       }
     }
     if (up > 0 || down > 0) {
-      log.info("Heartbeat: {} 可达服务列表发生变化, 当前总服务数: {}, 新标记可达服务数: {}, 不可达服务数: {}, 当前可达服务总数: {}",
+      log.info("Heartbeat: {} 可达服务列表发生变化, 当前总服务数: {}, 新标记可达服务数: {}, 不可达服务数: {}, 当前可达服务数: {}",
           serverName, size, up, down, reachableServeSize + up - down);
     }
-//    else if (log.isDebugEnabled()) {
-//      log.debug("对 {} 服务列表执行心跳检测, 当前总服务数: {}, 新标记可达服务数: {}, 不可达服务数: {}, 当前可达服务总数: {}",
-//          serverName, size, up, down, reachableServerMap.size());
-//    }
   }
 
   @Override

@@ -22,5 +22,4 @@ public class TaskResult {
   private String result;
   private int sequence;
   private LocalDateTime updateTime;
-
 }

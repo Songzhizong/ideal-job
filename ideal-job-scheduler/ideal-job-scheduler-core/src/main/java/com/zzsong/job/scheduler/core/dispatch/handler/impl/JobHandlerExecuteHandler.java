@@ -43,6 +43,7 @@ public final class JobHandlerExecuteHandler implements ExecuteHandler {
     ExecuteHandlerFactory.register(ExecuteTypeEnum.JOB_HANDLER, this);
   }
 
+  @Nonnull
   @Override
   public Mono<Boolean> execute(@Nonnull LbServer lbServer,
                                @Nonnull JobInstance instance,
@@ -68,11 +69,13 @@ public final class JobHandlerExecuteHandler implements ExecuteHandler {
         });
   }
 
+  @Nonnull
   @Override
   public Object parseExecuteParam(@Nonnull String executeParam) {
     return executeParam;
   }
 
+  @Nonnull
   @Override
   public Mono<List<? extends LbServer>> chooseWorkers(@Nonnull JobView jobView,
                                                       @Nonnull Object executeParam) {

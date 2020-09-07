@@ -53,6 +53,7 @@ public abstract class BaseHttpExecuteHandler implements ExecuteHandler {
   }
 
   @SuppressWarnings("DuplicatedCode")
+  @Nonnull
   @Override
   public final Mono<Boolean> execute(@Nonnull LbServer lbServer,
                                      @Nonnull JobInstance instance,
@@ -123,6 +124,7 @@ public abstract class BaseHttpExecuteHandler implements ExecuteHandler {
         });
   }
 
+  @Nonnull
   @Override
   public Object parseExecuteParam(@Nonnull String executeParam) {
     if (StringUtils.isBlank(executeParam)) {
@@ -138,6 +140,7 @@ public abstract class BaseHttpExecuteHandler implements ExecuteHandler {
     return httpRequest;
   }
 
+  @Nonnull
   @Override
   public Mono<List<? extends LbServer>> chooseWorkers(@Nonnull JobView jobView,
                                                       @Nonnull Object executeParam) {

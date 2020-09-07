@@ -208,48 +208,43 @@ public class JobExecutor {
       return Mono.just(Res.err("不存在此jobHandler: " + handlerName));
     }
     executorService.execute(() -> {
-      int sequence = 0;
       String jobId = param.getJobId();
       long instanceId = param.getInstanceId();
       String executeParam = param.getExecuteParam();
       long executeTime = System.currentTimeMillis();
-      RemoteTaskWorker executor = chooseRemoteJobExecutor(2);
-      if (executor == null) {
-        log.warn("当前没有可用的RemoteJobExecutor");
-      } else {
-        TaskCallback runningCallback = new TaskCallback();
-        runningCallback.setSequence(++sequence);
-        runningCallback.setJobId(jobId);
-        runningCallback.setInstanceId(instanceId);
-        runningCallback.setHandleStatus(HandleStatusEnum.RUNNING.getCode());
-        runningCallback.setHandleTime(executeTime);
-        executor.taskCallback(runningCallback);
-      }
 
-      TaskCallback endCallback = new TaskCallback();
-      endCallback.setSequence(++sequence);
-      endCallback.setJobId(jobId);
-      endCallback.setInstanceId(instanceId);
-      endCallback.setHandleStatus(HandleStatusEnum.COMPLETE.getCode());
-      endCallback.setHandleTime(executeTime);
+      TaskCallback callback = new TaskCallback();
+      callback.setSequence(2);
+      callback.setJobId(jobId);
+      callback.setInstanceId(instanceId);
+      callback.setHandleStatus(HandleStatusEnum.COMPLETE.getCode());
+      callback.setHandleTime(executeTime);
       try {
         Object execute = jobHandler.execute(executeParam);
         if (execute != null) {
           String handleMessage = execute.toString();
           if (StringUtils.isNotBlank(handleMessage)) {
-            endCallback.setHandleMessage(handleMessage);
+            callback.setHandleResult(handleMessage);
           }
         }
       } catch (Exception exception) {
         String errMsg = exception.getClass().getSimpleName() + ":" + exception.getMessage();
         log.info("Job execute exception: {}", errMsg);
-        endCallback.setHandleStatus(HandleStatusEnum.ABNORMAL.getCode());
-        endCallback.setHandleMessage(errMsg);
+        callback.setHandleStatus(HandleStatusEnum.ABNORMAL.getCode());
+        callback.setHandleResult(errMsg);
       } finally {
-        endCallback.setFinishedTime(System.currentTimeMillis());
-        // 任务完成时间尽量返回服务端, 如果当前没有则暂时缓存起来
+        callback.setFinishedTime(System.currentTimeMillis());
+        RemoteTaskWorker executor = chooseRemoteJobExecutor(2);
+        // 任务完成时间尽量返回服务端
         if (executor != null) {
-          executor.taskCallback(endCallback);
+          executor.taskCallback(callback)
+              .doOnNext(res -> {
+                // 失败了重试或者暂时缓存起来, 后续批量发送
+              })
+              .subscribe();
+        } else {
+          // 如果当前没有则暂时缓存起来
+          log.warn("当前没有可用的RemoteJobExecutor");
         }
       }
     });

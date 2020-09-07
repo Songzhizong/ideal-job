@@ -49,6 +49,7 @@
     <dependency>
       <groupId>org.springframework.data</groupId>
       <artifactId>spring-data-redis</artifactId>
+      <scope>provided</scope>
     </dependency>
     <!-- commons-lang3 -->
     <dependency>

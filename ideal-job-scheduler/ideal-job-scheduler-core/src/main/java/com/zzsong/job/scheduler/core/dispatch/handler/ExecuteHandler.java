@@ -22,6 +22,7 @@ public interface ExecuteHandler {
    * @author 宋志宗
    * @date 2020/8/28 10:23 下午
    */
+  @Nonnull
   Mono<Boolean> execute(@Nonnull LbServer lbServer,
                         @Nonnull JobInstance instance,
                         @Nonnull JobView jobView,
@@ -35,6 +36,7 @@ public interface ExecuteHandler {
    * @author 宋志宗
    * @date 2020/9/7
    */
+  @Nonnull
   Object parseExecuteParam(@Nonnull String executeParam) throws Exception;
 
   /**
@@ -46,6 +48,7 @@ public interface ExecuteHandler {
    * @author 宋志宗
    * @date 2020/9/7
    */
+  @Nonnull
   Mono<List<? extends LbServer>> chooseWorkers(@Nonnull JobView jobView,
                                                @Nonnull Object executeParam);
 }

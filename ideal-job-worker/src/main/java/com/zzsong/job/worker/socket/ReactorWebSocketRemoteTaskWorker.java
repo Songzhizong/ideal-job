@@ -324,11 +324,12 @@ public final class ReactorWebSocketRemoteTaskWorker extends Thread implements Re
   }
 
   @Override
-  public void taskCallback(@Nonnull TaskCallback callback) {
+  public Mono<Res<Void>> taskCallback(@Nonnull TaskCallback callback) {
     String callbackMessage = callback.toMessageString();
     SocketMessage socketMessage
         = new SocketMessage(TaskCallback.typeCode, callbackMessage);
     String messageString = socketMessage.toMessageString();
     sendMessage(messageString);
+    return Mono.just(Res.success());
   }
 }

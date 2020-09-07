@@ -38,10 +38,10 @@ public class TaskCallback {
    */
   private int handleStatus = -1;
   /**
-   * 执行日志
+   * 执行结果
    */
   @Nonnull
-  private String handleMessage = "";
+  private String handleResult = "";
   /**
    * 执行时间
    */

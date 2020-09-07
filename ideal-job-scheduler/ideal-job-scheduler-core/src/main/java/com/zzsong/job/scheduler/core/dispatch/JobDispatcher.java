@@ -156,22 +156,10 @@ public class JobDispatcher {
     instance.setCreatedTime(now);
     instance.setUpdateTime(now);
     instance.setDispatchStatus(JobInstance.STATUS_SUCCESS);
+    instance.setDispatchMsg("Success");
     instance.setHandleTime(currentTimeMillis);
     instance.setHandleStatus(HandleStatusEnum.RUNNING);
     instance.setSequence(1);
     return instance;
   }
-
-//  public Mono<Integer> dispatchCallback(@Nonnull TaskCallback taskCallback) {
-//    int handleStatus = taskCallback.getHandleStatus();
-//    TaskCallbackParam param = new TaskCallbackParam();
-//    param.setInstanceId(taskCallback.getInstanceId());
-//    param.setHandleTime(taskCallback.getHandleTime());
-//    param.setFinishedTime(taskCallback.getFinishedTime());
-//    param.setHandleStatus(HandleStatusEnum.valueOfCode(handleStatus));
-//    param.setResult(taskCallback.getHandleMessage());
-//    param.setSequence(taskCallback.getSequence());
-//    param.setUpdateTime(DateTimes.now());
-//    return instanceService.updateWhenTriggerCallback(param);
-//  }
 }

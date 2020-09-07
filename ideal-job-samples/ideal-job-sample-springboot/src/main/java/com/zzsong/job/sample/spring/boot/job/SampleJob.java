@@ -18,7 +18,8 @@ public class SampleJob {
     private static final Logger log = LoggerFactory.getLogger(SampleJob.class);
 
     @JobHandler("demoJobHandler")
-    public void demoJobHandler(@Nonnull String param) {
+    public String demoJobHandler(@Nonnull String param) {
         log.info("execute demoJobHandler, param = {}", param);
+        return "demoJobHandler 接收到任务并已执行完成";
     }
 }
