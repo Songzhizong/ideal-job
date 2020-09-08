@@ -3,6 +3,15 @@ server:
 logging:
   config: classpath:logback-spring-dev.xml
 spring:
+  banner:
+    location: banner.txt
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+    loadbalancer:
+      ribbon:
+        enabled: false
   main:
     allow-bean-definition-overriding: true
   application:
@@ -15,4 +24,8 @@ spring:
 ideal:
   job:
     access-token: dasdassdfafd
-    scheduler-addresses: 127.0.0.1:9904
+    scheduler-addresses: 127.0.0.1:9904,127.0.0.1:9905
+    executor-pool:
+      core-pool-size: 0
+      maximum-pool-size: 5
+      work-queue-size: 0

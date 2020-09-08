@@ -6,7 +6,9 @@ import com.zzsong.job.common.exception.VisibleException;
 import com.zzsong.job.common.http.HttpMethod;
 import com.zzsong.job.common.http.HttpRequest;
 import com.zzsong.job.common.http.HttpScriptUtils;
+import com.zzsong.job.common.loadbalancer.LbFactory;
 import com.zzsong.job.common.loadbalancer.LbServer;
+import com.zzsong.job.common.loadbalancer.SimpleLbFactory;
 import com.zzsong.job.common.utils.DateTimes;
 import com.zzsong.job.common.utils.JsonUtils;
 import com.zzsong.job.common.utils.ReactorUtils;
@@ -38,8 +40,9 @@ import java.util.concurrent.ConcurrentMap;
  */
 public abstract class BaseHttpExecuteHandler implements ExecuteHandler {
   private static final Logger log = LoggerFactory.getLogger(BaseHttpExecuteHandler.class);
-  private static final ConcurrentMap<String, VirtualHttpServer> VIRTUAL_SERVER_MAP
+  protected static final ConcurrentMap<String, VirtualHttpServer> VIRTUAL_SERVER_MAP
       = new ConcurrentHashMap<>();
+  protected static final LbFactory<VirtualHttpServer> LB_FACTORY = new SimpleLbFactory<>();
   // 超时时间5分钟
   private static final Duration READ_TIMEOUT = Duration.ofSeconds(5);
   private final WebClient webClient = ReactorUtils

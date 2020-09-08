@@ -234,10 +234,10 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
         }
       }
     }
-    if (up > 0 || down > 0) {
-      log.info("Heartbeat: {} 可达服务列表发生变化, 当前总服务数: {}, 新标记可达服务数: {}, 不可达服务数: {}, 当前可达服务数: {}",
-          serverName, size, up, down, reachableServeSize + up - down);
-    }
+//    if (up > 0 || down > 0) {
+//      log.info("Heartbeat: {} 可达服务列表发生变化, 当前总服务数: {}, 新标记可达服务数: {}, 不可达服务数: {}, 当前可达服务数: {}",
+//          serverName, size, up, down, reachableServeSize + up - down);
+//    }
   }
 
   @Override

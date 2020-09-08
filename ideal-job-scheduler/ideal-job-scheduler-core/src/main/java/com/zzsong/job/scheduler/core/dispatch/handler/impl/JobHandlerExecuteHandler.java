@@ -75,6 +75,7 @@ public final class JobHandlerExecuteHandler implements ExecuteHandler {
     return executeParam;
   }
 
+  @SuppressWarnings("DuplicatedCode")
   @Nonnull
   @Override
   public Mono<List<? extends LbServer>> chooseWorkers(@Nonnull JobView jobView,
@@ -110,9 +111,12 @@ public final class JobHandlerExecuteHandler implements ExecuteHandler {
         return Mono.just(reachableServers);
       } else {
         LbStrategyEnum lbStrategy = routeStrategy.getLbStrategy();
-        assert lbStrategy != null;
-        LoadBalancer<TaskWorker> loadBalancer = lbFactory
-            .getLoadBalancer(appName, lbStrategy);
+        LoadBalancer<TaskWorker> loadBalancer;
+        if (lbStrategy == null) {
+          loadBalancer = lbFactory.getLoadBalancer(appName);
+        } else {
+          loadBalancer = lbFactory.getLoadBalancer(appName, lbStrategy);
+        }
         TaskWorker chooseServer = loadBalancer.chooseServer(jobId, reachableServers);
         if (chooseServer == null) {
           log.info("执行器: {} 选取实例为空", appName);

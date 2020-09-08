@@ -88,7 +88,7 @@ public class JobExecutor {
       maximumPoolSize = availableProcessors << 5;
     }
     BlockingQueue<Runnable> workQueue;
-    if (poolQueueSize < 2) {
+    if (poolQueueSize < 1) {
       workQueue = new SynchronousQueue<>();
     } else {
       workQueue = new ArrayBlockingQueue<>(poolQueueSize);
@@ -210,6 +210,10 @@ public class JobExecutor {
     }
     try {
       executorService.execute(() -> {
+        TaskContext context = new TaskContext();
+        context.setTaskParam(param);
+        TaskContextHolder.putContext(context);
+
         String jobId = param.getJobId();
         long instanceId = param.getInstanceId();
         String executeParam = param.getExecuteParam();
@@ -235,6 +239,7 @@ public class JobExecutor {
           callback.setHandleStatus(HandleStatusEnum.ABNORMAL.getCode());
           callback.setHandleResult(errMsg);
         } finally {
+          TaskContextHolder.removeContext();
           callback.setFinishedTime(System.currentTimeMillis());
           RemoteTaskWorker executor = chooseRemoteJobExecutor(2);
           // 任务完成时间尽量返回服务端

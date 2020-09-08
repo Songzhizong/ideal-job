@@ -109,7 +109,7 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
             .setupData(messageString)
             .rsocketConnector(connector -> connector.acceptor(responder))
             .connectTcp(ip, port)
-            .doOnError(e -> log.warn("Job scheduler {}:{} Login fail: {}", ip, port, e.getMessage()))
+            .doOnError(e -> log.warn("Job scheduler {}:{} Login fail: ", ip, port, e))
             .doOnNext(r -> log.info("Job scheduler {}:{} login success.", ip, port))
             .block();
       } catch (Exception e) {
@@ -124,7 +124,7 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
             .setupData(messageString)
             .rsocketConnector(connector -> connector.acceptor(responder))
             .connectTcp(ip, port)
-            .doOnError(e -> log.warn("Job scheduler {}:{} Login fail: {}", ip, port, e.getMessage()))
+            .doOnError(e -> log.warn("Job scheduler {}:{} Login fail: ", ip, port, e))
             .doOnNext(r -> log.info("Job scheduler {}:{} login success.", ip, port))
             .block();
       } catch (Exception e) {

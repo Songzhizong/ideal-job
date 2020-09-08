@@ -54,7 +54,7 @@ Content-Type: application/json
   "tenantId": "",
   "bizType": "",
   "customTag": "",
-  "businessId": ""
+  "businessId": ""X
 }
 
 ### 开启任务
@@ -65,4 +65,4 @@ PUT http://{{ip}}:{{port}}/job/disable/133800657135075328
 
 
 ### 触发任务
-POST http://127.0.0.1:8804/job/trigger/134276800086802432
+POST http://127.0.0.1:8804/job/trigger/133925036980436993

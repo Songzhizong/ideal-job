@@ -17,6 +17,21 @@
       <artifactId>ideal-job-worker-springboot-starter</artifactId>
       <version>${ideal-job.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
+      <version>${caffeine.version}</version>
+    </dependency>
+    <!-- discovery -->
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-consul-discovery</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+      <version>${spring-boot-starter-actuator.version}</version>
+    </dependency>
     <!-- web -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
