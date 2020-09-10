@@ -1,8 +1,7 @@
 package com.zzsong.job.worker.spring.boot.starter;
 
 /**
- * @author 宋志宗
- * @date 2020/8/25
+ * @author 宋志宗 on 2020/8/25
  */
 public class ThreadPoolProperties {
   private int corePoolSize = -1;

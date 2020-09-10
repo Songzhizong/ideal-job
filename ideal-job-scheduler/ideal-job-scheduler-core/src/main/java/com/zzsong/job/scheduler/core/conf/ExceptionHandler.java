@@ -12,8 +12,7 @@ import javax.annotation.Nonnull;
 /**
  * 统一异常处理类
  *
- * @author 宋志宗
- * @date 2020/9/6
+ * @author 宋志宗 on 2020/9/6
  */
 public final class ExceptionHandler {
   private static final Logger log = LoggerFactory.getLogger(ExceptionHandler.class);

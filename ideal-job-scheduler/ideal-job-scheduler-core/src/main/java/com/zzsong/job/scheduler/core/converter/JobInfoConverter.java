@@ -9,8 +9,7 @@ import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
 
 /**
- * @author 宋志宗
- * @date 2020/9/6
+ * @author 宋志宗 on 2020/9/6
  */
 @SuppressWarnings("DuplicatedCode")
 public class JobInfoConverter {

@@ -15,8 +15,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /**
- * @author 宋志宗
- * @date 2020/9/2
+ * @author 宋志宗 on 2020/9/2
  */
 public interface JobInfoRepository
     extends JpaRepository<JobInfoDo, Long>,

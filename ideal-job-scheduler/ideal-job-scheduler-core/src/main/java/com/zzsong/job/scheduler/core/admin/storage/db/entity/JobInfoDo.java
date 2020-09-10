@@ -17,8 +17,7 @@ import java.time.LocalDateTime;
 /**
  * 任务信息
  *
- * @author 宋志宗
- * @date 2020/8/20
+ * @author 宋志宗 on 2020/8/20
  */
 @SuppressWarnings("unused")
 @Entity

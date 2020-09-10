@@ -11,8 +11,7 @@ import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author 宋志宗
- * @date 2020/8/21
+ * @author 宋志宗 on 2020/8/21
  */
 public final class ReactorUtils {
 

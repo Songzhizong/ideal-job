@@ -35,8 +35,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * @author 宋志宗
- * @date 2020/8/20
+ * @author 宋志宗 on 2020/8/20
  */
 public final class ReactorWebSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker {
   private static final Logger log = LoggerFactory
@@ -297,7 +296,7 @@ public final class ReactorWebSocketRemoteTaskWorker extends Thread implements Re
 
   @SuppressWarnings({"AliDeprecation", "deprecation", "RedundantSuppression"})
   @Override
-  public void destroy() {
+  public void dispose() {
     if (destroyed) {
       return;
     }

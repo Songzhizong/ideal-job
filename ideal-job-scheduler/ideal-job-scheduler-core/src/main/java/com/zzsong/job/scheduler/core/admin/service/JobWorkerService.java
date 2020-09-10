@@ -28,8 +28,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * @author 宋志宗
- * @date 2020/9/2
+ * @author 宋志宗 on 2020/9/2
  */
 @SuppressWarnings("DuplicatedCode")
 @Service
@@ -92,7 +91,7 @@ public class JobWorkerService {
           Optional<Long> byAppNameId = t.getT1().map(JobWorker::getWorkerId);
           Optional<JobWorker> jobWorkerOptional = t.getT2();
           Long a;
-          if (byAppNameId.isPresent() && (a = byAppNameId.get()).equals(workerId)) {
+          if (byAppNameId.isPresent() && !(a = byAppNameId.get()).equals(workerId)) {
             log.info("appName: {} 已被: {} 使用", appName, a);
             return Mono.error(new VisibleException("appName已被使用"));
           }
@@ -150,7 +149,7 @@ public class JobWorkerService {
                                              @Nonnull Paging paging) {
     return jobWorkerStorage.query(args, paging)
         .map(listRes ->
-            listRes.convertNewRes(list ->
+            listRes.convertData(list ->
                 list.stream()
                     .map(JobWorkerConverter::toJobWorkerRsp)
                     .collect(Collectors.toList())

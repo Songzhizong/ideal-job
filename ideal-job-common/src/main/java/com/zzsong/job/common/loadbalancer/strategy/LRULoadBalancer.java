@@ -12,8 +12,7 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * 最近最久未使用
  *
- * @author 宋志宗
- * @date 2020/8/19
+ * @author 宋志宗 on 2020/8/19
  */
 public class LRULoadBalancer<Server extends LbServer> implements LoadBalancer<Server> {
 

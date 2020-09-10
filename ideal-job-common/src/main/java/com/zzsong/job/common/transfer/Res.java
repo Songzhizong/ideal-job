@@ -1,6 +1,8 @@
 package com.zzsong.job.common.transfer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -9,8 +11,7 @@ import java.io.Serializable;
 import java.util.function.Function;
 
 /**
- * @author 宋志宗
- * @date 2019-05-14
+ * @author 宋志宗 on 2019-05-14
  */
 @SuppressWarnings({"unused", "UnusedReturnValue", "RedundantSuppression"})
 public class Res<T> implements Serializable {
@@ -61,6 +62,7 @@ public class Res<T> implements Serializable {
    */
   @Nullable
   @JsonInclude(JsonInclude.Include.NON_NULL)
+  @JsonSerialize(using = ToStringSerializer.class)
   private Long total;
 
   /**
@@ -347,7 +349,7 @@ public class Res<T> implements Serializable {
   }
 
   @Nonnull
-  public <R> Res<R> convertNewRes(@Nonnull Function<T, R> function) {
+  public <R> Res<R> convertData(@Nonnull Function<T, R> function) {
     Res<R> retRes = new Res<>();
     retRes.setId(this.getId());
     retRes.setSuccess(this.isSuccess());

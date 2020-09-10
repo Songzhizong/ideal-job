@@ -11,8 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.time.LocalDateTime;
 
 /**
- * @author 宋志宗
- * @date 2020/8/30
+ * @author 宋志宗 on 2020/8/30
  */
 @Configuration
 @EnableScheduling

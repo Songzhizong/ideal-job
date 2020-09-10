@@ -22,8 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @author 宋志宗
- * @date 2020/9/5
+ * @author 宋志宗 on 2020/9/5
  */
 @Component
 public class JpaJobWorkerStorage implements JobWorkerStorage {

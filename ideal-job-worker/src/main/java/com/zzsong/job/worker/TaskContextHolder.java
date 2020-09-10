@@ -5,8 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * @author 宋志宗
- * @date 2020/9/8
+ * @author 宋志宗 on 2020/9/8
  */
 public class TaskContextHolder {
   private static final ConcurrentMap<Thread, TaskContext> CONTEXT_MAP = new ConcurrentHashMap<>();

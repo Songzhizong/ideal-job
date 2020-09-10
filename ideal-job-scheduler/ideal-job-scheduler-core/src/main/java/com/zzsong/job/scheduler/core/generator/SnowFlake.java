@@ -1,8 +1,7 @@
 package com.zzsong.job.scheduler.core.generator;
 
 /**
- * @author 宋志宗
- * @date 2020/9/2
+ * @author 宋志宗 on 2020/9/2
  */
 public class SnowFlake implements IDGenerator {
   /**

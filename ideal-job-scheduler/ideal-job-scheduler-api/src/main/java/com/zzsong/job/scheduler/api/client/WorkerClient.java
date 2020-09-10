@@ -9,13 +9,13 @@ import com.zzsong.job.scheduler.api.dto.rsp.JobWorkerRsp;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
  * 执行器管理
  *
- * @author 宋志宗
- * @date 2020/8/26
+ * @author 宋志宗 on 2020/8/26
  */
 public interface WorkerClient {
 
@@ -24,8 +24,7 @@ public interface WorkerClient {
    *
    * @param args 新建参数
    * @return 执行器ID
-   * @author 宋志宗
-   * @date 2020/8/26 23:41
+   * @author 宋志宗 on 2020/8/26 23:41
    */
   @Nonnull
   Mono<Res<JobWorkerRsp>> create(@Nonnull CreateWorkerArgs args);
@@ -35,8 +34,7 @@ public interface WorkerClient {
    *
    * @param args 更新参数
    * @return 更新结果
-   * @author 宋志宗
-   * @date 2020/8/26 23:42
+   * @author 宋志宗 on 2020/8/26 23:42
    */
   @Nonnull
   Mono<Res<JobWorkerRsp>> update(@Nonnull UpdateWorkerArgs args);
@@ -46,8 +44,7 @@ public interface WorkerClient {
    *
    * @param workerId 执行器ID
    * @return 删除结果
-   * @author 宋志宗
-   * @date 2020/8/26 23:43
+   * @author 宋志宗 on 2020/8/26 23:43
    */
   @Nonnull
   Mono<Res<Void>> delete(long workerId);
@@ -58,10 +55,9 @@ public interface WorkerClient {
    * @param args   查询参数
    * @param paging 分页参数
    * @return 执行器信息列表
-   * @author 宋志宗
-   * @date 2020/8/26 23:45
+   * @author 宋志宗 on 2020/8/26 23:45
    */
   @Nonnull
-  Mono<Res<List<JobWorkerRsp>>> query(@Nonnull QueryWorkerArgs args,
-                                      @Nonnull Paging paging);
+  Mono<Res<List<JobWorkerRsp>>> query(@Nullable QueryWorkerArgs args,
+                                      @Nullable Paging paging);
 }

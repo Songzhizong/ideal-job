@@ -1,8 +1,10 @@
 package com.zzsong.job.scheduler.core.admin.storage.db.jpa.repository;
 
+import com.zzsong.job.scheduler.core.admin.storage.db.entity.JobInfoDo;
 import com.zzsong.job.scheduler.core.admin.storage.db.entity.JobInstanceDo;
 import com.zzsong.job.scheduler.core.admin.storage.param.TaskResult;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,11 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 /**
- * @author 宋志宗
- * @date 2020/9/2
+ * @author 宋志宗 on 2020/9/2
  */
 @SuppressWarnings("UnusedReturnValue")
-public interface JobInstanceRepository extends JpaRepository<JobInstanceDo, Long> {
+public interface JobInstanceRepository
+    extends JpaRepository<JobInstanceDo, Long>,
+    JpaSpecificationExecutor<JobInstanceDo> {
 
   @Modifying
   @Transactional(rollbackFor = Exception.class)

@@ -9,8 +9,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Nonnull;
 
 /**
- * @author 宋志宗
- * @date 2020/8/20
+ * @author 宋志宗 on 2020/8/20
  */
 @Getter
 @Setter
@@ -23,6 +22,11 @@ public class JobSchedulerProperties {
   private int jobInstanceStorageDay = 30;
   @Nonnull
   private String accessToken = "";
+  /**
+   * 集群配置
+   */
+  @NestedConfigurationProperty
+  private ClusterProperties cluster = new ClusterProperties();
 
   @NestedConfigurationProperty
   private ThreadPoolProperties blockPool = new ThreadPoolProperties();

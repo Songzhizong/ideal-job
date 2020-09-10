@@ -12,8 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * @author 宋志宗
- * @date 2020/5/15
+ * @author 宋志宗 on 2020/5/15
  */
 public final class SpringPages {
 

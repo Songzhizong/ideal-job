@@ -1,5 +1,6 @@
 package com.zzsong.job.worker.socket.rsocket;
 
+import com.zzsong.job.common.constants.WorkerRouter;
 import com.zzsong.job.common.message.payload.LoginMessage;
 import com.zzsong.job.common.message.payload.TaskCallback;
 import com.zzsong.job.common.message.payload.TaskParam;
@@ -17,19 +18,16 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
-import java.time.Duration;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author 宋志宗
- * @date 2020/9/3
+ * @author 宋志宗 on 2020/9/3
  */
 public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker {
   private static final Logger log = LoggerFactory.getLogger(RSocketRemoteTaskWorker.class);
@@ -48,6 +46,7 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
    * 调度器程序端口
    */
   private final int port;
+  private final String ipPort;
   /**
    * 应用名称
    */
@@ -76,6 +75,7 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
   public RSocketRemoteTaskWorker(String ip, int port) {
     this.ip = ip;
     this.port = port;
+    this.ipPort = ip + ":" + port;
   }
 
   public void setWeight(int weight) {
@@ -105,7 +105,7 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
       try {
         this.rsocketRequester.rsocket().dispose();
         this.rsocketRequester = requesterBuilder
-            .setupRoute("login")
+            .setupRoute(WorkerRouter.LOGIN)
             .setupData(messageString)
             .rsocketConnector(connector -> connector.acceptor(responder))
             .connectTcp(ip, port)
@@ -120,7 +120,7 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
     } else {
       try {
         this.rsocketRequester = requesterBuilder
-            .setupRoute("login")
+            .setupRoute(WorkerRouter.LOGIN)
             .setupData(messageString)
             .rsocketConnector(connector -> connector.acceptor(responder))
             .connectTcp(ip, port)
@@ -179,7 +179,7 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
 
   @Override
   public Mono<Res<Void>> taskCallback(@Nonnull TaskCallback callback) {
-    return rsocketRequester.route("task-callback")
+    return rsocketRequester.route(WorkerRouter.TASK_CALLBACK)
         .data(callback)
         .retrieveMono(VOID_RES)
         .doOnNext(res -> {
@@ -190,7 +190,7 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
   }
 
   @Override
-  @MessageMapping("execute")
+  @MessageMapping(WorkerRouter.EXECUTE)
   public Mono<Res<Void>> execute(@Nonnull TaskParam param) {
     log.debug("execute: {}", JsonUtils.toJsonString(param));
     return JobExecutor.getExecutor().executeJob(param)
@@ -205,7 +205,7 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
   @Nonnull
   @Override
   public String getInstanceId() {
-    return ip + ":" + port;
+    return ipPort;
   }
 
   @Override
@@ -216,9 +216,8 @@ public class RSocketRemoteTaskWorker extends Thread implements RemoteTaskWorker 
         && !rsocketRequester.rsocket().isDisposed();
   }
 
-  @SuppressWarnings("deprecation")
   @Override
-  public void destroy() {
+  public void dispose() {
     if (destroyed) {
       return;
     }

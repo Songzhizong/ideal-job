@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 /**
- * @author 宋志宗
- * @date 2020/9/8
+ * @author 宋志宗 on 2020/9/8
  */
 @RestController
 public class Controller {

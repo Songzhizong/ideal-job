@@ -9,8 +9,7 @@ import java.time.LocalDateTime;
 /**
  * 任务执行结果
  *
- * @author 宋志宗
- * @date 2020/9/6
+ * @author 宋志宗 on 2020/9/6
  */
 @Getter
 @Setter

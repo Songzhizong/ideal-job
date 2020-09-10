@@ -17,8 +17,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * 一致性Hash策略
  * <p>See <a href="https://github.com/xuxueli/xxl-job/blob/master/xxl-job-admin/src/main/java/com/xxl/job/admin/core/route/strategy/ExecutorRouteConsistentHash.java">xxl-job ExecutorRouteConsistentHash</a></p>
  *
- * @author 宋志宗
- * @date 2020/8/19
+ * @author 宋志宗 on 2020/8/19
  */
 public class ConsistentHashLoadBalancer<Server extends LbServer> implements LoadBalancer<Server> {
 

@@ -7,8 +7,7 @@ import javax.annotation.Nullable;
 import java.time.Duration;
 
 /**
- * @author 宋志宗
- * @date 2020/9/5
+ * @author 宋志宗 on 2020/9/5
  */
 public interface ReactiveCache {
   Mono<Boolean> expire(@Nonnull String key, @Nonnull Duration expire);

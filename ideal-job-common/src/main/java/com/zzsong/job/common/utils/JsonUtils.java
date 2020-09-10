@@ -21,8 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 /**
- * @author 宋志宗
- * @date 2020/8/20
+ * @author 宋志宗 on 2020/8/20
  */
 public class JsonUtils {
   private static final DateTimeFormatter dateTimeFormatter

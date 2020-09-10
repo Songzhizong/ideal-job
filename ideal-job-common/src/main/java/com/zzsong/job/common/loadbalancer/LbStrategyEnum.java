@@ -5,8 +5,7 @@ import javax.annotation.Nonnull;
 /**
  * 负载均衡策略枚举
  *
- * @author 宋志宗
- * @date 2020/8/20
+ * @author 宋志宗 on 2020/8/20
  */
 public enum LbStrategyEnum {
   /**

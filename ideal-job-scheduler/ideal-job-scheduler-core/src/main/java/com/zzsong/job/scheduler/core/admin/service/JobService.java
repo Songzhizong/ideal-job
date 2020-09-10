@@ -10,11 +10,11 @@ import com.zzsong.job.scheduler.api.dto.req.CreateJobArgs;
 import com.zzsong.job.scheduler.api.dto.req.QueryJobArgs;
 import com.zzsong.job.scheduler.api.dto.req.UpdateJobArgs;
 import com.zzsong.job.scheduler.api.dto.rsp.JobInfoRsp;
+import com.zzsong.job.scheduler.core.dispatcher.JobDispatcher;
 import com.zzsong.job.scheduler.core.pojo.JobInfo;
 import com.zzsong.job.scheduler.core.pojo.JobView;
 import com.zzsong.job.scheduler.core.admin.storage.JobInfoStorage;
 import com.zzsong.job.scheduler.core.converter.JobInfoConverter;
-import com.zzsong.job.scheduler.core.dispatch.JobDispatcher;
 import com.zzsong.job.scheduler.core.utils.CronExpression;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -35,8 +35,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author 宋志宗
- * @date 2020/9/2
+ * @author 宋志宗 on 2020/9/2
  */
 @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
 @Service
@@ -61,8 +60,7 @@ public class JobService {
    *
    * @param createJobArgs 新增任务请求参数
    * @return 任务id
-   * @author 宋志宗
-   * @date 2020/8/26 7:36 下午
+   * @author 宋志宗 on 2020/8/26 7:36 下午
    */
   public Mono<JobInfoRsp> createJob(@Nonnull CreateJobArgs createJobArgs) {
     long workerId = createJobArgs.getWorkerId();
@@ -98,8 +96,7 @@ public class JobService {
    * 更新任务信息
    *
    * @param args 更新参数
-   * @author 宋志宗
-   * @date 2020/8/26 8:48 下午
+   * @author 宋志宗 on 2020/8/26 8:48 下午
    */
   public Mono<JobInfoRsp> updateJob(@Nonnull UpdateJobArgs args) {
     long jobId = args.getJobId();
@@ -135,8 +132,7 @@ public class JobService {
    * 移除任务
    *
    * @param jobId 任务id
-   * @author 宋志宗
-   * @date 2020/8/26 8:49 下午
+   * @author 宋志宗 on 2020/8/26 8:49 下午
    */
   public Mono<Integer> removeJob(long jobId) {
     return jobInfoStorage.findById(jobId)
@@ -155,14 +151,13 @@ public class JobService {
    * @param args   查询参数
    * @param paging 分页参数
    * @return 任务信息列表
-   * @author 宋志宗
-   * @date 2020/8/26 8:51 下午
+   * @author 宋志宗 on 2020/8/26 8:51 下午
    */
   @Nonnull
   public Mono<Res<List<JobInfoRsp>>> query(@Nonnull QueryJobArgs args, @Nonnull Paging paging) {
     return jobInfoStorage.query(args, paging)
         .map(listRes ->
-            listRes.convertNewRes(list ->
+            listRes.convertData(list ->
                 list.stream()
                     .map(JobInfoConverter::toJobInfoRsp)
                     .collect(Collectors.toList())
@@ -174,8 +169,7 @@ public class JobService {
    * 启用任务
    *
    * @param jobId 任务id
-   * @author 宋志宗
-   * @date 2020/8/20 4:38 下午
+   * @author 宋志宗 on 2020/8/20 4:38 下午
    */
   public Mono<Boolean> enableJob(long jobId) {
     return jobInfoStorage.findById(jobId)
@@ -206,8 +200,7 @@ public class JobService {
    * 停用任务
    *
    * @param jobId 任务id
-   * @author 宋志宗
-   * @date 2020/8/20 4:38 下午
+   * @author 宋志宗 on 2020/8/20 4:38 下午
    */
   public Mono<Boolean> disableJob(long jobId) {
     return jobInfoStorage.findById(jobId)
@@ -228,12 +221,12 @@ public class JobService {
         });
   }
 
-  public Mono<Boolean> triggerJob(long jobId, @Nullable String customExecuteParam) {
+  public Mono<Res<Void>> triggerJob(long jobId, @Nullable String customExecuteParam) {
     return jobInfoStorage.findJobViewById(jobId)
         .flatMap(jobViewOptional -> {
           if (!jobViewOptional.isPresent()) {
             log.info("任务: {} 不存在", jobId);
-            return Mono.error(new VisibleException(CommonResMsg.NOT_FOUND, "任务不存在"));
+            return Mono.just(Res.err(CommonResMsg.NOT_FOUND, "任务不存在"));
           }
           JobView jobView = jobViewOptional.get();
           return jobDispatcher.dispatch(jobView, TriggerTypeEnum.MANUAL, customExecuteParam);

@@ -3,8 +3,7 @@ package com.zzsong.job.common.transfer;
 import javax.annotation.Nonnull;
 
 /**
- * @author 宋志宗
- * @date 2019-05-14
+ * @author 宋志宗 on 2019-05-14
  */
 public interface ResMsg {
   /**

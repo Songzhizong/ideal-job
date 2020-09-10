@@ -18,8 +18,7 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * @author 宋志宗
- * @date 2020/8/21
+ * @author 宋志宗 on 2020/8/21
  */
 public final class SpringJobExecutor extends JobExecutor
     implements ApplicationContextAware, SmartInitializingSingleton {

@@ -3,12 +3,11 @@ package com.zzsong.job.common.constants;
 import javax.annotation.Nonnull;
 
 /**
- * @author 宋志宗
- * @date 2020/8/23
+ * @author 宋志宗 on 2020/8/23
  */
 public enum TriggerTypeEnum {
   MANUAL(1, "手动"),
-  CRON(2, "CRON"),
+  CRON(2, "定时"),
   ;
   private final int code;
   @Nonnull

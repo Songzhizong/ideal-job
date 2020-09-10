@@ -5,8 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * @author 宋志宗
- * @date 2020/9/8
+ * @author 宋志宗 on 2020/9/8
  */
 @Getter
 @Setter

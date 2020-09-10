@@ -8,8 +8,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * @author 宋志宗
- * @date 2020/8/28
+ * @author 宋志宗 on 2020/8/28
  */
 @Getter
 @Setter

@@ -4,8 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * @author 宋志宗
- * @date 2020/8/19
+ * @author 宋志宗 on 2020/8/19
  */
 public interface LbServer {
 
@@ -50,12 +49,7 @@ public interface LbServer {
   /**
    * 销毁对象
    */
-  default void destroy() {
+  default void dispose() {
     // non
   }
-
-//  @Override
-//  default int compareTo(@Nonnull LbServer o) {
-//    return this.getWeight() - o.getWeight();
-//  }
 }

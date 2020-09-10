@@ -8,8 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 /**
- * @author 宋志宗
- * @date 2020/8/30
+ * @author 宋志宗 on 2020/8/30
  */
 @SuppressWarnings("unused")
 public final class DateTimes {
@@ -62,7 +61,8 @@ public final class DateTimes {
   }
 
   @Nonnull
-  public static String format(@Nonnull LocalDateTime localDateTime, @Nonnull String pattern, @Nonnull Locale locale) {
+  public static String format(@Nonnull LocalDateTime localDateTime,
+                              @Nonnull String pattern, @Nonnull Locale locale) {
     return localDateTime.format(DateTimeFormatter.ofPattern(pattern, locale));
   }
 
@@ -72,7 +72,8 @@ public final class DateTimes {
   }
 
   @Nonnull
-  public static LocalDateTime parse(@Nonnull String dateTimeString, @Nonnull String pattern, @Nonnull Locale locale) {
+  public static LocalDateTime parse(@Nonnull String dateTimeString,
+                                    @Nonnull String pattern, @Nonnull Locale locale) {
     return LocalDateTime.parse(dateTimeString, DateTimeFormatter.ofPattern(pattern, locale));
   }
 
@@ -104,6 +105,4 @@ public final class DateTimes {
   public static LocalDateTime now(@Nonnull ZoneOffset zoneOffset) {
     return LocalDateTime.now(zoneOffset);
   }
-
-
 }

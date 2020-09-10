@@ -6,8 +6,7 @@ import com.zzsong.job.scheduler.core.pojo.JobWorker;
 import javax.annotation.Nonnull;
 
 /**
- * @author 宋志宗
- * @date 2020/9/6
+ * @author 宋志宗 on 2020/9/6
  */
 public class JobWorkerConverter {
   @Nonnull

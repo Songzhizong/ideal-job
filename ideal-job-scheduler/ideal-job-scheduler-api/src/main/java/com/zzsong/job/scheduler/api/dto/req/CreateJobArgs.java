@@ -11,8 +11,7 @@ import lombok.Setter;
 import javax.annotation.Nonnull;
 
 /**
- * @author 宋志宗
- * @date 2020/8/26
+ * @author 宋志宗 on 2020/8/26
  */
 @Getter
 @Setter

@@ -13,8 +13,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * 最不经常使用
  * <p>返回一定时间内使用次数最少的服务</p>
  *
- * @author 宋志宗
- * @date 2020/8/19
+ * @author 宋志宗 on 2020/8/19
  */
 public class LFULoadBalancer<Server extends LbServer> implements LoadBalancer<Server> {
   /**

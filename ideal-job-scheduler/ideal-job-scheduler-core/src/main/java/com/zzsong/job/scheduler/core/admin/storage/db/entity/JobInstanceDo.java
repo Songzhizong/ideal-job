@@ -17,8 +17,7 @@ import java.time.LocalDateTime;
 /**
  * 任务实例
  *
- * @author 宋志宗
- * @date 2020/8/20
+ * @author 宋志宗 on 2020/8/20
  */
 @SuppressWarnings("unused")
 @Entity
@@ -27,6 +26,8 @@ import java.time.LocalDateTime;
     indexes = {
         @Index(name = "parent_id", columnList = "parentId"),
         @Index(name = "job_id", columnList = "jobId"),
+        @Index(name = "worker_Id", columnList = "workerId"),
+        @Index(name = "handle_status", columnList = "handleStatus"),
         @Index(name = "created_time", columnList = "createdTime"),
     }
 )

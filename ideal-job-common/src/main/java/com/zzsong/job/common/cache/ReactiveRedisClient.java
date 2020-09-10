@@ -12,8 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 /**
- * @author 宋志宗
- * @date 2020/9/5
+ * @author 宋志宗 on 2020/9/5
  */
 public class ReactiveRedisClient implements ReactiveCache {
   private static final byte[] SCRIPT

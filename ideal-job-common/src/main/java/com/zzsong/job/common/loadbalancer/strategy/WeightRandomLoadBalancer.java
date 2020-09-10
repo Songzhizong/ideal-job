@@ -11,8 +11,7 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * 加权随机策略
  *
- * @author 宋志宗
- * @date 2020/8/19
+ * @author 宋志宗 on 2020/8/19
  */
 public class WeightRandomLoadBalancer<Server extends LbServer> implements LoadBalancer<Server> {
 

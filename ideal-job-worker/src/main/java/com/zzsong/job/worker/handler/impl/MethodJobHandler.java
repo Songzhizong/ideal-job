@@ -7,8 +7,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 
 /**
- * @author 宋志宗
- * @date 2020/8/22
+ * @author 宋志宗 on 2020/8/22
  */
 public class MethodJobHandler implements IJobHandler {
   private final Object target;

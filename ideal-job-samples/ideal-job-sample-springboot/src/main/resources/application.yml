@@ -24,7 +24,7 @@ spring:
 ideal:
   job:
     access-token: dasdassdfafd
-    scheduler-addresses: 127.0.0.1:9904,127.0.0.1:9905
+    scheduler-addresses: 127.0.0.1:9904
     executor-pool:
       core-pool-size: 0
       maximum-pool-size: 5

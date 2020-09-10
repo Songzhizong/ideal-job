@@ -3,8 +3,7 @@ package com.zzsong.job.worker.annotation;
 import java.lang.annotation.*;
 
 /**
- * @author 宋志宗
- * @date 2020/8/21
+ * @author 宋志宗 on 2020/8/21
  */
 @Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)

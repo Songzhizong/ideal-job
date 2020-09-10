@@ -3,8 +3,7 @@ package com.zzsong.job.common.transfer;
 import javax.annotation.Nonnull;
 
 /**
- * @author 宋志宗
- * @date 2020/8/20
+ * @author 宋志宗 on 2020/8/20
  */
 public enum CommonResMsg implements ResMsg {
   SUCCESS(200, "Success"),

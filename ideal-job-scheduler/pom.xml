@@ -15,5 +15,7 @@
     <module>ideal-job-scheduler-api</module>
     <module>ideal-job-scheduler-core</module>
     <module>ideal-job-scheduler-server</module>
+    <module>ideal-job-scheduler-client</module>
+    <module>ideal-job-scheduler-client-springboot-starter</module>
   </modules>
 </project>

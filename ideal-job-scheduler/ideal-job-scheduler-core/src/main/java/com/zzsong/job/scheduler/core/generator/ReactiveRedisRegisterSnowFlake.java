@@ -14,8 +14,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 通过Redis注册机器码的SnowFlake实现
  *
- * @author 宋志宗
- * @date 2020/9/2
+ * @author 宋志宗 on 2020/9/2
  */
 public class ReactiveRedisRegisterSnowFlake implements IDGenerator {
   private static final Logger log = LoggerFactory

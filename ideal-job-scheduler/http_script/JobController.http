@@ -1,10 +1,10 @@
 ### 新建任务
-POST http://{{ip}}:{{port}}/job/create
+POST http://127.0.0.1:8804/job/create
 Content-Type: application/json
 
 {
   "autoStart": false,
-  "workerId": 133924649984589824,
+  "workerId": 134930081742061568,
   "executeType": "HTTP_SCRIPT",
   "executorHandler": "demoJobHandler",
   "executeParam": "test",
@@ -22,13 +22,13 @@ Content-Type: application/json
 }
 
 ### 更新任务
-POST http://{{ip}}:{{port}}/job/update
+POST http://127.0.0.1:8804/job/update
 Content-Type: application/json
 
 {
-  "jobId": 133800657135075328,
-  "workerId": 133799357949411328,
-  "executorHandler": "",
+  "jobId": 134938329517916160,
+  "workerId": 134930081742061568,
+  "executorHandler": "demoJobHandler",
   "executeParam": "",
   "routeStrategy": "WEIGHT_ROUND_ROBIN",
   "blockStrategy": "PARALLEL",
@@ -39,10 +39,10 @@ Content-Type: application/json
 }
 
 ### 删除任务
-DELETE http://{{ip}}:{{port}}/job/remove/133800657135075328
+DELETE http://127.0.0.1:8804/job/remove/134938329517916160
 
 ### 查询
-POST http://{{ip}}:{{port}}/job/query
+POST http://127.0.0.1:8804/job/query
 Content-Type: application/json
 
 {
@@ -54,15 +54,22 @@ Content-Type: application/json
   "tenantId": "",
   "bizType": "",
   "customTag": "",
-  "businessId": ""X
+  "businessId": ""
 }
 
 ### 开启任务
-PUT http://{{ip}}:{{port}}/job/enable/133925036980436992
+PUT http://127.0.0.1:8804/job/enable/133925036980436992
 
 ### 关闭任务
-PUT http://{{ip}}:{{port}}/job/disable/133800657135075328
+PUT http://127.0.0.1:8804/job/disable/133800657135075328
 
 
 ### 触发任务
-POST http://127.0.0.1:8804/job/trigger/133925036980436993
+POST http://127.0.0.1:8804/job/trigger/134938329517916160
+Content-Type: application/json
+
+helloworld
+
+
+###
+GET http://127.0.0.1:8804/job/triggerPlan?count=5&cron=0/30%20*%20*%20*%20*%20?

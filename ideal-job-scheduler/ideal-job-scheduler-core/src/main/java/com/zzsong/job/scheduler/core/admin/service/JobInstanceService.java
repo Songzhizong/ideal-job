@@ -1,5 +1,8 @@
 package com.zzsong.job.scheduler.core.admin.service;
 
+import com.zzsong.job.common.transfer.Paging;
+import com.zzsong.job.common.transfer.Res;
+import com.zzsong.job.scheduler.api.dto.req.QueryInstanceArgs;
 import com.zzsong.job.scheduler.core.admin.storage.JobInstanceStorage;
 import com.zzsong.job.scheduler.core.admin.storage.param.TaskResult;
 import com.zzsong.job.scheduler.core.pojo.JobInstance;
@@ -11,11 +14,11 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 /**
- * @author 宋志宗
- * @date 2020/9/2
+ * @author 宋志宗 on 2020/9/2
  */
 @SuppressWarnings("UnusedReturnValue")
 @Service
@@ -40,6 +43,12 @@ public class JobInstanceService {
   @Nullable
   public Mono<Optional<JobInstance>> getJobInstance(long instanceId) {
     return jobInstanceStorage.findById(instanceId);
+  }
+
+  @Nonnull
+  public Mono<Res<List<JobInstance>>> query(@Nonnull QueryInstanceArgs args,
+                                            @Nonnull Paging paging) {
+    return jobInstanceStorage.query(args, paging);
   }
 
   public Mono<Integer> updateByTaskResult(@Nonnull TaskResult param) {

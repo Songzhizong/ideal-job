@@ -12,8 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author 宋志宗
- * @date 2020/9/2
+ * @author 宋志宗 on 2020/9/2
  */
 @Repository
 public class JobInfoRepositoryCustomImpl implements JobInfoRepositoryCustom {

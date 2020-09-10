@@ -8,8 +8,7 @@ import org.springframework.stereotype.Component;
 import java.io.Serializable;
 
 /**
- * @author 宋志宗
- * @date 2020/7/14
+ * @author 宋志宗 on 2020/7/14
  */
 public class JpaIdentityGenerator extends IdentityGenerator {
   private static IDGenerator idGenerator;

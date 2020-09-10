@@ -3,8 +3,7 @@ package com.zzsong.job.common.constants;
 import javax.annotation.Nonnull;
 
 /**
- * @author 宋志宗
- * @date 2020/8/23
+ * @author 宋志宗 on 2020/8/23
  */
 public enum HandleStatusEnum {
   /**

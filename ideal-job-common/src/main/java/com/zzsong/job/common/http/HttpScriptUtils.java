@@ -28,8 +28,7 @@ import java.util.Map;
  *  }
  * </pre>
  *
- * @author 宋志宗
- * @date 2020/8/29
+ * @author 宋志宗 on 2020/8/29
  */
 @SuppressWarnings("unused")
 public final class HttpScriptUtils {

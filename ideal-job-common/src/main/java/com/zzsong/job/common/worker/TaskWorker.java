@@ -8,8 +8,7 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 
 /**
- * @author 宋志宗
- * @date 2020/8/20
+ * @author 宋志宗 on 2020/8/20
  */
 public interface TaskWorker extends LbServer {
 
@@ -17,8 +16,7 @@ public interface TaskWorker extends LbServer {
    * 执行任务
    *
    * @param param 触发器参数
-   * @author 宋志宗
-   * @date 2020/8/20 2:12 下午
+   * @author 宋志宗 on 2020/8/20 2:12 下午
    */
   Mono<Res<Void>> execute(@Nonnull TaskParam param);
 }

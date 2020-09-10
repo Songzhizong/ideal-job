@@ -9,8 +9,7 @@ import lombok.Setter;
 import javax.annotation.Nonnull;
 
 /**
- * @author 宋志宗
- * @date 2020/8/30
+ * @author 宋志宗 on 2020/8/30
  */
 @SuppressWarnings("unused")
 @Getter
@@ -24,6 +23,9 @@ public class JobView {
    * 所属执行器Id
    */
   private long workerId;
+  /**
+   * cron表达式
+   */
   @Nonnull
   private String cron = "";
   /**

@@ -6,8 +6,7 @@ import com.zzsong.job.scheduler.core.admin.storage.db.entity.JobWorkerDo;
 import javax.annotation.Nonnull;
 
 /**
- * @author 宋志宗
- * @date 2020/8/27
+ * @author 宋志宗 on 2020/8/27
  */
 public final class WorkerDoConverter {
 

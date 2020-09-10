@@ -16,8 +16,7 @@ import java.util.concurrent.*;
  *  对象内的定时任务也不会自动结束, 为了防止资源浪费后续需要针对此情况进行优化
  * </pre>
  *
- * @author 宋志宗
- * @date 2020/8/20
+ * @author 宋志宗 on 2020/8/20
  */
 public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHolder<Server> {
   private static final Logger log = LoggerFactory.getLogger(SimpleLbServerHolder.class);
@@ -26,9 +25,8 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
   private static volatile boolean RUNNING = false;
 
   static {
-    int availableProcessors = Runtime.getRuntime().availableProcessors();
-    int corePoolSize = availableProcessors << 2;
-    int maximumPoolSize = availableProcessors << 3;
+    int corePoolSize = Runtime.getRuntime().availableProcessors();
+    int maximumPoolSize = corePoolSize << 1;
     heartbeatThreadPool = new ThreadPoolExecutor(corePoolSize, maximumPoolSize,
         60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(corePoolSize),
         new ThreadFactoryBuilder().setNameFormat("LbServer-heartbeat-%d").build(),
@@ -46,8 +44,11 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
 
   @Getter
   private final String serverName;
+
+  @Nonnull
   private final BlockingQueue<Boolean> refreshReachableServersQueue
       = new ArrayBlockingQueue<>(1);
+
   private volatile int cycleStrategy = 1;
   /**
    * 所有服务列表
@@ -59,19 +60,22 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
   private final ConcurrentMap<String, Server> reachableServerMap
       = new ConcurrentHashMap<>();
   private List<Server> reachableServers = Collections.emptyList();
+  private final Thread daemonThread;
   private volatile boolean destroyed;
 
 
-  public SimpleLbServerHolder(@Nonnull String serverName) {
-    this(serverName, defaultHeartbeatIntervalSeconds);
+  SimpleLbServerHolder(@Nonnull String serverName, @Nonnull LbFactory<Server> lbFactory) {
+    this(serverName, defaultHeartbeatIntervalSeconds, lbFactory);
   }
 
-  public SimpleLbServerHolder(@Nonnull String serverName, int heartbeatIntervalSeconds) {
+  SimpleLbServerHolder(@Nonnull String serverName,
+                       int heartbeatIntervalSeconds,
+                       @Nonnull LbFactory<Server> lbFactory) {
     SimpleLbServerHolder.RUNNING = true;
     long heartbeatIntervalMills = heartbeatIntervalSeconds * 1000;
     this.serverName = serverName;
 
-    Thread thread = new Thread(() -> {
+    daemonThread = new Thread(() -> {
       long lastHeartbeatTime = System.currentTimeMillis();
       while (!destroyed) {
         try {
@@ -83,16 +87,23 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
           }
           if (poll != null) {
             reachableServers = ImmutableList.copyOf(reachableServerMap.values());
+            final int serviceCount = allServers.size();
+            final int reachableServerCount = reachableServers.size();
             log.info("{} 可用服务列表发生变化, 当前总服务数: {}, 当前可达服务数: {}",
-                serverName, allServers.size(), reachableServers.size());
+                serverName, serviceCount, reachableServerCount);
+            final LbFactoryEvent event = new LbFactoryEvent();
+            event.setServerName(serverName);
+            event.setServerCount(serviceCount);
+            event.setReachableServerCount(reachableServerCount);
+            lbFactory.serverChange(event);
           }
         } catch (InterruptedException e) {
           log.debug("{}", e.getMessage());
         }
       }
     });
-    thread.setDaemon(true);
-    thread.start();
+    daemonThread.setDaemon(true);
+    daemonThread.start();
   }
 
   @Override
@@ -114,7 +125,7 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
         } else {
           // 服务已注册, 将原有的替换成新的并销毁原对象
           Server server = allServers.get(integer);
-          server.destroy();
+          server.dispose();
           allServers.set(integer, newServer);
         }
         if (reachable && newServer.heartbeat()) {
@@ -185,9 +196,6 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
       temp = new ArrayList<>(allServers);
     }
     int size = temp.size();
-    int up = 0;
-    int down = 0;
-    final int reachableServeSize = reachableServerMap.size();
     if (cycleStrategy == 0) {
       for (Server server : temp) {
         String instanceId = server.getInstanceId();
@@ -201,13 +209,11 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
         }
         final Server containsInstance = reachableServerMap.get(instanceId);
         if (available && containsInstance == null) {
-          up++;
           reachableServerMap.put(instanceId, server);
           refreshReachableServers();
         } else if (!available && containsInstance != null) {
-          down++;
-//          reachableServerMap.remove(instanceId);
-//          refreshReachableServers();
+          reachableServerMap.remove(instanceId);
+          refreshReachableServers();
         }
       }
     } else {
@@ -224,26 +230,23 @@ public class SimpleLbServerHolder<Server extends LbServer> implements LbServerHo
         }
         final Server containsInstance = reachableServerMap.get(instanceId);
         if (available && containsInstance == null) {
-          up++;
           reachableServerMap.put(instanceId, server);
           refreshReachableServers();
         } else if (!available && containsInstance != null) {
-          down++;
           reachableServerMap.remove(instanceId);
           refreshReachableServers();
         }
       }
     }
-//    if (up > 0 || down > 0) {
-//      log.info("Heartbeat: {} 可达服务列表发生变化, 当前总服务数: {}, 新标记可达服务数: {}, 不可达服务数: {}, 当前可达服务数: {}",
-//          serverName, size, up, down, reachableServeSize + up - down);
-//    }
   }
 
   @Override
   public void destroy() {
     if (!destroyed) {
       destroyed = true;
+      if (daemonThread != null) {
+        daemonThread.interrupt();
+      }
     }
   }
 

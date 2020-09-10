@@ -11,8 +11,7 @@ import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
 
 /**
- * @author 宋志宗
- * @date 2020/9/5
+ * @author 宋志宗 on 2020/9/5
  */
 @Getter
 @Setter

@@ -19,8 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author 宋志宗
- * @date 2020/9/3
+ * @author 宋志宗 on 2020/9/3
  */
 public final class RSocketConfigure {
   private static final String PATH_PATTERN_ROUTE_MATCHER_CLASS

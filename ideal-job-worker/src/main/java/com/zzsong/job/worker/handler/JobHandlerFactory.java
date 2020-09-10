@@ -6,8 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author 宋志宗
- * @date 2020/8/22
+ * @author 宋志宗 on 2020/8/22
  */
 public final class JobHandlerFactory {
   private static final Map<String, IJobHandler> JOB_HANDLER_MAP = new HashMap<>();

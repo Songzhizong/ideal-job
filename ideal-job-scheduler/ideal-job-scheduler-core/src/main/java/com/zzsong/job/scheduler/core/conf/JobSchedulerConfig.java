@@ -1,11 +1,15 @@
 package com.zzsong.job.scheduler.core.conf;
 
+import com.google.common.eventbus.EventBus;
 import com.zzsong.job.common.cache.ReactiveCache;
 import com.zzsong.job.common.cache.ReactiveRedisClient;
 import com.zzsong.job.common.worker.TaskWorker;
 import com.zzsong.job.common.loadbalancer.LbFactory;
 import com.zzsong.job.common.loadbalancer.SimpleLbFactory;
 import com.zzsong.job.common.utils.IpUtil;
+import com.zzsong.job.scheduler.core.dispatcher.LocalClusterNode;
+import com.zzsong.job.scheduler.core.dispatcher.cluster.ClusterRegistry;
+import com.zzsong.job.scheduler.core.dispatcher.cluster.SimpleClusterRegistry;
 import com.zzsong.job.scheduler.core.generator.IDGenerator;
 import com.zzsong.job.scheduler.core.generator.JpaIdentityGenerator;
 import com.zzsong.job.scheduler.core.generator.ReactiveRedisRegisterSnowFlake;
@@ -21,11 +25,13 @@ import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 
 /**
- * @author 宋志宗
- * @date 2020/8/20
+ * @author 宋志宗 on 2020/8/20
  */
 @Configuration
 public class JobSchedulerConfig {
@@ -76,9 +82,37 @@ public class JobSchedulerConfig {
 //        return new ServerEndpointExporter();
 //    }
 
+  @SuppressWarnings("UnstableApiUsage")
   @Bean
-  public LbFactory<TaskWorker> lbFactory() {
-    return new SimpleLbFactory<>();
+  public EventBus eventBus() {
+    return new EventBus();
+  }
+
+  @Bean
+  public ClusterRegistry clusterRegistry(@Nonnull LocalClusterNode localClusterNode) {
+    return new SimpleClusterRegistry(localClusterNode);
+  }
+
+  @SuppressWarnings("DuplicatedCode")
+  @Bean
+  public LbFactory<TaskWorker> lbFactory(@Nonnull ClusterRegistry registry,
+                                         @Nonnull LocalClusterNode localClusterNode) {
+    final SimpleLbFactory<TaskWorker> lbFactory = new SimpleLbFactory<>();
+    lbFactory.registerEventListener((factory, event) -> {
+      int reachableServerCount = event.getReachableServerCount();
+      if (reachableServerCount == 0) {
+        final Map<String, List<TaskWorker>> map = factory.getReachableServers();
+        List<String> supportApps = new ArrayList<>();
+        map.forEach((appName, list) -> {
+          if (list != null && list.size() > 0) {
+            supportApps.add(appName);
+          }
+        });
+        registry.refreshNode(localClusterNode, supportApps);
+        // todo 服务列表发生了变更, 需要通知集群中的其他节点更新注册表
+      }
+    });
+    return lbFactory;
   }
 
   @Bean

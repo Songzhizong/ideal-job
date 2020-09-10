@@ -7,16 +7,14 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 
 /**
- * @author 宋志宗
- * @date 2020/8/20
+ * @author 宋志宗 on 2020/8/20
  */
 public interface RemoteTaskWorker extends TaskWorker {
   /**
    * 任务执行完成回调
    *
    * @param callback 回调消息
-   * @author 宋志宗
-   * @date 2020/8/22 23:47
+   * @author 宋志宗 on 2020/8/22 23:47
    */
   Mono<Res<Void>> taskCallback(@Nonnull TaskCallback callback);
 }

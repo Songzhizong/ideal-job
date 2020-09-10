@@ -4,7 +4,6 @@ import com.zzsong.job.common.constants.HandleStatusEnum;
 import com.zzsong.job.common.transfer.Res;
 import com.zzsong.job.common.worker.RemoteTaskWorker;
 import com.zzsong.job.common.loadbalancer.LbFactory;
-import com.zzsong.job.common.loadbalancer.LbServerHolder;
 import com.zzsong.job.common.loadbalancer.SimpleLbFactory;
 import com.zzsong.job.common.message.payload.TaskCallback;
 import com.zzsong.job.common.message.payload.TaskParam;
@@ -26,8 +25,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
- * @author 宋志宗
- * @date 2020/8/21
+ * @author 宋志宗 on 2020/8/21
  */
 public class JobExecutor {
   private static final Logger log = LoggerFactory.getLogger(JobExecutor.class);
@@ -113,7 +111,7 @@ public class JobExecutor {
       log.info("JobExecutor destroy.");
       destroyed = true;
       for (RemoteTaskWorker remoteExecutor : remoteTaskWorkers) {
-        remoteExecutor.destroy();
+        remoteExecutor.dispose();
       }
       executorService.shutdown();
     }
@@ -127,8 +125,7 @@ public class JobExecutor {
     if (protocolType == ProtocolTypeEnum.WEBSOCKET) {
       initWebsocketRemoteWorks();
     }
-    LbServerHolder<RemoteTaskWorker> holder = getServerHolder();
-    holder.addServers(remoteTaskWorkers);
+    lbFactory.addServers(SCHEDULER_SERVER_NAME, remoteTaskWorkers);
   }
 
   private void initRSocketRemoteWorks() {
@@ -176,10 +173,6 @@ public class JobExecutor {
       worker.start();
       remoteTaskWorkers.add(worker);
     }
-  }
-
-  public LbServerHolder<RemoteTaskWorker> getServerHolder() {
-    return lbFactory.getServerHolder(SCHEDULER_SERVER_NAME);
   }
 
   @Nullable

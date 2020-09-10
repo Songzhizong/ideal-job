@@ -10,14 +10,13 @@ import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
 
 /**
- * @author 宋志宗
- * @date 2020/9/5
+ * @author 宋志宗 on 2020/9/5
  */
 @Getter
 @Setter
 public class JobInstance {
-  public static final int STATUS_FAIL = 0;
-  public static final int STATUS_SUCCESS = 1;
+  public static final int DISPATCH_FAIL = 0;
+  public static final int DISPATCH_SUCCESS = 1;
 
   // -------------------------- 基本信息
   /**
@@ -87,7 +86,7 @@ public class JobInstance {
   /**
    * 调度-结果
    */
-  private int dispatchStatus = DBDefaults.DEFAULT_INT_VALUE;
+  private int dispatchStatus = DISPATCH_FAIL;
 
   /**
    * 调度信息
