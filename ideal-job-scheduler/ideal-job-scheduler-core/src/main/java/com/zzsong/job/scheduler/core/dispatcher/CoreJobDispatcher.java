@@ -4,6 +4,7 @@ import com.zzsong.job.common.constants.ExecuteTypeEnum;
 import com.zzsong.job.common.constants.TriggerTypeEnum;
 import com.zzsong.job.common.exception.VisibleException;
 import com.zzsong.job.common.loadbalancer.*;
+import com.zzsong.job.common.loadbalancer.strategy.WeightRandomLoadBalancer;
 import com.zzsong.job.common.transfer.CommonResMsg;
 import com.zzsong.job.common.transfer.Res;
 import com.zzsong.job.scheduler.core.admin.service.JobWorkerService;
@@ -14,6 +15,7 @@ import com.zzsong.job.scheduler.core.pojo.JobWorker;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
@@ -25,33 +27,26 @@ import java.util.List;
  * 核心调度器
  * <p>所有的调度触发都会通过此调度器完成调度</p>
  * <p>
+ *
  * @author 宋志宗 on 2020/9/9
  */
 @Component("jobDispatcher")
 public class CoreJobDispatcher implements JobDispatcher {
   private static final Logger log = LoggerFactory.getLogger(CoreJobDispatcher.class);
-  private static final LoadBalancer<ClusterNode> LOAD_BALANCER;
-  private static final String APP_NAME = "DEFAULT";
-
-  static {
-    final SimpleLbFactory<ClusterNode> simpleLbFactory = new SimpleLbFactory<>();
-    simpleLbFactory.setStrategy(LbStrategyEnum.WEIGHT_RANDOM);
-    LOAD_BALANCER = simpleLbFactory.getLoadBalancer(APP_NAME);
-  }
+  private static final LoadBalancer<ClusterNode> LOAD_BALANCER = new WeightRandomLoadBalancer<>();
 
   @Setter
   private boolean clusterEnabled = false;
-
-  private final ClusterRegistry registry;
+  @Autowired
+  @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
+  private ClusterRegistry registry;
   private final JobWorkerService workerService;
   private final JobSchedulerProperties properties;
   private final LocalClusterNode localClusterDispatcher;
 
-  public CoreJobDispatcher(ClusterRegistry registry,
-                           JobWorkerService workerService,
+  public CoreJobDispatcher(JobWorkerService workerService,
                            JobSchedulerProperties properties,
                            LocalClusterNode localClusterDispatcher) {
-    this.registry = registry;
     this.workerService = workerService;
     this.properties = properties;
     this.localClusterDispatcher = localClusterDispatcher;
@@ -94,7 +89,6 @@ public class CoreJobDispatcher implements JobDispatcher {
               return dispatcher.dispatch(jobView, triggerType, customExecuteParam);
             }
           });
-
     }
 
 

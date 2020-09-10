@@ -9,6 +9,7 @@ import io.rsocket.SocketAcceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.rsocket.RSocketStrategies;
 import org.springframework.messaging.rsocket.annotation.support.RSocketMessageHandler;
@@ -60,7 +61,6 @@ public class RemoteClusterNode extends Thread implements ClusterNode {
   private RSocketRequester rsocketRequester;
 
   public RemoteClusterNode(@Nonnull String ip, int port,
-                           @Nonnull ClusterSocket responder,
                            @Nonnull ClusterRegistry clusterRegistry) {
     this.ip = ip;
     this.port = port;
@@ -147,6 +147,7 @@ public class RemoteClusterNode extends Thread implements ClusterNode {
           running = false;
           log.info("{} -> RemoteClusterDispatcher 连接断开: {}, {} 秒后尝试重连...",
               ipPort, consumer, restartDelay);
+          clusterRegistry.removeNode(this);
           restartSocket();
         })
         .subscribe();
@@ -160,6 +161,16 @@ public class RemoteClusterNode extends Thread implements ClusterNode {
 
   private void restartSocket() {
     restartNoticeQueue.offer(true);
+  }
+
+  @MessageMapping(ClusterRoute.REFRESH_SUPPORT_NOTICE)
+  public Mono<Void> refreshSupportList(List<String> supportApps) {
+    clusterRegistry.refreshNode(this, supportApps);
+    if (log.isDebugEnabled()) {
+      log.debug("{} -> support app list refresh: {}",
+          getInstanceId(), JsonUtils.toJsonString(supportApps));
+    }
+    return Mono.empty();
   }
 
   @Override
@@ -196,7 +207,7 @@ public class RemoteClusterNode extends Thread implements ClusterNode {
 
   @Override
   public int getWeight() {
-    return 0;
+    return 1;
   }
 
   @Override

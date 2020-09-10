@@ -29,6 +29,6 @@
 #### TODO
 
 - [x] 支持基于SpringCloud注册中心的http脚本定时任务.
-- [ ] 建立scheduler和worker连接关系注册表, worker只要连接到任意一个scheduler节点便可保证任务不丢失.
+- [x] 建立scheduler和worker连接关系注册表, worker只要连接到任意一个scheduler节点便可保证任务不丢失.
 - [ ] 添加WEB管理页面
 - [ ] 添加任务执行日志采集功能

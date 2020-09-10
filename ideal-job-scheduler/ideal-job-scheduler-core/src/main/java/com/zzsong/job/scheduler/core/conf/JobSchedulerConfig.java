@@ -9,6 +9,7 @@ import com.zzsong.job.common.loadbalancer.SimpleLbFactory;
 import com.zzsong.job.common.utils.IpUtil;
 import com.zzsong.job.scheduler.core.dispatcher.LocalClusterNode;
 import com.zzsong.job.scheduler.core.dispatcher.cluster.ClusterRegistry;
+import com.zzsong.job.scheduler.core.dispatcher.cluster.ClusterSocket;
 import com.zzsong.job.scheduler.core.dispatcher.cluster.SimpleClusterRegistry;
 import com.zzsong.job.scheduler.core.generator.IDGenerator;
 import com.zzsong.job.scheduler.core.generator.JpaIdentityGenerator;
@@ -88,14 +89,10 @@ public class JobSchedulerConfig {
     return new EventBus();
   }
 
-  @Bean
-  public ClusterRegistry clusterRegistry(@Nonnull LocalClusterNode localClusterNode) {
-    return new SimpleClusterRegistry(localClusterNode);
-  }
-
   @SuppressWarnings("DuplicatedCode")
   @Bean
   public LbFactory<TaskWorker> lbFactory(@Nonnull ClusterRegistry registry,
+                                         @Nonnull ClusterSocket clusterSocket,
                                          @Nonnull LocalClusterNode localClusterNode) {
     final SimpleLbFactory<TaskWorker> lbFactory = new SimpleLbFactory<>();
     lbFactory.registerEventListener((factory, event) -> {
@@ -109,7 +106,7 @@ public class JobSchedulerConfig {
           }
         });
         registry.refreshNode(localClusterNode, supportApps);
-        // todo 服务列表发生了变更, 需要通知集群中的其他节点更新注册表
+        clusterSocket.refreshNodeNotice(supportApps);
       }
     });
     return lbFactory;

@@ -1,15 +1,21 @@
 package com.zzsong.job.scheduler.core.dispatcher.cluster;
 
+import com.zzsong.job.common.constants.TriggerTypeEnum;
 import com.zzsong.job.common.loadbalancer.LbFactory;
+import com.zzsong.job.common.transfer.Res;
 import com.zzsong.job.common.worker.TaskWorker;
+import com.zzsong.job.scheduler.core.dispatcher.LocalClusterNode;
+import com.zzsong.job.scheduler.core.pojo.JobView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.rsocket.annotation.ConnectMapping;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
@@ -27,10 +33,13 @@ public class ClusterSocket {
   private static final Logger log = LoggerFactory.getLogger(ClusterSocket.class);
   private final ConcurrentMap<String, RSocketRequester> requesterMap = new ConcurrentHashMap<>();
 
-  private final LbFactory<TaskWorker> lbFactory;
+  @Autowired
+  @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
+  private LbFactory<TaskWorker> lbFactory;
+  private final LocalClusterNode localClusterNode;
 
-  public ClusterSocket(LbFactory<TaskWorker> lbFactory) {
-    this.lbFactory = lbFactory;
+  public ClusterSocket(LocalClusterNode localClusterNode) {
+    this.localClusterNode = localClusterNode;
   }
 
   @ConnectMapping(ClusterRoute.CONNECT)
@@ -69,5 +78,22 @@ public class ClusterSocket {
       });
       return supportApps;
     });
+  }
+
+  @MessageMapping(ClusterRoute.DISPATCH)
+  public Mono<Res<Void>> dispatch(@Nonnull DispatchData dispatchData) {
+    JobView jobView = dispatchData.getJobView();
+    TriggerTypeEnum triggerType = dispatchData.getTriggerType();
+    String customExecuteParam = dispatchData.getCustomExecuteParam();
+    return localClusterNode.dispatch(jobView, triggerType, customExecuteParam);
+  }
+
+  public void refreshNodeNotice(List<String> supportApps) {
+    requesterMap.forEach((instanceId, requester) ->
+        requester.route(ClusterRoute.REFRESH_SUPPORT_NOTICE)
+            .data(supportApps)
+            .send()
+            .subscribe()
+    );
   }
 }
