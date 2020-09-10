@@ -89,6 +89,7 @@ public class ClusterSocket {
   }
 
   public void refreshNodeNotice(List<String> supportApps) {
+    log.info("客户端应用列表发生变化, 通知各节点更新数据...");
     requesterMap.forEach((instanceId, requester) ->
         requester.route(ClusterRoute.REFRESH_SUPPORT_NOTICE)
             .data(supportApps)

@@ -154,7 +154,13 @@ public class RemoteClusterNode extends Thread implements ClusterNode {
     this.rsocketRequester.route(ClusterRoute.SUPPORT_APPS)
         .data(getInstanceId())
         .retrieveFlux(STRING_LIST_RES)
-        .doOnNext(list -> clusterRegistry.refreshNode(this, list))
+        .doOnNext(list -> {
+          clusterRegistry.refreshNode(this, list);
+          if (log.isDebugEnabled()) {
+            log.debug("从 {} 拉取支持服务列表: {}",
+                getInstanceId(), JsonUtils.toJsonString(list));
+          }
+        })
         .subscribe();
     running = true;
   }

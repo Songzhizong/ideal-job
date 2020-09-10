@@ -13,8 +13,4 @@ public class ClusterProperties {
    * 节点列表
    */
   private String nodes;
-  /**
-   * 优先在当前节点执行调度
-   */
-  private boolean currentPriority = true;
 }

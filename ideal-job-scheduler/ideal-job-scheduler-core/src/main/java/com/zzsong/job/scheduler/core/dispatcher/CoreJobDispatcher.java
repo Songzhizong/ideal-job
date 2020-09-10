@@ -26,7 +26,6 @@ import java.util.List;
 /**
  * 核心调度器
  * <p>所有的调度触发都会通过此调度器完成调度</p>
- * <p>
  *
  * @author 宋志宗 on 2020/9/9
  */
@@ -57,7 +56,6 @@ public class CoreJobDispatcher implements JobDispatcher {
   public Mono<Res<Void>> dispatch(@Nonnull JobView jobView,
                                   @Nonnull TriggerTypeEnum triggerType,
                                   @Nullable String customExecuteParam) {
-    boolean currentPriority = properties.getCluster().isCurrentPriority();
     // 如果没有开启集群, 那么就直接在本地完成调度
     if (!clusterEnabled) {
       return localClusterDispatcher.dispatch(jobView, triggerType, customExecuteParam);
@@ -76,36 +74,25 @@ public class CoreJobDispatcher implements JobDispatcher {
             }
             JobWorker jobWorker = workerOptional.get();
             String appName = jobWorker.getAppName();
-            if (currentPriority && registry.isCurrentNodeSupport(appName)) {
-              //
+            if (registry.isCurrentNodeSupport(appName)) {
               return localClusterDispatcher.dispatch(jobView, triggerType, customExecuteParam);
             } else {
               // 如果本地注册表中没有该应用, 选取一个包含此应用的节点执行
               final List<ClusterNode> availableNodes = registry.getSupportNodes(appName);
               final ClusterNode dispatcher = LOAD_BALANCER.chooseServer(null, availableNodes);
               if (dispatcher == null) {
+                // 可能该worker没有注册到集群
+                log.warn("本地注册表不包含应用: {}, 选取远程节点返回空", appName);
                 return Mono.just(Res.err("选取ClusterDispatcher为空"));
               }
+              String instanceId = dispatcher.getInstanceId();
+              log.info("本地注册表不包含应用: {}, 尝试通过远程节点: {} 完成调度", appName, instanceId);
               return dispatcher.dispatch(jobView, triggerType, customExecuteParam);
             }
           });
     }
 
-
     // http script 模式下, 任何一个存活的集群节点都可以完成调度
-    if (currentPriority) {
-      return localClusterDispatcher.dispatch(jobView, triggerType, customExecuteParam);
-    } else {
-      final List<ClusterNode> availableNodes = registry.getAvailableNodes();
-      // 当前节点肯定是可用的, 因此可用节点数量小于2就应该在当前节点执行调度
-      if (availableNodes.size() < 2) {
-        return localClusterDispatcher.dispatch(jobView, triggerType, customExecuteParam);
-      }
-      final ClusterNode dispatcher = LOAD_BALANCER.chooseServer(null, availableNodes);
-      if (dispatcher == null) {
-        return Mono.just(Res.err("选取ClusterDispatcher为空"));
-      }
-      return dispatcher.dispatch(jobView, triggerType, customExecuteParam);
-    }
+    return localClusterDispatcher.dispatch(jobView, triggerType, customExecuteParam);
   }
 }

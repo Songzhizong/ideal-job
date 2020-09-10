@@ -97,17 +97,18 @@ public class JobSchedulerConfig {
     final SimpleLbFactory<TaskWorker> lbFactory = new SimpleLbFactory<>();
     lbFactory.registerEventListener((factory, event) -> {
       int reachableServerCount = event.getReachableServerCount();
+
+      final Map<String, List<TaskWorker>> map = factory.getReachableServers();
+      List<String> supportApps = new ArrayList<>();
+      map.forEach((appName, list) -> {
+        if (list != null && list.size() > 0) {
+          supportApps.add(appName);
+        }
+      });
       if (reachableServerCount == 0) {
-        final Map<String, List<TaskWorker>> map = factory.getReachableServers();
-        List<String> supportApps = new ArrayList<>();
-        map.forEach((appName, list) -> {
-          if (list != null && list.size() > 0) {
-            supportApps.add(appName);
-          }
-        });
         registry.refreshNode(localClusterNode, supportApps);
-        clusterSocket.refreshNodeNotice(supportApps);
       }
+      clusterSocket.refreshNodeNotice(supportApps);
     });
     return lbFactory;
   }
