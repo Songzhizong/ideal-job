@@ -1,4 +1,4 @@
-![image-logo](assets/image-logo.png)
+![image-logo](./assets/image-logo.png)
 
 <p align="center"><a href="https://github.com/Songzhizong/ideal-job/"><strong>-- Home Page --</strong></a></p>
 
@@ -16,7 +16,7 @@ ideal-job是一个分布式任务调度系统，其设计目标是简单可靠�
 
 ## 软件架构
 
-![image-20200911145013596](assets/image-architecture-diagram.png)
+![image-20200911145013596](./assets/image-architecture-diagram.png)
 
 **部署方式**
 
