@@ -9,7 +9,9 @@ import com.zzsong.job.scheduler.api.dto.req.QueryWorkerArgs;
 import com.zzsong.job.scheduler.api.dto.req.UpdateWorkerArgs;
 import com.zzsong.job.scheduler.api.dto.rsp.JobWorkerRsp;
 import com.zzsong.job.scheduler.core.admin.service.JobWorkerService;
+import com.zzsong.job.scheduler.core.admin.vo.JobWorkerVo;
 import com.zzsong.job.scheduler.core.conf.ExceptionHandler;
+import jdk.nashorn.internal.objects.annotations.Getter;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -209,6 +211,23 @@ public class JobWorkerController implements WorkerClient {
     paging.cleanOrders();
     paging.descBy("workerId");
     return service.query(args, paging)
+        .onErrorResume(ExceptionHandler::resultException);
+  }
+
+
+  @Nonnull
+  @GetMapping("/queryVo")
+  public Mono<Res<List<JobWorkerVo>>> queryVo(@Nullable QueryWorkerArgs args,
+                                              @Nullable Paging paging) {
+    if (args == null) {
+      args = new QueryWorkerArgs();
+    }
+    if (paging == null) {
+      paging = Paging.of(1, 20);
+    }
+    paging.cleanOrders();
+    paging.descBy("workerId");
+    return service.queryVo(args, paging)
         .onErrorResume(ExceptionHandler::resultException);
   }
 }

@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -66,14 +67,20 @@ public class ClusterSocket {
 
   @SuppressWarnings("DuplicatedCode")
   @MessageMapping(ClusterRoute.SUPPORT_APPS)
-  public Flux<List<String>> getSupportApps(String instance) {
+  public Flux<Map<String, List<String>>> getSupportApps(String instance) {
     log.info("{} get support apps connection", instance);
     return Flux.interval(Duration.ofSeconds(0), Duration.ofSeconds(30)).map(index -> {
       final Map<String, List<TaskWorker>> map = lbFactory.getReachableServers();
-      List<String> supportApps = new ArrayList<>();
+      Map<String, List<String>> supportApps = new HashMap<>();
       map.forEach((appName, list) -> {
+        List<String> instanceList = new ArrayList<>();
         if (list != null && list.size() > 0) {
-          supportApps.add(appName);
+          for (TaskWorker taskWorker : list) {
+            instanceList.add(taskWorker.getInstanceId());
+          }
+        }
+        if (instanceList.size() > 0) {
+          supportApps.put(appName, instanceList);
         }
       });
       return supportApps;
@@ -88,7 +95,7 @@ public class ClusterSocket {
     return localClusterNode.dispatch(jobView, triggerType, customExecuteParam);
   }
 
-  public void refreshNodeNotice(List<String> supportApps) {
+  public void refreshNodeNotice(@Nonnull Map<String, List<String>> supportApps) {
     log.info("客户端应用列表发生变化, 通知各节点更新数据...");
     requesterMap.forEach((instanceId, requester) ->
         requester.route(ClusterRoute.REFRESH_SUPPORT_NOTICE)

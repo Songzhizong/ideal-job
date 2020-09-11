@@ -32,9 +32,25 @@ public class SimpleClusterRegistry implements ClusterRegistry, InitializingBean 
   @Autowired
   @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
   private CoreJobDispatcher coreJobDispatcher;
-
+  /**
+   * 节点支持的应用详情信息
+   * <p>
+   * 机器节点 -> appName -> 实例列表
+   */
+  private final ConcurrentMap<ClusterNode, Map<String, List<String>>> nodeRegistryMap = new ConcurrentHashMap<>();
+  /**
+   * 节点支持的应用信息
+   * <p>
+   * 机器节点 -> appName
+   */
   private final ConcurrentMap<ClusterNode, List<String>> nodeSupportMapping = new ConcurrentHashMap<>();
+  /**
+   * 应用 -> 节点列表 注册对应关系
+   */
   private ConcurrentMap<String, List<ClusterNode>> appSupportMapping = new ConcurrentHashMap<>();
+  /**
+   * 当前节点支持的应用列表
+   */
   private Set<String> localSupports = Collections.emptySet();
   @Nullable
   private List<ClusterNode> availableNodes = null;
@@ -47,8 +63,15 @@ public class SimpleClusterRegistry implements ClusterRegistry, InitializingBean 
     this.properties = properties;
   }
 
+  @Nonnull
+  @Override
+  public Map<ClusterNode, Map<String, List<String>>> getClusterRegistryDetails() {
+    return new HashMap<>(nodeRegistryMap);
+  }
+
   @Override
   public void removeNode(@Nonnull ClusterNode node) {
+    nodeRegistryMap.remove(node);
     List<String> remove = nodeSupportMapping.remove(node);
     if (remove != null) {
       log.info("remove node: {}", node.getInstanceId());
@@ -59,37 +82,39 @@ public class SimpleClusterRegistry implements ClusterRegistry, InitializingBean 
 
   @Override
   public void refreshNode(@Nonnull ClusterNode node,
-                          @Nonnull List<String> supportAppList) {
+                          @Nonnull Map<String, List<String>> supportApps) {
+    nodeRegistryMap.put(node, supportApps);
     //noinspection SynchronizationOnLocalVariableOrMethodParameter
     synchronized (node) {
+      final Set<String> supportAppSet = supportApps.keySet();
       final List<String> list = nodeSupportMapping.get(node);
       if (list == null) {
-        refresh(node, supportAppList);
+        refresh(node, supportAppSet);
         return;
       }
-      if (supportAppList.size() == 0 && list.size() == 0) {
+      if (supportAppSet.size() == 0 && list.size() == 0) {
         return;
       }
-      if (list.size() != supportAppList.size()) {
-        refresh(node, supportAppList);
+      if (list.size() != supportAppSet.size()) {
+        refresh(node, supportAppSet);
         return;
       }
       Set<String> currentSet = new HashSet<>(list);
-      Set<String> newSet = new HashSet<>(supportAppList);
+      Set<String> newSet = new HashSet<>(supportAppSet);
       if (currentSet.size() != newSet.size()) {
-        refresh(node, supportAppList);
+        refresh(node, supportAppSet);
         return;
       }
       for (String s : newSet) {
         if (!currentSet.contains(s)) {
-          refresh(node, supportAppList);
+          refresh(node, supportAppSet);
           return;
         }
       }
     }
   }
 
-  private void refresh(@Nonnull ClusterNode node, @Nonnull List<String> supportAppList) {
+  private void refresh(@Nonnull ClusterNode node, @Nonnull Set<String> supportAppList) {
     nodeSupportMapping.put(node, ImmutableList.copyOf(supportAppList));
     if (node.equals(localClusterNode)) {
       localSupports = new HashSet<>(supportAppList);

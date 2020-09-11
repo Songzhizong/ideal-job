@@ -25,6 +25,7 @@ import reactor.core.scheduler.Schedulers;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
@@ -91,10 +92,16 @@ public class JobSchedulerConfig {
       int reachableServerCount = event.getReachableServerCount();
 
       final Map<String, List<TaskWorker>> map = factory.getReachableServers();
-      List<String> supportApps = new ArrayList<>();
+      Map<String, List<String>> supportApps = new HashMap<>();
       map.forEach((appName, list) -> {
+        List<String> instanceList = new ArrayList<>();
         if (list != null && list.size() > 0) {
-          supportApps.add(appName);
+          for (TaskWorker taskWorker : list) {
+            instanceList.add(taskWorker.getInstanceId());
+          }
+        }
+        if (instanceList.size() > 0) {
+          supportApps.put(appName, instanceList);
         }
       });
       if (reachableServerCount == 0) {

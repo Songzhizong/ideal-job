@@ -10,6 +10,9 @@ import com.zzsong.job.scheduler.api.dto.req.CreateWorkerArgs;
 import com.zzsong.job.scheduler.api.dto.req.QueryWorkerArgs;
 import com.zzsong.job.scheduler.api.dto.req.UpdateWorkerArgs;
 import com.zzsong.job.scheduler.api.dto.rsp.JobWorkerRsp;
+import com.zzsong.job.scheduler.core.admin.vo.JobWorkerVo;
+import com.zzsong.job.scheduler.core.dispatcher.ClusterNode;
+import com.zzsong.job.scheduler.core.dispatcher.cluster.ClusterRegistry;
 import com.zzsong.job.scheduler.core.pojo.JobWorker;
 import com.zzsong.job.scheduler.core.admin.storage.JobInfoStorage;
 import com.zzsong.job.scheduler.core.admin.storage.JobWorkerStorage;
@@ -17,14 +20,14 @@ import com.zzsong.job.scheduler.core.converter.JobWorkerConverter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -38,6 +41,10 @@ public class JobWorkerService {
   private static final String UN_CACHE_VALUE = "UN_CACHE";
   private static final Duration CACHE_EXPIRE = Duration.ofDays(1);
   private static final Duration UN_CACHE_EXPIRE = Duration.ofMillis(60);
+
+  @Autowired
+  @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
+  private ClusterRegistry clusterRegistry;
 
   private final ReactiveCache reactiveCache;
   private final JobInfoStorage jobInfoStorage;
@@ -155,6 +162,59 @@ public class JobWorkerService {
                     .collect(Collectors.toList())
             )
         );
+  }
+
+  @Nonnull
+  public Mono<Res<List<JobWorkerVo>>> queryVo(@Nonnull QueryWorkerArgs args,
+                                              @Nonnull Paging paging) {
+    return jobWorkerStorage.query(args, paging)
+        .map(listRes -> {
+          if (listRes.getData() == null || listRes.getData().size() == 0) {
+            return listRes.convertData(list -> Collections.emptyList());
+          }
+
+          final Map<ClusterNode, Map<String, List<String>>> clusterRegistryDetails
+              = clusterRegistry.getClusterRegistryDetails();
+
+          final List<String> nodeInstances = clusterRegistryDetails.keySet()
+              .stream().map(ClusterNode::getInstanceId)
+              .collect(Collectors.toList());
+
+          // worker appName -> cluster node instance -> online worker node
+          Map<String, Map<String, List<String>>> map = new HashMap<>();
+          clusterRegistryDetails.forEach((node, stringListMap) ->
+              stringListMap.forEach((appName, instanceList) -> {
+                final Map<String, List<String>> listMap = map
+                    .computeIfAbsent(appName, k -> new HashMap<>());
+                listMap.put(node.getInstanceId(), instanceList);
+              }));
+
+          return listRes.convertData(list ->
+              list.stream()
+                  .map(worker -> {
+                    final JobWorkerVo vo = JobWorkerConverter.toJobWorkerVo(worker);
+                    final String appName = vo.getAppName();
+                    // cluster nodeInstance -> online worker node
+                    Map<String, List<String>> nodeRegistry = new HashMap<>();
+                    for (String nodeInstance : nodeInstances) {
+                      final Map<String, List<String>> stringListMap = map.get(appName);
+                      if (stringListMap == null) {
+                        nodeRegistry.put(nodeInstance, Collections.emptyList());
+                      } else {
+                        vo.setOnline(true);
+                        final List<String> strings = stringListMap.get(nodeInstance);
+                        if (strings == null) {
+                          nodeRegistry.put(nodeInstance, Collections.emptyList());
+                        } else {
+                          nodeRegistry.put(nodeInstance, strings);
+                        }
+                      }
+                    }
+                    vo.setNodeRegistry(nodeRegistry);
+                    return vo;
+                  })
+                  .collect(Collectors.toList()));
+        });
   }
 
   @Nonnull

@@ -19,6 +19,7 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -36,8 +37,8 @@ public class RemoteClusterNode extends Thread implements ClusterNode {
   private static final ParameterizedTypeReference<Res<Void>> VOID_RES
       = new ParameterizedTypeReference<Res<Void>>() {
   };
-  private static final ParameterizedTypeReference<List<String>> STRING_LIST_RES
-      = new ParameterizedTypeReference<List<String>>() {
+  private static final ParameterizedTypeReference<Map<String, List<String>>> STRING_LIST_MAP_RES
+      = new ParameterizedTypeReference<Map<String, List<String>>>() {
   };
   private final BlockingQueue<Boolean> restartNoticeQueue
       = new ArrayBlockingQueue<>(1);
@@ -156,7 +157,7 @@ public class RemoteClusterNode extends Thread implements ClusterNode {
         .subscribe();
     this.rsocketRequester.route(ClusterRoute.SUPPORT_APPS)
         .data(config.getIpPort())
-        .retrieveFlux(STRING_LIST_RES)
+        .retrieveFlux(STRING_LIST_MAP_RES)
         .doOnNext(list -> clusterRegistry.refreshNode(this, list))
         .subscribe();
     running = true;
@@ -168,7 +169,7 @@ public class RemoteClusterNode extends Thread implements ClusterNode {
   }
 
   @MessageMapping(ClusterRoute.REFRESH_SUPPORT_NOTICE)
-  public Mono<Void> refreshSupportList(List<String> supportApps) {
+  public Mono<Void> refreshSupportList(Map<String, List<String>> supportApps) {
     clusterRegistry.refreshNode(this, supportApps);
     return Mono.empty();
   }

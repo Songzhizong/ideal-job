@@ -4,6 +4,7 @@ import com.zzsong.job.scheduler.core.dispatcher.ClusterNode;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 集群worker注册表
@@ -16,6 +17,14 @@ import java.util.List;
 public interface ClusterRegistry {
 
   /**
+   * 获取机器注册详情
+   *
+   * @return 注册表详情, 机器节点 -> 应用名称 -> 在线客户端列表
+   */
+  @Nonnull
+  Map<ClusterNode, Map<String, List<String>>> getClusterRegistryDetails();
+
+  /**
    * 删除集群节点
    */
   void removeNode(@Nonnull ClusterNode node);
@@ -23,7 +32,7 @@ public interface ClusterRegistry {
   /**
    * 刷新节点支持服务列表, 新加入的节点也通过此方法进行注册
    */
-  void refreshNode(@Nonnull ClusterNode node, @Nonnull List<String> supportAppList);
+  void refreshNode(@Nonnull ClusterNode node, @Nonnull Map<String, List<String>> supportApps);
 
   /**
    * 通过appName获取可用的集群节点
