@@ -65,7 +65,7 @@ PUT http://127.0.0.1:8804/job/disable/133800657135075328
 
 
 ### 触发任务
-POST http://127.0.0.1:8805/job/trigger/134276800086802432
+POST http://127.0.0.1:8805/job/trigger/134938329517916160
 Content-Type: application/json
 
 helloworld

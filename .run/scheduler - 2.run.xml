@@ -2,7 +2,7 @@
   <configuration default="false" name="scheduler - 2" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <module name="ideal-job-scheduler-server" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.zzsong.job.scheduler.server.SchedulerApplication" />
-    <option name="PROGRAM_PARAMETERS" value="--spring.profiles.active=local --server.port=8805 --spring.rsocket.server.port=9905 --ideal.job.cluster.nodes=127.0.0.1:9904" />
+    <option name="PROGRAM_PARAMETERS" value="--server.port=8805 --spring.rsocket.server.port=9905" />
     <option name="ALTERNATIVE_JRE_PATH" />
     <method v="2">
       <option name="Make" enabled="true" />

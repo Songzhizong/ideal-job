@@ -28,9 +28,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author 宋志宗 on 2020/9/3
  */
-@Component
-public class TimingSchedule implements SmartInitializingSingleton {
-  public static final Logger log = LoggerFactory.getLogger(TimingSchedule.class);
+@Component("timingJobDispatcher")
+public class TimingJobDispatcher implements SmartInitializingSingleton {
+  public static final Logger log = LoggerFactory.getLogger(TimingJobDispatcher.class);
   private static final String LOCK_SQL
       = "select lock_name from ideal_job_lock where lock_name = 'schedule_lock' for update";
   private static final int preReadCount = 500;
@@ -52,10 +52,10 @@ public class TimingSchedule implements SmartInitializingSingleton {
   @Nonnull
   private final ExecutorService blockThreadPool;
 
-  public TimingSchedule(@Nonnull DataSource dataSource,
-                        @Nonnull JobService jobService,
-                        @Nonnull ClusterNode jobDispatcher,
-                        @Nonnull ExecutorService blockThreadPool) {
+  public TimingJobDispatcher(@Nonnull DataSource dataSource,
+                             @Nonnull JobService jobService,
+                             @Nonnull ClusterNode jobDispatcher,
+                             @Nonnull ExecutorService blockThreadPool) {
     this.dataSource = dataSource;
     this.jobService = jobService;
     this.jobDispatcher = jobDispatcher;

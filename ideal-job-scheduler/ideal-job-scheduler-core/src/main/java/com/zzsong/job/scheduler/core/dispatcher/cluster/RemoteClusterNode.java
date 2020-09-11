@@ -3,6 +3,7 @@ package com.zzsong.job.scheduler.core.dispatcher.cluster;
 import com.zzsong.job.common.constants.TriggerTypeEnum;
 import com.zzsong.job.common.transfer.Res;
 import com.zzsong.job.common.utils.JsonUtils;
+import com.zzsong.job.scheduler.core.conf.JobSchedulerConfig;
 import com.zzsong.job.scheduler.core.dispatcher.ClusterNode;
 import com.zzsong.job.scheduler.core.pojo.JobView;
 import io.rsocket.SocketAcceptor;
@@ -54,6 +55,7 @@ public class RemoteClusterNode extends Thread implements ClusterNode {
   private final String ipPort;
   @Nonnull
   private final ClusterRegistry clusterRegistry;
+  private final JobSchedulerConfig config;
 
   private volatile boolean running = false;
   private volatile boolean destroyed = false;
@@ -61,9 +63,11 @@ public class RemoteClusterNode extends Thread implements ClusterNode {
   private RSocketRequester rsocketRequester;
 
   public RemoteClusterNode(@Nonnull String ip, int port,
+                           @Nonnull JobSchedulerConfig config,
                            @Nonnull ClusterRegistry clusterRegistry) {
     this.ip = ip;
     this.port = port;
+    this.config = config;
     this.clusterRegistry = clusterRegistry;
     this.ipPort = ip + ":" + port;
 
@@ -101,7 +105,7 @@ public class RemoteClusterNode extends Thread implements ClusterNode {
     SocketAcceptor responder
         = RSocketMessageHandler.responder(rSocketStrategies, this);
     final ConnectMessage message = new ConnectMessage();
-    message.setInstanceId(ipPort);
+    message.setInstanceId(config.getIpPort());
     final String messageString = message.toMessageString();
     if (rsocketRequester != null && !rsocketRequester.rsocket().isDisposed()) {
       try {
@@ -147,35 +151,25 @@ public class RemoteClusterNode extends Thread implements ClusterNode {
           running = false;
           log.info("{} -> RemoteClusterDispatcher 连接断开: {}, {} 秒后尝试重连...",
               ipPort, consumer, restartDelay);
-          clusterRegistry.removeNode(this);
           restartSocket();
         })
         .subscribe();
     this.rsocketRequester.route(ClusterRoute.SUPPORT_APPS)
-        .data(getInstanceId())
+        .data(config.getIpPort())
         .retrieveFlux(STRING_LIST_RES)
-        .doOnNext(list -> {
-          clusterRegistry.refreshNode(this, list);
-          if (log.isDebugEnabled()) {
-            log.debug("从 {} 拉取支持服务列表: {}",
-                getInstanceId(), JsonUtils.toJsonString(list));
-          }
-        })
+        .doOnNext(list -> clusterRegistry.refreshNode(this, list))
         .subscribe();
     running = true;
   }
 
   private void restartSocket() {
+    clusterRegistry.removeNode(this);
     restartNoticeQueue.offer(true);
   }
 
   @MessageMapping(ClusterRoute.REFRESH_SUPPORT_NOTICE)
   public Mono<Void> refreshSupportList(List<String> supportApps) {
     clusterRegistry.refreshNode(this, supportApps);
-    if (log.isDebugEnabled()) {
-      log.debug("{} -> support app list refresh: {}",
-          getInstanceId(), JsonUtils.toJsonString(supportApps));
-    }
     return Mono.empty();
   }
 

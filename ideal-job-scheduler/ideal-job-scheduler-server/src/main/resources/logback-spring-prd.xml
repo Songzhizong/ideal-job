@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60000">
+  <jmxConfigurator/>
+  <!-- 彩色日志 -->
+  <!-- 彩色日志依赖的渲染类 -->
+  <conversionRule conversionWord="clr"
+                  converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+  <conversionRule conversionWord="wex"
+                  converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter"/>
+  <conversionRule conversionWord="wEx"
+                  converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
+  <!-- 彩色日志格式 -->
+  <property name="DEFAULT_CONSOLE_LOG_PATTERN"
+            value="${CONSOLE_LOG_PATTERN:-%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(-){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(%6L){magenta} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+
+  <!-- 控制台输出, 生产环境去除 -->
+  <appender name="DEFAULT_CONSOLE_NONE" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <pattern>${DEFAULT_CONSOLE_LOG_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="DEFAULT_CONSOLE_WARN" class="ch.qos.logback.core.ConsoleAppender">
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>WARN</level>
+    </filter>
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <pattern>${DEFAULT_CONSOLE_LOG_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+
+  <!--========================================= 文件日志 =========================================-->
+  <!-- 日志目录 -->
+  <property name="LOG_HOME" value="./log"/>
+  <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+  <!-- %d{yyyy-MM-dd HH:mm:ss.SSS} %5p - [%15.15t] %-40.40logger{39} %6L : %m%n -->
+  <property name="File_LOG_PATTERN"
+            value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5p - [%15.15t] %-40.40logger{39}  : %m%n"/>
+  <!-- 日志文件最大的大小 -->
+  <property name="MAX_SIZE" value="20MB"/>
+  <!-- 日志最大保存天数 -->
+  <property name="MAX_HISTORY" value="180"/>
+  <!-- 日志文件名称 -->
+  <property name="AUTO_File_NAME" value="%d{yyyy-MM-dd}.%i.log"/>
+
+  <!-- 输出到文件 -->
+  <appender name="ALL_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- 按天分文件夹存放 ，并压缩 -->
+      <fileNamePattern>${LOG_HOME}/all/${AUTO_File_NAME}</fileNamePattern>
+      <timeBasedFileNamingAndTriggeringPolicy
+          class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <!-- 每个文件的最大值 20MB,超过则编号,生成新文件 -->
+        <maxFileSize>${MAX_SIZE}</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+      <!-- 例如，假设每天滚动，且 maxHistory 是 6，则只 保留最近 6 天的归档文件，删除之前的文件。 -->
+      <maxHistory>${MAX_HISTORY}</maxHistory>
+    </rollingPolicy>
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <pattern>${File_LOG_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="IMP_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <!-- 临界值过滤器，过滤掉低于指定临界值的日志。
+         当日志级别等于或高于临界值时，过滤器返回NEUTRAL；
+         当日志级别低于临界值时，日志会被拒绝。 -->
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>WARN</level>
+    </filter>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+      <!-- 按天分文件夹存放 ，并压缩 -->
+      <fileNamePattern>${LOG_HOME}/imp/${AUTO_File_NAME}</fileNamePattern>
+      <timeBasedFileNamingAndTriggeringPolicy
+          class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+        <!-- 每个文件的最大值 20MB,超过则编号,生成新文件 -->
+        <maxFileSize>${MAX_SIZE}</maxFileSize>
+      </timeBasedFileNamingAndTriggeringPolicy>
+      <!-- 例如，假设每天滚动，且 maxHistory 是 6，则只 保留最近 6 天的归档文件，删除之前的文件。 -->
+      <maxHistory>${MAX_HISTORY}</maxHistory>
+    </rollingPolicy>
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <pattern>${File_LOG_PATTERN}</pattern>
+    </encoder>
+  </appender>
+
+  <appender name="ALL_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+    <!-- 队列大小1024 -->
+    <queueSize>2048</queueSize>
+    <!-- 队列空闲小于256时拒绝debug和info日志 -->
+    <discardingThreshold>256</discardingThreshold>
+    <includeCallerData>false</includeCallerData>
+    <appender-ref ref="ALL_FILE"/>
+  </appender>
+  <appender name="IMP_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+    <!-- 队列大小1024 -->
+    <queueSize>1024</queueSize>
+    <includeCallerData>false</includeCallerData>
+    <appender-ref ref="IMP_FILE"/>
+  </appender>
+
+
+  <!--========================================= 输出配置 =========================================-->
+
+  <!-- 启动日志输出到控制台 -->
+  <logger name="cn.sh.ideal.nj.cmpt.bus.server.BusServerApplicationKt"
+          level="info" additivity="false">
+    <appender-ref ref="DEFAULT_CONSOLE_NONE"/>
+  </logger>
+
+  <!-- 项目日志, 输出到一般日志文件、重要日志文件、warn和error日志输出到控制台 -->
+  <logger name="com.zzsong" level="info" additivity="false">
+    <appender-ref ref="ALL_ASYNC"/>
+    <appender-ref ref="IMP_ASYNC"/>
+    <appender-ref ref="DEFAULT_CONSOLE_WARN"/>
+  </logger>
+
+  <!-- 默认日志配置, 输出到控制台、一般日志文件、重要日志文件 -->
+  <root level="info">
+    <appender-ref ref="ALL_ASYNC"/>
+    <appender-ref ref="IMP_ASYNC"/>
+    <appender-ref ref="DEFAULT_CONSOLE_NONE"/>
+  </root>
+
+  <!-- 直接输出到控制台 -->
+  <logger name="org.springframework.boot.web.embedded.netty.NettyWebServer"
+          level="info" additivity="false">
+    <appender-ref ref="DEFAULT_CONSOLE_NONE"/>
+  </logger>
+
+  <!-- 直接输出到控制台 -->
+  <logger name="org.springframework.data.repository.config.RepositoryConfigurationDelegate"
+          level="warn" additivity="false">
+    <appender-ref ref="DEFAULT_CONSOLE_NONE"/>
+  </logger>
+
+  <!-- 直接输出到控制台 -->
+  <logger name="com.netflix.discovery.shared.resolver.aws.ConfigClusterResolver"
+          level="warn" additivity="false">
+    <appender-ref ref="DEFAULT_CONSOLE_NONE"/>
+  </logger>
+
+  <!-- 直接输出到控制台 -->
+  <logger name="com.netflix.discovery.DiscoveryClient" level="warn" additivity="false">
+    <appender-ref ref="DEFAULT_CONSOLE_NONE"/>
+  </logger>
+</configuration>

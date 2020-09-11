@@ -15,10 +15,13 @@ import java.util.List;
  */
 public interface ClusterRegistry {
 
+  /**
+   * 删除集群节点
+   */
   void removeNode(@Nonnull ClusterNode node);
 
   /**
-   * 节点支持应用列表发生变更
+   * 刷新节点支持服务列表, 新加入的节点也通过此方法进行注册
    */
   void refreshNode(@Nonnull ClusterNode node, @Nonnull List<String> supportAppList);
 

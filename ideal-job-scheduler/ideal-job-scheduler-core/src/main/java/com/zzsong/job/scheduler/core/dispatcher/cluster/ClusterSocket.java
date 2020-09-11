@@ -67,7 +67,7 @@ public class ClusterSocket {
   @SuppressWarnings("DuplicatedCode")
   @MessageMapping(ClusterRoute.SUPPORT_APPS)
   public Flux<List<String>> getSupportApps(String instance) {
-    log.info("{} connection ", instance);
+    log.info("{} get support apps connection", instance);
     return Flux.interval(Duration.ofSeconds(0), Duration.ofSeconds(30)).map(index -> {
       final Map<String, List<TaskWorker>> map = lbFactory.getReachableServers();
       List<String> supportApps = new ArrayList<>();

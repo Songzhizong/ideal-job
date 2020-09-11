@@ -10,7 +10,6 @@ import com.zzsong.job.common.utils.IpUtil;
 import com.zzsong.job.scheduler.core.dispatcher.LocalClusterNode;
 import com.zzsong.job.scheduler.core.dispatcher.cluster.ClusterRegistry;
 import com.zzsong.job.scheduler.core.dispatcher.cluster.ClusterSocket;
-import com.zzsong.job.scheduler.core.dispatcher.cluster.SimpleClusterRegistry;
 import com.zzsong.job.scheduler.core.generator.IDGenerator;
 import com.zzsong.job.scheduler.core.generator.JpaIdentityGenerator;
 import com.zzsong.job.scheduler.core.generator.ReactiveRedisRegisterSnowFlake;
@@ -18,7 +17,6 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.context.WebServerApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
@@ -41,14 +39,12 @@ public class JobSchedulerConfig {
   private String applicationName;
 
   private String ip = null;
-  private int port = -1;
+  @Value("${server.port:8080}")
+  private int port;
   private String ipPort = null;
-  private final WebServerApplicationContext context;
   private final JobSchedulerProperties schedulerProperties;
 
-  public JobSchedulerConfig(WebServerApplicationContext context,
-                            JobSchedulerProperties schedulerProperties) {
-    this.context = context;
+  public JobSchedulerConfig(JobSchedulerProperties schedulerProperties) {
     this.schedulerProperties = schedulerProperties;
   }
 
@@ -61,10 +57,6 @@ public class JobSchedulerConfig {
   }
 
   public int getPort() {
-    if (port > 1) {
-      return port;
-    }
-    port = context.getWebServer().getPort();
     return port;
   }
 

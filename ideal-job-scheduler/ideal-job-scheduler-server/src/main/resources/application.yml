@@ -1,10 +1,8 @@
-server:
-  port: 21001
 spring:
+  application:
+    name: JOB-SCHEDULER
   banner:
     location: banner.txt
-  main:
-    allow-bean-definition-overriding: true
   cloud:
     consul:
       host: localhost
@@ -12,10 +10,6 @@ spring:
     loadbalancer:
       ribbon:
         enabled: false
-  profiles:
-    active: dev
-  application:
-    name: JOB-SCHEDULER
   jackson:
     locale: zh_CN
     time-zone: 'GMT+8'
@@ -26,10 +20,9 @@ spring:
     open-in-view: true
     properties:
       hibernate:
-        jdbc:
-          batch_size: 500
-          batch_versioned_data: true
-          order_inserts: true
-          order_updates: true
         temp:
           use_jdbc_metadata_defaults: false
+  main:
+    allow-bean-definition-overriding: true
+  profiles:
+    active: dev

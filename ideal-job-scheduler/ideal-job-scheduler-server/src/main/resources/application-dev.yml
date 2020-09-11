@@ -3,10 +3,13 @@ logging:
 server:
   port: 8804
 spring:
+  rsocket:
+    server:
+      port: 9904
   datasource:
-    url: "jdbc:mysql://127.0.0.1:8802/ideal-job?useUnicode=true&characterEncoding=utf-8&useAffectedRows=true&allowMultiQueries=true&useSSL=false&serverTimezone=Asia/Shanghai"
+    url: "jdbc:mysql://127.0.0.1:3306/ideal-job?useUnicode=true&characterEncoding=utf-8&useAffectedRows=true&allowMultiQueries=true&useSSL=false&serverTimezone=Asia/Shanghai"
     username: root
-    password: root
+    password: Include@203
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
@@ -15,8 +18,7 @@ spring:
       idle-timeout: 180000
   redis:
     host: 127.0.0.1
-    port: 4372
-    password: 123456
+    port: 6379
     timeout: 200ms
     lettuce:
       pool:
@@ -26,5 +28,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
-    show-sql: true
-
+    show-sql: false
+ideal:
+  job:
+    access-token: dasdassdfafd
+    cluster:
+      nodes: 127.0.0.1:9904,127.0.0.1:9905

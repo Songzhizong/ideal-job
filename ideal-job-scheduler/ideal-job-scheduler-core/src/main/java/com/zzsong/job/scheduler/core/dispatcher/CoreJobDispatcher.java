@@ -8,7 +8,6 @@ import com.zzsong.job.common.loadbalancer.strategy.WeightRandomLoadBalancer;
 import com.zzsong.job.common.transfer.CommonResMsg;
 import com.zzsong.job.common.transfer.Res;
 import com.zzsong.job.scheduler.core.admin.service.JobWorkerService;
-import com.zzsong.job.scheduler.core.conf.JobSchedulerProperties;
 import com.zzsong.job.scheduler.core.dispatcher.cluster.ClusterRegistry;
 import com.zzsong.job.scheduler.core.pojo.JobView;
 import com.zzsong.job.scheduler.core.pojo.JobWorker;
@@ -40,14 +39,11 @@ public class CoreJobDispatcher implements JobDispatcher {
   @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
   private ClusterRegistry registry;
   private final JobWorkerService workerService;
-  private final JobSchedulerProperties properties;
   private final LocalClusterNode localClusterDispatcher;
 
   public CoreJobDispatcher(JobWorkerService workerService,
-                           JobSchedulerProperties properties,
                            LocalClusterNode localClusterDispatcher) {
     this.workerService = workerService;
-    this.properties = properties;
     this.localClusterDispatcher = localClusterDispatcher;
 
   }
@@ -92,7 +88,7 @@ public class CoreJobDispatcher implements JobDispatcher {
           });
     }
 
-    // http script 模式下, 任何一个存活的集群节点都可以完成调度
+    // http script 模式直接在本地调度
     return localClusterDispatcher.dispatch(jobView, triggerType, customExecuteParam);
   }
 }
