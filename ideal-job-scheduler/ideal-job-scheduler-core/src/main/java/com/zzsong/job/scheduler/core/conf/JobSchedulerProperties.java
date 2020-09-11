@@ -19,7 +19,7 @@ public class JobSchedulerProperties {
   /**
    * 任务实例保存天数
    */
-  private int jobInstanceStorageDay = 30;
+  private int jobInstanceStorageDay = 60;
   @Nonnull
   private String accessToken = "";
   /**

@@ -30,7 +30,7 @@ public class ServerScheduled {
   public void deleteJobInstanceScheduled() {
     int storageDay = properties.getJobInstanceStorageDay();
     if (storageDay < 1) {
-      storageDay = 30;
+      return;
     }
     LocalDateTime time = DateTimes.now().minusDays(storageDay);
     jobInstanceService.deleteAllByCreatedTimeLessThan(time)
