@@ -183,7 +183,6 @@ public class JobController implements JobClient {
         .flatMap(jobService::updateJob)
         .map(Res::data)
         .onErrorResume(ExceptionHandler::resultException);
-
   }
 
   /**
@@ -355,7 +354,7 @@ public class JobController implements JobClient {
    * <p>通过cron表达式获取接下来几次的执行时间</p>
    * <pre>
    *   <b>请求示例:</b>
-   *   GET http://{{host}}:{{port}}/{{gateway}}/job/triggerPlan?count=5&cron=0/30%20*%20*%20*%20*%20?
+   *   GET http://{{host}}:{{port}}/{{gateway}}/job/triggerPlan?count=5&cron=0%200%2012%20*%20*%20?%20*
    *
    *   <b>成功响应示例:</b>
    *   {
@@ -363,11 +362,11 @@ public class JobController implements JobClient {
    *     "code": 200,
    *     "message": "Success",
    *     "data": [
-   *       "2020-09-09 19:40:30",
-   *       "2020-09-09 19:41:00",
-   *       "2020-09-09 19:41:30",
-   *       "2020-09-09 19:42:00",
-   *       "2020-09-09 19:42:30"
+   *       "2020-09-12 12:00:00",
+   *       "2020-09-13 12:00:00",
+   *       "2020-09-14 12:00:00",
+   *       "2020-09-15 12:00:00",
+   *       "2020-09-16 12:00:00"
    *     ]
    *   }
    * </pre>
@@ -377,7 +376,11 @@ public class JobController implements JobClient {
    * @return 执行计划
    */
   @GetMapping("/triggerPlan")
-  public Mono<Res<List<String>>> triggerPlan(int count, @Nonnull String cron) {
+  public Mono<Res<List<String>>> triggerPlan(@RequestParam(defaultValue = "5")
+                                                 int count, @Nonnull String cron) {
+    if (StringUtils.isBlank(cron)) {
+      return Mono.just(Res.err("cron不能为空"));
+    }
     return Mono.just(cron)
         .doOnNext(c -> {
           if (count < 1 || count > 10) {
