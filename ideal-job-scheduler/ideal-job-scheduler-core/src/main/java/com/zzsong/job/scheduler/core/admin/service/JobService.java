@@ -83,9 +83,11 @@ public class JobService {
               return Mono.error(new VisibleException(CommonResMsg.BAD_REQUEST, "cron表达式不合法"));
             }
             if (autoStart) {
-              long nextTriggerTime = getNextTriggerTime(cron);
-              jobInfo.setJobStatus(JobInfo.JOB_START);
-              jobInfo.setNextTriggerTime(nextTriggerTime);
+              Long nextTriggerTime = getNextTriggerTime(cron);
+              if (nextTriggerTime != null) {
+                jobInfo.setJobStatus(JobInfo.JOB_START);
+                jobInfo.setNextTriggerTime(nextTriggerTime);
+              }
             }
           }
           return jobInfoStorage.save(jobInfo).map(JobInfoConverter::toJobInfoRsp);
@@ -118,8 +120,14 @@ public class JobService {
               return Mono.error(new VisibleException(CommonResMsg.BAD_REQUEST, "cron表达式不合法"));
             }
             if (jobInfo.getJobStatus() == JobInfo.JOB_START) {
-              long nextTriggerTime = getNextTriggerTime(cron);
-              jobInfo.setNextTriggerTime(nextTriggerTime);
+              Long nextTriggerTime = getNextTriggerTime(cron);
+              if (nextTriggerTime != null) {
+                jobInfo.setNextTriggerTime(nextTriggerTime);
+              } else {
+                jobInfo.setLastTriggerTime(0);
+                jobInfo.setNextTriggerTime(0);
+                jobInfo.setJobStatus(JobInfo.JOB_STOP);
+              }
             }
           } else {
             jobInfo.setJobStatus(JobInfo.JOB_STOP);
@@ -188,10 +196,14 @@ public class JobService {
             log.info("启动任务: {} 失败, cron表达式为空", jobId);
             return Mono.error(new VisibleException("cron表达式为空"));
           }
-          long nextTriggerTime = getNextTriggerTime(cron);
-          jobInfo.setJobStatus(JobInfo.JOB_START);
-          jobInfo.setLastTriggerTime(0);
-          jobInfo.setNextTriggerTime(nextTriggerTime);
+          Long nextTriggerTime = getNextTriggerTime(cron);
+          if (nextTriggerTime != null) {
+            jobInfo.setJobStatus(JobInfo.JOB_START);
+            jobInfo.setLastTriggerTime(0);
+            jobInfo.setNextTriggerTime(nextTriggerTime);
+          } else {
+            return Mono.error(new VisibleException("获取下次执行时间为空"));
+          }
           return jobInfoStorage.save(jobInfo).map(j -> true);
         });
   }
@@ -251,7 +263,8 @@ public class JobService {
   }
 
 
-  private long getNextTriggerTime(String cron) {
+  @Nullable
+  private Long getNextTriggerTime(String cron) {
     long benchmark = System.currentTimeMillis() + PRE_READ_MS;
     Date nextValidTime;
     try {
@@ -263,8 +276,7 @@ public class JobService {
       throw new VisibleException("解析cron表达式出现异常");
     }
     if (nextValidTime == null) {
-      log.info("尝试通过cron: {} 获取下次执行时间失败", cron);
-      throw new VisibleException("获取下次执行时间失败");
+      return null;
     }
     return nextValidTime.getTime();
   }
