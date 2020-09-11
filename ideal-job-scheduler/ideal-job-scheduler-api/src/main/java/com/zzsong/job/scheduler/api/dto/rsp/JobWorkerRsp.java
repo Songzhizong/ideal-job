@@ -9,6 +9,8 @@ import lombok.Setter;
 
 import javax.annotation.Nonnull;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author 宋志宗 on 2020/8/26
@@ -19,7 +21,7 @@ public class JobWorkerRsp {
   /**
    * 执行器Id
    */
-  @JsonSerialize(using= ToStringSerializer.class)
+  @JsonSerialize(using = ToStringSerializer.class)
   private long workerId;
   /**
    * 执行器AppName
@@ -31,6 +33,14 @@ public class JobWorkerRsp {
    */
   @Nonnull
   private String title;
+  /**
+   * 是否在线
+   */
+  private boolean online = false;
+  /**
+   * 各个节点的注册情况
+   */
+  private Map<String, List<String>> nodeRegistry;
   /**
    * 创建时间
    */

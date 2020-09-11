@@ -10,7 +10,6 @@ import com.zzsong.job.scheduler.api.dto.req.CreateWorkerArgs;
 import com.zzsong.job.scheduler.api.dto.req.QueryWorkerArgs;
 import com.zzsong.job.scheduler.api.dto.req.UpdateWorkerArgs;
 import com.zzsong.job.scheduler.api.dto.rsp.JobWorkerRsp;
-import com.zzsong.job.scheduler.core.admin.vo.JobWorkerVo;
 import com.zzsong.job.scheduler.core.dispatcher.ClusterNode;
 import com.zzsong.job.scheduler.core.dispatcher.cluster.ClusterRegistry;
 import com.zzsong.job.scheduler.core.pojo.JobWorker;
@@ -155,45 +154,30 @@ public class JobWorkerService {
   public Mono<Res<List<JobWorkerRsp>>> query(@Nonnull QueryWorkerArgs args,
                                              @Nonnull Paging paging) {
     return jobWorkerStorage.query(args, paging)
-        .map(listRes ->
-            listRes.convertData(list ->
-                list.stream()
-                    .map(JobWorkerConverter::toJobWorkerRsp)
-                    .collect(Collectors.toList())
-            )
-        );
-  }
-
-  @Nonnull
-  public Mono<Res<List<JobWorkerVo>>> queryVo(@Nonnull QueryWorkerArgs args,
-                                              @Nonnull Paging paging) {
-    return jobWorkerStorage.query(args, paging)
         .map(listRes -> {
           if (listRes.getData() == null || listRes.getData().size() == 0) {
             return listRes.convertData(list -> Collections.emptyList());
           }
-
-          final Map<ClusterNode, Map<String, List<String>>> clusterRegistryDetails
+          // 集群注册表信息
+          Map<ClusterNode, Map<String, List<String>>> clusterRegistryDetails
               = clusterRegistry.getClusterRegistryDetails();
-
-          final List<String> nodeInstances = clusterRegistryDetails.keySet()
+          // 集群实例列表
+          List<String> nodeInstances = clusterRegistryDetails.keySet()
               .stream().map(ClusterNode::getInstanceId)
               .collect(Collectors.toList());
-
-          // worker appName -> cluster node instance -> online worker node
+          // 执行器在各个机器节点的注册情况 worker appName -> cluster node instance -> online worker node
           Map<String, Map<String, List<String>>> map = new HashMap<>();
           clusterRegistryDetails.forEach((node, stringListMap) ->
               stringListMap.forEach((appName, instanceList) -> {
-                final Map<String, List<String>> listMap = map
+                Map<String, List<String>> listMap = map
                     .computeIfAbsent(appName, k -> new HashMap<>());
                 listMap.put(node.getInstanceId(), instanceList);
               }));
-
           return listRes.convertData(list ->
               list.stream()
                   .map(worker -> {
-                    final JobWorkerVo vo = JobWorkerConverter.toJobWorkerVo(worker);
-                    final String appName = vo.getAppName();
+                    final JobWorkerRsp workerRsp = JobWorkerConverter.toJobWorkerRsp(worker);
+                    final String appName = workerRsp.getAppName();
                     // cluster nodeInstance -> online worker node
                     Map<String, List<String>> nodeRegistry = new HashMap<>();
                     for (String nodeInstance : nodeInstances) {
@@ -201,7 +185,7 @@ public class JobWorkerService {
                       if (stringListMap == null) {
                         nodeRegistry.put(nodeInstance, Collections.emptyList());
                       } else {
-                        vo.setOnline(true);
+                        workerRsp.setOnline(true);
                         final List<String> strings = stringListMap.get(nodeInstance);
                         if (strings == null) {
                           nodeRegistry.put(nodeInstance, Collections.emptyList());
@@ -210,8 +194,8 @@ public class JobWorkerService {
                         }
                       }
                     }
-                    vo.setNodeRegistry(nodeRegistry);
-                    return vo;
+                    workerRsp.setNodeRegistry(nodeRegistry);
+                    return workerRsp;
                   })
                   .collect(Collectors.toList()));
         });

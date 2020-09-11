@@ -42,7 +42,8 @@ public class JobInstanceController implements JobInstanceClient {
    */
   @Nonnull
   @PostMapping("/queryVo")
-  public Mono<Res<List<JobInstanceVo>>> query(@Nonnull QueryInstanceArgs args, @Nullable Paging paging) {
+  public Mono<Res<List<JobInstanceVo>>> query(@Nonnull QueryInstanceArgs args,
+                                              @Nullable Paging paging) {
     if (paging == null) {
       paging = Paging.of(1, 20);
     }
