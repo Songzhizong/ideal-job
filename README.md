@@ -1,4 +1,4 @@
-<p align="center"><img src="assets/image-logo.png" alt="logo" style="zoom:25%;" /></p>
+<p align="center"><img src="./assets/image-logo.png" alt="logo" style="zoom:25%;" /></p>
 
 <p align="center"><a href="https://github.com/Songzhizong/ideal-job/"><strong>-- Home Page --</strong></a></p>
 
