@@ -4,11 +4,12 @@ import com.zzsong.job.common.constants.BlockStrategyEnum;
 import com.zzsong.job.common.constants.DBDefaults;
 import com.zzsong.job.common.constants.ExecuteTypeEnum;
 import com.zzsong.job.common.constants.RouteStrategyEnum;
-import com.zzsong.job.common.exception.VisibleException;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.annotation.Nonnull;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author 宋志宗 on 2020/8/26
@@ -23,7 +24,10 @@ public class CreateJobArgs {
   /**
    * 所属执行器Id
    */
-  private long workerId = -1L;
+  @Nonnull
+  @Min(value = 1, message = "workerId不合法")
+  @NotNull(message = "workerId不能为空")
+  private Long workerId;
   /**
    * 执行模式
    */
@@ -96,11 +100,4 @@ public class CreateJobArgs {
    */
   @Nonnull
   private String businessId = DBDefaults.DEFAULT_STRING_VALUE;
-
-  public CreateJobArgs checkArgs() {
-    if (this.workerId < 1) {
-      throw new VisibleException("所属执行器id不合法");
-    }
-    return this;
-  }
 }

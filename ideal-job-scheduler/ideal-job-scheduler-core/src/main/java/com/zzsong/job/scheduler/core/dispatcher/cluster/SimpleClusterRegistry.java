@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nonnull;
@@ -24,7 +26,7 @@ import java.util.concurrent.ConcurrentMap;
  * @author 宋志宗 on 2020/9/10
  */
 @Component
-public class SimpleClusterRegistry implements ClusterRegistry, InitializingBean {
+public class SimpleClusterRegistry implements ClusterRegistry, ApplicationRunner {
   private static final Logger log = LoggerFactory.getLogger(SimpleClusterRegistry.class);
   private final JobSchedulerConfig config;
   private final LocalClusterNode localClusterNode;
@@ -157,7 +159,7 @@ public class SimpleClusterRegistry implements ClusterRegistry, InitializingBean 
   }
 
   @Override
-  public void afterPropertiesSet() {
+  public void run(ApplicationArguments args) {
     String nodes = properties.getCluster().getNodes();
     if (StringUtils.isBlank(nodes)) {
       return;

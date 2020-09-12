@@ -1,9 +1,7 @@
 package com.zzsong.job.scheduler.api.dto.rsp;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.zzsong.job.common.utils.DateTimes;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,7 +18,6 @@ public class JobInfoRsp {
   /**
    * 任务Id
    */
-  @JsonSerialize(using = ToStringSerializer.class)
   private long jobId;
   /**
    * 所属应用
@@ -50,7 +47,6 @@ public class JobInfoRsp {
   /**
    * 所属执行器Id
    */
-  @JsonSerialize(using = ToStringSerializer.class)
   private long workerId;
   /**
    * 任务执行CRON
@@ -98,24 +94,20 @@ public class JobInfoRsp {
    * 上次调度时间
    */
   @Nullable
-  @JsonFormat(pattern = DateTimes.yyyy_MM_dd_HH_mm_ss, timezone = "GMT+8")
   private LocalDateTime lastTriggerTime;
   /**
    * 下次调度时间
    */
   @Nullable
-  @JsonFormat(pattern = DateTimes.yyyy_MM_dd_HH_mm_ss, timezone = "GMT+8")
   private LocalDateTime nextTriggerTime;
   /**
    * 创建时间
    */
   @Nonnull
-  @JsonFormat(pattern = DateTimes.yyyy_MM_dd_HH_mm_ss, timezone = "GMT+8")
   private LocalDateTime createdTime;
   /**
    * 更新时间
    */
   @Nonnull
-  @JsonFormat(pattern = DateTimes.yyyy_MM_dd_HH_mm_ss, timezone = "GMT+8")
   private LocalDateTime updateTime;
 }

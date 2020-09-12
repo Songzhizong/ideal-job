@@ -31,7 +31,7 @@ public class JobClientImpl implements JobClient {
 
   @Nonnull
   @Override
-  public Mono<Res<Void>> remove(long jobId) {
+  public Mono<Res<Void>> remove(@Nonnull Long jobId) {
     return null;
   }
 
@@ -43,19 +43,19 @@ public class JobClientImpl implements JobClient {
 
   @Nonnull
   @Override
-  public Mono<Res<Void>> enable(long jobId) {
+  public Mono<Res<Void>> enable(@Nonnull Long jobId) {
     return null;
   }
 
   @Nonnull
   @Override
-  public Mono<Res<Void>> disable(long jobId) {
+  public Mono<Res<Void>> disable(@Nonnull Long jobId) {
     return null;
   }
 
   @Nonnull
   @Override
-  public Mono<Res<Void>> trigger(long jobId, @Nullable String executeParam) {
+  public Mono<Res<Void>> trigger(@Nonnull Long jobId, @Nullable String executeParam) {
     return null;
   }
 }

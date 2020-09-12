@@ -59,7 +59,7 @@ public final class SpringPages {
    */
   @Nonnull
   public static <T> Res<List<T>> toPageRes(@Nonnull Page<?> page, @Nonnull List<T> dataList) {
-    long totalElements = page.getTotalElements();
+    int totalElements = (int) page.getTotalElements();
     int totalPages = page.getTotalPages();
     int number = page.getNumber();
     int size = page.getSize();

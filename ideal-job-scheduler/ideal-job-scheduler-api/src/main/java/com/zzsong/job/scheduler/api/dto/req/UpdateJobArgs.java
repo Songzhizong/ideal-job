@@ -3,11 +3,12 @@ package com.zzsong.job.scheduler.api.dto.req;
 import com.zzsong.job.common.constants.BlockStrategyEnum;
 import com.zzsong.job.common.constants.DBDefaults;
 import com.zzsong.job.common.constants.RouteStrategyEnum;
-import com.zzsong.job.common.exception.VisibleException;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.annotation.Nonnull;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author 宋志宗 on 2020/8/26
@@ -19,11 +20,17 @@ public class UpdateJobArgs {
   /**
    * 任务ID
    */
-  private long jobId = -1;
+  @Nonnull
+  @Min(value = 1, message = "jobId不合法")
+  @NotNull(message = "jobId不能为空")
+  private Long jobId;
   /**
    * 所属执行器Id
    */
-  private long workerId = -1;
+  @Nonnull
+  @Min(value = 1, message = "workerId不合法")
+  @NotNull(message = "workerId不能为空")
+  private Long workerId;
   /**
    * JobHandler
    */
@@ -63,15 +70,4 @@ public class UpdateJobArgs {
    */
   @Nonnull
   private String alarmEmail = DBDefaults.DEFAULT_STRING_VALUE;
-
-
-  public UpdateJobArgs checkArgs() {
-    if (jobId < 1) {
-      throw new VisibleException("jobId不合法");
-    }
-    if (workerId < 1) {
-      throw new VisibleException("workerId不合法");
-    }
-    return this;
-  }
 }

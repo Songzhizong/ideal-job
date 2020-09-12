@@ -1,0 +1,10 @@
+###
+POST http://127.0.0.1:8804/job/instance/queryVo
+Content-Type: application/json
+
+{
+  "dispatchTimeRange": {
+    "start": "2020-09-01 12:11:20",
+    "end": "2020-09-02 12:11:20"
+  }
+}

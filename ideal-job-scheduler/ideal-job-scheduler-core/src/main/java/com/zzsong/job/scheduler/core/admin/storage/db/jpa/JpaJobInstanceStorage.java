@@ -1,10 +1,7 @@
 package com.zzsong.job.scheduler.core.admin.storage.db.jpa;
 
 import com.zzsong.job.common.constants.HandleStatusEnum;
-import com.zzsong.job.common.transfer.Paging;
-import com.zzsong.job.common.transfer.Range;
-import com.zzsong.job.common.transfer.Res;
-import com.zzsong.job.common.transfer.SpringPages;
+import com.zzsong.job.common.transfer.*;
 import com.zzsong.job.scheduler.api.dto.req.QueryInstanceArgs;
 import com.zzsong.job.scheduler.core.admin.storage.JobInstanceStorage;
 import com.zzsong.job.scheduler.core.admin.storage.converter.JobInstanceDoConverter;

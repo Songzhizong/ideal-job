@@ -1,8 +1,6 @@
 package com.zzsong.job.common.transfer;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -62,8 +60,7 @@ public class Res<T> implements Serializable {
    */
   @Nullable
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  @JsonSerialize(using = ToStringSerializer.class)
-  private Long total;
+  private Integer total;
 
   /**
    * 分页查询 总页数
@@ -78,7 +75,7 @@ public class Res<T> implements Serializable {
   private Res(@Nullable String id, boolean success,
               int code, @Nonnull String message, @Nullable T data,
               @Nullable Integer page, @Nullable Integer size,
-              @Nullable Long total, @Nullable Integer totalPages) {
+              @Nullable Integer total, @Nullable Integer totalPages) {
     this.id = id;
     this.success = success;
     this.code = code;
@@ -437,12 +434,12 @@ public class Res<T> implements Serializable {
   }
 
   @Nullable
-  public Long getTotal() {
+  public Integer getTotal() {
     return total;
   }
 
   @Nonnull
-  public Res<T> setTotal(@Nullable Long total) {
+  public Res<T> setTotal(@Nullable Integer total) {
     this.total = total;
     return this;
   }
@@ -467,7 +464,7 @@ public class Res<T> implements Serializable {
     private T data;
     private Integer page;
     private Integer size;
-    private Long total;
+    private Integer total;
     private Integer totalPages;
 
     ResBuilder() {
@@ -508,7 +505,7 @@ public class Res<T> implements Serializable {
       return this;
     }
 
-    public ResBuilder<T> total(Long total) {
+    public ResBuilder<T> total(Integer total) {
       this.total = total;
       return this;
     }

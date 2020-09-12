@@ -8,6 +8,7 @@ import com.zzsong.job.scheduler.core.admin.vo.JobInstanceVo;
 import com.zzsong.job.scheduler.core.admin.service.JobInstanceService;
 import com.zzsong.job.scheduler.core.converter.JobInstanceConverter;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
@@ -42,7 +43,7 @@ public class JobInstanceController implements JobInstanceClient {
    */
   @Nonnull
   @PostMapping("/queryVo")
-  public Mono<Res<List<JobInstanceVo>>> query(@Nonnull QueryInstanceArgs args,
+  public Mono<Res<List<JobInstanceVo>>> query(@RequestBody @Nonnull QueryInstanceArgs args,
                                               @Nullable Paging paging) {
     if (paging == null) {
       paging = Paging.of(1, 20);

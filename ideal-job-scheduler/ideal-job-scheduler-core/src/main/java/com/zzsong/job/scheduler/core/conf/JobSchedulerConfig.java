@@ -12,7 +12,7 @@ import com.zzsong.job.scheduler.core.dispatcher.cluster.ClusterRegistry;
 import com.zzsong.job.scheduler.core.dispatcher.cluster.ClusterSocket;
 import com.zzsong.job.scheduler.core.generator.IDGenerator;
 import com.zzsong.job.scheduler.core.generator.JpaIdentityGenerator;
-import com.zzsong.job.scheduler.core.generator.ReactiveRedisRegisterSnowFlake;
+import com.zzsong.job.scheduler.core.generator.ReactiveRedisSnowFlakeFactory;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,12 +113,13 @@ public class JobSchedulerConfig {
   }
 
   @Bean
-  public IDGenerator idGenerator(ReactiveStringRedisTemplate reactiveStringRedisTemplate) {
-    ReactiveRedisRegisterSnowFlake snowFlake
-        = new ReactiveRedisRegisterSnowFlake(applicationName, reactiveStringRedisTemplate);
-    log.debug("Test SnowFlake: {}", snowFlake.generate());
-    JpaIdentityGenerator.setIDGenerator(snowFlake);
-    return snowFlake;
+  public ReactiveRedisSnowFlakeFactory reactiveRedisSnowFlakeFactory(
+      ReactiveStringRedisTemplate reactiveStringRedisTemplate) {
+    ReactiveRedisSnowFlakeFactory snowFlakeFactory
+        = new ReactiveRedisSnowFlakeFactory(applicationName, reactiveStringRedisTemplate);
+    log.debug("Test SnowFlake: {}", snowFlakeFactory.generate());
+    JpaIdentityGenerator.setIDGenerator(snowFlakeFactory);
+    return snowFlakeFactory;
   }
 
   @Bean

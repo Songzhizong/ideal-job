@@ -1,6 +1,5 @@
 package com.zzsong.job.scheduler.core.admin.controller;
 
-import com.zzsong.job.common.exception.VisibleException;
 import com.zzsong.job.common.transfer.Paging;
 import com.zzsong.job.common.transfer.Res;
 import com.zzsong.job.scheduler.api.client.WorkerClient;
@@ -9,7 +8,7 @@ import com.zzsong.job.scheduler.api.dto.req.QueryWorkerArgs;
 import com.zzsong.job.scheduler.api.dto.req.UpdateWorkerArgs;
 import com.zzsong.job.scheduler.api.dto.rsp.JobWorkerRsp;
 import com.zzsong.job.scheduler.core.admin.service.JobWorkerService;
-import com.zzsong.job.scheduler.core.conf.ExceptionHandler;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -22,6 +21,7 @@ import java.util.List;
  *
  * @author 宋志宗 on 2020/8/20
  */
+@Validated
 @RestController
 @RequestMapping("/worker")
 public class JobWorkerController implements WorkerClient {
@@ -72,12 +72,9 @@ public class JobWorkerController implements WorkerClient {
   @Nonnull
   @Override
   @PostMapping("/create")
-  public Mono<Res<JobWorkerRsp>> create(@RequestBody @Nonnull CreateWorkerArgs args) {
-    return Mono.just(args)
-        .doOnNext(CreateWorkerArgs::checkArgs)
-        .flatMap(service::create)
-        .map(Res::data)
-        .onErrorResume(ExceptionHandler::resultException);
+  public Mono<Res<JobWorkerRsp>> create(@Validated @RequestBody
+                                        @Nonnull CreateWorkerArgs args) {
+    return service.create(args).map(Res::data);
   }
 
   /**
@@ -122,12 +119,9 @@ public class JobWorkerController implements WorkerClient {
   @Nonnull
   @Override
   @PostMapping("/update")
-  public Mono<Res<JobWorkerRsp>> update(@RequestBody @Nonnull UpdateWorkerArgs args) {
-    return Mono.just(args)
-        .doOnNext(UpdateWorkerArgs::checkArgs)
-        .flatMap(service::update)
-        .map(Res::data)
-        .onErrorResume(ExceptionHandler::resultException);
+  public Mono<Res<JobWorkerRsp>> update(@Validated @RequestBody
+                                        @Nonnull UpdateWorkerArgs args) {
+    return service.update(args).map(Res::data);
   }
 
   /**
@@ -151,16 +145,8 @@ public class JobWorkerController implements WorkerClient {
   @Nonnull
   @Override
   @DeleteMapping("/delete/{workerId}")
-  public Mono<Res<Void>> delete(@PathVariable("workerId") long workerId) {
-    return Mono.just(workerId)
-        .doOnNext(id -> {
-          if (id < 1) {
-            throw new VisibleException(("执行器ID不合法"));
-          }
-        })
-        .flatMap(service::delete)
-        .map(b -> Res.<Void>success())
-        .onErrorResume(ExceptionHandler::resultException);
+  public Mono<Res<Void>> delete(@PathVariable("workerId") @Nonnull Long workerId) {
+    return service.delete(workerId).map(b -> Res.success());
   }
 
   /**
@@ -208,7 +194,6 @@ public class JobWorkerController implements WorkerClient {
     }
     paging.cleanOrders();
     paging.descBy("workerId");
-    return service.query(args, paging)
-        .onErrorResume(ExceptionHandler::resultException);
+    return service.query(args, paging);
   }
 }

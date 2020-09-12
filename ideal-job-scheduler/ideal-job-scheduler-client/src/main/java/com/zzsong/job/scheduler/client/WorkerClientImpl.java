@@ -31,7 +31,7 @@ public class WorkerClientImpl implements WorkerClient {
 
   @Nonnull
   @Override
-  public Mono<Res<Void>> delete(long workerId) {
+  public Mono<Res<Void>> delete(@Nonnull Long workerId) {
     return null;
   }
 

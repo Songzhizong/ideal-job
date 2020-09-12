@@ -19,25 +19,21 @@ public class JobInstanceVo {
   /**
    * 任务实例ID
    */
-  @JsonSerialize(using = ToStringSerializer.class)
   private long instanceId;
 
   /**
    * 父实例ID
    */
-  @JsonSerialize(using = ToStringSerializer.class)
   private long parentId;
 
   /**
    * 任务Id
    */
-  @JsonSerialize(using = ToStringSerializer.class)
   private long jobId;
 
   /**
    * 执行器Id
    */
-  @JsonSerialize(using = ToStringSerializer.class)
   private long workerId;
 
   /**
@@ -68,14 +64,12 @@ public class JobInstanceVo {
    * 创建时间
    */
   @Nonnull
-  @JsonFormat(pattern = DateTimes.yyyy_MM_dd_HH_mm_ss, timezone = "GMT+8")
   private LocalDateTime createdTime;
 
   /**
    * 更新时间
    */
   @Nonnull
-  @JsonFormat(pattern = DateTimes.yyyy_MM_dd_HH_mm_ss, timezone = "GMT+8")
   private LocalDateTime updateTime;
 
   // -------------------------- 调度信息

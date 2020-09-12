@@ -10,6 +10,7 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -47,7 +48,8 @@ public interface WorkerClient {
    * @author 宋志宗 on 2020/8/26 23:43
    */
   @Nonnull
-  Mono<Res<Void>> delete(long workerId);
+  Mono<Res<Void>> delete(@NotNull(message = "workerId不能为空")
+                         @Nonnull Long workerId);
 
   /**
    * 查询执行器列表

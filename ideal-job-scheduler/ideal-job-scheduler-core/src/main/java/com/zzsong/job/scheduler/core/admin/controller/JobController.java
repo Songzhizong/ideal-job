@@ -11,14 +11,16 @@ import com.zzsong.job.scheduler.api.dto.rsp.JobInfoRsp;
 import com.zzsong.job.scheduler.core.admin.service.JobService;
 import com.zzsong.job.common.transfer.Res;
 import com.zzsong.job.scheduler.api.client.JobClient;
-import com.zzsong.job.scheduler.core.conf.ExceptionHandler;
 import com.zzsong.job.scheduler.core.utils.CronExpression;
-import org.apache.commons.lang3.StringUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,6 +31,7 @@ import java.util.List;
  *
  * @author 宋志宗 on 2020/8/20
  */
+@Validated
 @RestController
 @RequestMapping("/job")
 public class JobController implements JobClient {
@@ -107,12 +110,9 @@ public class JobController implements JobClient {
   @Nonnull
   @Override
   @PostMapping("/create")
-  public Mono<Res<JobInfoRsp>> create(@RequestBody @Nonnull CreateJobArgs createJobArgs) {
-    return Mono.just(createJobArgs)
-        .doOnNext(CreateJobArgs::checkArgs)
-        .flatMap(jobService::createJob)
-        .map(Res::data)
-        .onErrorResume(ExceptionHandler::resultException);
+  public Mono<Res<JobInfoRsp>> create(@Validated @RequestBody
+                                      @Nonnull CreateJobArgs createJobArgs) {
+    return jobService.createJob(createJobArgs).map(Res::data);
   }
 
   /**
@@ -177,12 +177,9 @@ public class JobController implements JobClient {
   @Nonnull
   @Override
   @PostMapping("/update")
-  public Mono<Res<JobInfoRsp>> update(@RequestBody @Nonnull UpdateJobArgs updateJobArgs) {
-    return Mono.just(updateJobArgs)
-        .doOnNext(UpdateJobArgs::checkArgs)
-        .flatMap(jobService::updateJob)
-        .map(Res::data)
-        .onErrorResume(ExceptionHandler::resultException);
+  public Mono<Res<JobInfoRsp>> update(@Validated @RequestBody
+                                      @Nonnull UpdateJobArgs updateJobArgs) {
+    return jobService.updateJob(updateJobArgs).map(Res::data);
   }
 
   /**
@@ -206,16 +203,8 @@ public class JobController implements JobClient {
   @Nonnull
   @Override
   @DeleteMapping("/remove/{jobId}")
-  public Mono<Res<Void>> remove(@PathVariable("jobId") long jobId) {
-    return Mono.just(jobId)
-        .doOnNext(id -> {
-          if (id < 1) {
-            throw new VisibleException("任务id不合法");
-          }
-        })
-        .flatMap(jobService::removeJob)
-        .map(b -> Res.<Void>success())
-        .onErrorResume(ExceptionHandler::resultException);
+  public Mono<Res<Void>> remove(@PathVariable("jobId") @Nonnull Long jobId) {
+    return jobService.removeJob(jobId).map(b -> Res.success());
   }
 
   /**
@@ -235,8 +224,7 @@ public class JobController implements JobClient {
       paging = Paging.of(1, 20);
     }
     paging.cleanOrders().descBy("jobId");
-    return jobService.query(args, paging)
-        .onErrorResume(ExceptionHandler::resultException);
+    return jobService.query(args, paging);
   }
 
   /**
@@ -260,16 +248,8 @@ public class JobController implements JobClient {
   @Nonnull
   @Override
   @PutMapping("/enable/{jobId}")
-  public Mono<Res<Void>> enable(@PathVariable("jobId") long jobId) {
-    return Mono.just(jobId)
-        .doOnNext(id -> {
-          if (id < 1) {
-            throw new VisibleException("任务id不合法");
-          }
-        })
-        .flatMap(jobService::enableJob)
-        .map(b -> Res.<Void>success())
-        .onErrorResume(ExceptionHandler::resultException);
+  public Mono<Res<Void>> enable(@PathVariable("jobId") @Nonnull Long jobId) {
+    return jobService.enableJob(jobId).map(b -> Res.success());
   }
 
   /**
@@ -293,16 +273,8 @@ public class JobController implements JobClient {
   @Nonnull
   @Override
   @PutMapping("/disable/{jobId}")
-  public Mono<Res<Void>> disable(@PathVariable("jobId") long jobId) {
-    return Mono.just(jobId)
-        .doOnNext(id -> {
-          if (id < 1) {
-            throw new VisibleException("任务id不合法");
-          }
-        })
-        .flatMap(jobService::disableJob)
-        .map(b -> Res.<Void>success())
-        .onErrorResume(ExceptionHandler::resultException);
+  public Mono<Res<Void>> disable(@PathVariable("jobId") @Nonnull Long jobId) {
+    return jobService.disableJob(jobId).map(b -> Res.success());
   }
 
   /**
@@ -337,16 +309,9 @@ public class JobController implements JobClient {
   @Nonnull
   @Override
   @PostMapping("/trigger/{jobId}")
-  public Mono<Res<Void>> trigger(@PathVariable("jobId") long jobId,
+  public Mono<Res<Void>> trigger(@PathVariable("jobId") @Nonnull Long jobId,
                                  @RequestBody @Nullable String executeParam) {
-    return Mono.just(jobId)
-        .doOnNext(id -> {
-          if (id < 1) {
-            throw new VisibleException("任务id不合法");
-          }
-        })
-        .flatMap(id -> jobService.triggerJob(id, executeParam))
-        .onErrorResume(ExceptionHandler::resultException);
+    return jobService.triggerJob(jobId, executeParam);
   }
 
   /**
@@ -377,37 +342,26 @@ public class JobController implements JobClient {
    */
   @GetMapping("/triggerPlan")
   public Mono<Res<List<String>>> triggerPlan(@RequestParam(defaultValue = "5")
-                                                 int count, @Nonnull String cron) {
-    if (StringUtils.isBlank(cron)) {
-      return Mono.just(Res.err("cron不能为空"));
+                                             @Min(value = 1, message = "count至少为1")
+                                             @Max(value = 10, message = "count最大为10") int count,
+                                             @NotBlank(message = "cron不能为空") @Nonnull String cron) {
+
+    CronExpression expression;
+    try {
+      expression = new CronExpression(cron);
+    } catch (ParseException e) {
+      throw new VisibleException("cron表达式不合法");
     }
-    return Mono.just(cron)
-        .doOnNext(c -> {
-          if (count < 1 || count > 10) {
-            throw new VisibleException("count不合法");
-          }
-        })
-        .map(c -> {
-          if (StringUtils.isBlank(c)) {
-            return Res.err("cron表达式为空");
-          }
-          final CronExpression expression;
-          try {
-            expression = new CronExpression(cron);
-          } catch (ParseException e) {
-            throw new VisibleException("cron表达式不合法");
-          }
-          List<String> plans = new ArrayList<>();
-          Date lastTime = new Date();
-          for (int i = 0; i < count; i++) {
-            lastTime = expression.getNextValidTimeAfter(lastTime);
-            if (lastTime != null) {
-              plans.add(DateUtils.format(lastTime, DateTimes.yyyy_MM_dd_HH_mm_ss));
-            } else {
-              break;
-            }
-          }
-          return Res.data(plans);
-        });
+    List<String> plans = new ArrayList<>();
+    Date lastTime = new Date();
+    for (int i = 0; i < count; i++) {
+      lastTime = expression.getNextValidTimeAfter(lastTime);
+      if (lastTime != null) {
+        plans.add(DateUtils.format(lastTime, DateTimes.yyyy_MM_dd_HH_mm_ss));
+      } else {
+        break;
+      }
+    }
+    return Mono.just(Res.data(plans));
   }
 }

@@ -10,6 +10,7 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -47,7 +48,8 @@ public interface JobClient {
    * @author 宋志宗 on 2020/8/26 8:49 下午
    */
   @Nonnull
-  Mono<Res<Void>> remove(long jobId);
+  Mono<Res<Void>> remove(@NotNull(message = "jobId不能为空")
+                         @Nonnull Long jobId);
 
   /**
    * 查询任务信息
@@ -69,7 +71,8 @@ public interface JobClient {
    * @author 宋志宗 on 2020/8/20 4:38 下午
    */
   @Nonnull
-  Mono<Res<Void>> enable(long jobId);
+  Mono<Res<Void>> enable(@NotNull(message = "jobId不能为空")
+                         @Nonnull Long jobId);
 
   /**
    * 停用任务
@@ -79,7 +82,8 @@ public interface JobClient {
    * @author 宋志宗 on 2020/8/20 4:38 下午
    */
   @Nonnull
-  Mono<Res<Void>> disable(long jobId);
+  Mono<Res<Void>> disable(@NotNull(message = "jobId不能为空")
+                          @Nonnull Long jobId);
 
   /**
    * 触发任务
@@ -90,5 +94,6 @@ public interface JobClient {
    * @author 宋志宗 on 2020/8/20 4:18 下午
    */
   @Nonnull
-  Mono<Res<Void>> trigger(long jobId, @Nullable String executeParam);
+  Mono<Res<Void>> trigger(@NotNull(message = "jobId不能为空")
+                          @Nonnull Long jobId, @Nullable String executeParam);
 }

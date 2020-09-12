@@ -1,11 +1,12 @@
 package com.zzsong.job.scheduler.api.dto.req;
 
-import com.zzsong.job.common.exception.VisibleException;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nonnull;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 /**
  * @author 宋志宗 on 2020/8/26
@@ -16,28 +17,20 @@ public class UpdateWorkerArgs {
   /**
    * 执行器Id
    */
-  private long workerId = -1L;
+  @Nonnull
+  @Min(value = 1, message = "workerId不合法")
+  @NotNull(message = "workerId不能为空")
+  private Long workerId;
   /**
    * 执行器AppName
    */
   @Nonnull
-  private String appName = "";
+  @NotBlank(message = "appName不能为空")
+  private String appName;
   /**
    * 执行器名称
    */
   @Nonnull
-  private String title = "";
-
-  public UpdateWorkerArgs checkArgs() {
-    if (workerId < 1) {
-      throw new VisibleException("执行器Id不合法");
-    }
-    if (StringUtils.isBlank(this.appName)) {
-      throw new VisibleException("appName不能为空");
-    }
-    if (StringUtils.isBlank(this.title)) {
-      throw new VisibleException("执行器名称不能为空");
-    }
-    return this;
-  }
+  @NotBlank(message = "执行器名称不能为空")
+  private String title;
 }

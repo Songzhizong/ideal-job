@@ -7,18 +7,17 @@ import org.springframework.data.redis.core.ReactiveValueOperations;
 
 import javax.annotation.Nonnull;
 import java.time.Duration;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * 通过Redis注册机器码的SnowFlake实现
  *
  * @author 宋志宗 on 2020/9/2
  */
-public class ReactiveRedisRegisterSnowFlake implements IDGenerator {
+public class ReactiveRedisSnowFlakeFactory implements IDGenerator, IDGeneratorFactory {
   private static final Logger log = LoggerFactory
-      .getLogger(ReactiveRedisRegisterSnowFlake.class);
+      .getLogger(ReactiveRedisSnowFlakeFactory.class);
+  private final ConcurrentMap<String, IDGenerator> generatorMap = new ConcurrentHashMap<>();
   private final String prefix;
   private final Duration expire;
   private final long expireSeconds;
@@ -26,18 +25,19 @@ public class ReactiveRedisRegisterSnowFlake implements IDGenerator {
   @Nonnull
   private final ReactiveStringRedisTemplate reactiveStringRedisTemplate;
 
-  private long machineId = -1;
+  private final long dataCenterId;
+  private final long machineId;
   private final SnowFlake snowFlake;
   private boolean automaticallyRenewal = false;
   private ScheduledExecutorService executorService;
 
-  public ReactiveRedisRegisterSnowFlake(
+  public ReactiveRedisSnowFlakeFactory(
       @Nonnull String applicationName,
       @Nonnull ReactiveStringRedisTemplate reactiveStringRedisTemplate) {
     this(0, applicationName, reactiveStringRedisTemplate);
   }
 
-  public ReactiveRedisRegisterSnowFlake(
+  public ReactiveRedisSnowFlakeFactory(
       long dataCenterId,
       @Nonnull String applicationName,
       @Nonnull ReactiveStringRedisTemplate reactiveStringRedisTemplate) {
@@ -45,7 +45,7 @@ public class ReactiveRedisRegisterSnowFlake implements IDGenerator {
         applicationName, reactiveStringRedisTemplate);
   }
 
-  public ReactiveRedisRegisterSnowFlake(
+  public ReactiveRedisSnowFlakeFactory(
       long dataCenterId,
       long expireSeconds,
       long renewalIntervalSeconds,
@@ -56,6 +56,7 @@ public class ReactiveRedisRegisterSnowFlake implements IDGenerator {
       log.warn("dataCenterId must >=0 and <=" + maxDataCenterNum);
       dataCenterId = 0;
     }
+    this.dataCenterId = dataCenterId;
     this.prefix = "ideal:register:snowflake:machineId:" + applicationName + ":";
     this.expire = Duration.ofSeconds(expireSeconds);
     this.expireSeconds = expireSeconds;
@@ -64,6 +65,7 @@ public class ReactiveRedisRegisterSnowFlake implements IDGenerator {
     int maxMachineNum = SnowFlake.MAX_MACHINE_NUM;
     ReactiveValueOperations<String, String> operations
         = reactiveStringRedisTemplate.opsForValue();
+    int machineId = -1;
     while (true) {
       ++machineId;
       Boolean success = operations
@@ -80,6 +82,7 @@ public class ReactiveRedisRegisterSnowFlake implements IDGenerator {
         System.exit(0);
       }
     }
+    this.machineId = machineId;
     // 开始自动续期
     automaticallyRenewed();
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -88,7 +91,7 @@ public class ReactiveRedisRegisterSnowFlake implements IDGenerator {
         executorService.shutdownNow();
       }
       // 释放机器码
-      operations.delete(prefix + machineId).block();
+      operations.delete(prefix + this.machineId).block();
     }));
     log.info("SnowFlake dataCenterId = {}, machineId = {}",
         dataCenterId, machineId);
@@ -119,5 +122,10 @@ public class ReactiveRedisRegisterSnowFlake implements IDGenerator {
   @Override
   public long generate() {
     return snowFlake.generate();
+  }
+
+  @Override
+  public IDGenerator getGenerator(@Nonnull String biz) {
+    return generatorMap.computeIfAbsent(biz, k -> new SnowFlake(dataCenterId, machineId));
   }
 }
