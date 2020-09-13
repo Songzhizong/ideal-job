@@ -310,7 +310,8 @@ public class JobController implements JobClient {
   @Override
   @PostMapping("/trigger/{jobId}")
   public Mono<Res<Void>> trigger(@PathVariable("jobId") @Nonnull Long jobId,
-                                 @RequestBody @Nullable String executeParam) {
+                                 @RequestBody(required = false)
+                                 @Nullable String executeParam) {
     return jobService.triggerJob(jobId, executeParam);
   }
 

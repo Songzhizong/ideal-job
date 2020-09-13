@@ -40,7 +40,7 @@ public final class JobHandlerExecuteHandler implements ExecuteHandler {
                                   @Nonnull JobWorkerService jobWorkerService) {
     this.lbFactory = lbFactory;
     this.jobWorkerService = jobWorkerService;
-    ExecuteHandlerFactory.register(ExecuteTypeEnum.JOB_HANDLER, this);
+    ExecuteHandlerFactory.register(ExecuteTypeEnum.BEAN, this);
   }
 
   @Nonnull

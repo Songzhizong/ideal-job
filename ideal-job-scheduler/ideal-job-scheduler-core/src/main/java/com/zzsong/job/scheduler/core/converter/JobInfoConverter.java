@@ -44,19 +44,15 @@ public class JobInfoConverter {
   public static JobInfoRsp toJobInfoRsp(@Nonnull JobInfo jobInfo) {
     JobInfoRsp jobInfoRsp = new JobInfoRsp();
     jobInfoRsp.setJobId(jobInfo.getJobId());
-    jobInfoRsp.setApplication(jobInfo.getApplication());
-    jobInfoRsp.setTenantId(jobInfo.getTenantId());
-    jobInfoRsp.setBizType(jobInfo.getBizType());
-    jobInfoRsp.setCustomTag(jobInfo.getCustomTag());
-    jobInfoRsp.setBusinessId(jobInfo.getBusinessId());
     jobInfoRsp.setWorkerId(jobInfo.getWorkerId());
     jobInfoRsp.setCron(jobInfo.getCron());
     jobInfoRsp.setJobName(jobInfo.getJobName());
     jobInfoRsp.setAlarmEmail(jobInfo.getAlarmEmail());
-    jobInfoRsp.setRouteStrategy(String.valueOf(jobInfo.getRouteStrategy()));
+    jobInfoRsp.setRouteStrategy(jobInfo.getRouteStrategy().name());
+    jobInfoRsp.setExecuteType(jobInfo.getExecuteType().name());
     jobInfoRsp.setExecutorHandler(jobInfo.getExecutorHandler());
     jobInfoRsp.setExecuteParam(jobInfo.getExecuteParam());
-    jobInfoRsp.setBlockStrategy(String.valueOf(jobInfo.getBlockStrategy()));
+    jobInfoRsp.setBlockStrategy(jobInfo.getBlockStrategy().name());
     jobInfoRsp.setRetryCount(jobInfo.getRetryCount());
     jobInfoRsp.setJobStatus(jobInfo.getJobStatus());
     long lastTriggerTime = jobInfo.getLastTriggerTime();
@@ -71,6 +67,11 @@ public class JobInfoConverter {
     }
     jobInfoRsp.setCreatedTime(jobInfo.getCreatedTime());
     jobInfoRsp.setUpdateTime(jobInfo.getUpdateTime());
+    jobInfoRsp.setApplication(jobInfo.getApplication());
+    jobInfoRsp.setTenantId(jobInfo.getTenantId());
+    jobInfoRsp.setBizType(jobInfo.getBizType());
+    jobInfoRsp.setCustomTag(jobInfo.getCustomTag());
+    jobInfoRsp.setBusinessId(jobInfo.getBusinessId());
     return jobInfoRsp;
   }
 }

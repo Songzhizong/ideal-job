@@ -2,6 +2,7 @@ package com.zzsong.job.scheduler.api.dto.req;
 
 import com.zzsong.job.common.constants.BlockStrategyEnum;
 import com.zzsong.job.common.constants.DBDefaults;
+import com.zzsong.job.common.constants.ExecuteTypeEnum;
 import com.zzsong.job.common.constants.RouteStrategyEnum;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,6 +32,11 @@ public class UpdateJobArgs {
   @Min(value = 1, message = "workerId不合法")
   @NotNull(message = "workerId不能为空")
   private Long workerId;
+  /**
+   * 执行模式
+   */
+  @Nonnull
+  private ExecuteTypeEnum executeType = ExecuteTypeEnum.BEAN;
   /**
    * JobHandler
    */

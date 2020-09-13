@@ -47,7 +47,7 @@ public final class SpringCloudHttpExecuteHandler extends BaseHttpExecuteHandler 
     super(instanceService);
     this.jobWorkerService = jobWorkerService;
     this.discoveryClient = discoveryClient;
-    ExecuteHandlerFactory.register(ExecuteTypeEnum.LB_HTTP_SCRIPT, this);
+    ExecuteHandlerFactory.register(ExecuteTypeEnum.LB_HTTP, this);
   }
 
   @SuppressWarnings("DuplicatedCode")

@@ -15,6 +15,6 @@ public final class HttpExecuteHandler extends BaseHttpExecuteHandler {
 
   public HttpExecuteHandler(@Nonnull JobInstanceService instanceService) {
     super(instanceService);
-    ExecuteHandlerFactory.register(ExecuteTypeEnum.HTTP_SCRIPT, this);
+    ExecuteHandlerFactory.register(ExecuteTypeEnum.HTTP, this);
   }
 }

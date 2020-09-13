@@ -3,7 +3,8 @@ POST http://127.0.0.1:8804/worker/create
 Content-Type: application/json
 
 {
-  "title": "示例执行器"
+  "title": "示例执行器1",
+  "appName": "test"
 }
 
 ###

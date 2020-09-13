@@ -11,15 +11,15 @@ public enum ExecuteTypeEnum {
   /**
    * JobHandler
    */
-  JOB_HANDLER(0, "Job handler"),
+  BEAN(0, "Bean"),
   /**
    * Http script
    */
-  HTTP_SCRIPT(1, "Http script"),
+  HTTP(1, "Http Script"),
   /**
    * SpringCloud http script
    */
-  LB_HTTP_SCRIPT(2, "SpringCloud http script"),
+  LB_HTTP(2, "Spring Cloud Http Script"),
   ;
 
 

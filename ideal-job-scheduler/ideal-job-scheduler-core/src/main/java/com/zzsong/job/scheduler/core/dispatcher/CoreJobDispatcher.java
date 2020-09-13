@@ -59,7 +59,7 @@ public class CoreJobDispatcher implements JobDispatcher {
     ExecuteTypeEnum executeType = jobView.getExecuteType();
 
     // JOB_HANDLER模式下 worker不一定会连接到集群中的每一个节点, 因此需要获取到其连接到的节点列表, 然后执行调度
-    if (executeType == ExecuteTypeEnum.JOB_HANDLER) {
+    if (executeType == ExecuteTypeEnum.BEAN) {
       long workerId = jobView.getWorkerId();
       return workerService.loadById(workerId)
           .flatMap(workerOptional -> {

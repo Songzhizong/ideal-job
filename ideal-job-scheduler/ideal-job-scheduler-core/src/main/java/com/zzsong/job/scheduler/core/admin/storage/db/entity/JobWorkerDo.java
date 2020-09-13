@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @Table(
     name = "ideal_job_worker",
     indexes = {
-        @Index(name = "uk_app_name", columnList = "appName", unique = true),
+        @Index(name = "app_name", columnList = "appName"),
         @Index(name = "title", columnList = "title"),
     }
 )

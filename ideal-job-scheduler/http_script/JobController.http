@@ -65,11 +65,10 @@ PUT http://127.0.0.1:8804/job/disable/133800657135075328
 
 
 ### 触发任务
-POST http://127.0.0.1:8805/job/trigger/134938329517916160
+POST http://127.0.0.1:8804/job/trigger/134276800086802432
 Content-Type: application/json
 
-helloworld
-
+hello_world
 
 ###
 GET http://127.0.0.1:8804/job/triggerPlan?count=5&cron=0/30%20*%20*%20*%20*%20?

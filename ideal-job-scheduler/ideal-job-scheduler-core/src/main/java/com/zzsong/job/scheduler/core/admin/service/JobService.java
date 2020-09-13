@@ -10,6 +10,7 @@ import com.zzsong.job.scheduler.api.dto.req.CreateJobArgs;
 import com.zzsong.job.scheduler.api.dto.req.QueryJobArgs;
 import com.zzsong.job.scheduler.api.dto.req.UpdateJobArgs;
 import com.zzsong.job.scheduler.api.dto.rsp.JobInfoRsp;
+import com.zzsong.job.scheduler.api.utils.Cron;
 import com.zzsong.job.scheduler.core.dispatcher.JobDispatcher;
 import com.zzsong.job.scheduler.core.pojo.JobInfo;
 import com.zzsong.job.scheduler.core.pojo.JobView;
@@ -131,6 +132,8 @@ public class JobService {
             }
           } else {
             jobInfo.setJobStatus(JobInfo.JOB_STOP);
+            jobInfo.setLastTriggerTime(0);
+            jobInfo.setNextTriggerTime(0);
           }
           return jobInfoStorage.save(jobInfo).map(JobInfoConverter::toJobInfoRsp);
         });
@@ -279,5 +282,12 @@ public class JobService {
       return null;
     }
     return nextValidTime.getTime();
+  }
+
+  public static void main(String[] args) {
+    String build = Cron.builder().week(Cron.Joint.CONTINUOUS,"1","5").build();
+    boolean validExpression = CronExpression.isValidExpression(build);
+    System.out.println(validExpression);
+    System.out.println(build);
   }
 }

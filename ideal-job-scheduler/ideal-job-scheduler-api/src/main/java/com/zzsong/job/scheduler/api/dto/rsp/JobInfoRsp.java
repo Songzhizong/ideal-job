@@ -20,31 +20,6 @@ public class JobInfoRsp {
    */
   private long jobId;
   /**
-   * 所属应用
-   */
-  @Nonnull
-  private String application;
-  /**
-   * 租户ID
-   */
-  @Nonnull
-  private String tenantId;
-  /**
-   * 业务分类
-   */
-  @Nonnull
-  private String bizType;
-  /**
-   * 业务方自定义标签
-   */
-  @Nonnull
-  private String customTag;
-  /**
-   * 业务方Id
-   */
-  @Nonnull
-  private String businessId;
-  /**
    * 所属执行器Id
    */
   private long workerId;
@@ -67,6 +42,10 @@ public class JobInfoRsp {
    * 执行器路由策略
    */
   private String routeStrategy;
+  /**
+   * 执行模式
+   */
+  private String executeType;
   /**
    * JobHandler
    */
@@ -110,4 +89,33 @@ public class JobInfoRsp {
    */
   @Nonnull
   private LocalDateTime updateTime;
+
+
+// ---------------------------------------------- 扩展查询字段
+
+  /**
+   * 所属应用
+   */
+  @Nonnull
+  private String application;
+  /**
+   * 租户ID
+   */
+  @Nonnull
+  private String tenantId;
+  /**
+   * 业务分类
+   */
+  @Nonnull
+  private String bizType;
+  /**
+   * 业务方自定义标签
+   */
+  @Nonnull
+  private String customTag;
+  /**
+   * 业务方Id
+   */
+  @Nonnull
+  private String businessId;
 }

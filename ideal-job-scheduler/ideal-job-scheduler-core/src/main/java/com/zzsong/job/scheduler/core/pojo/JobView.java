@@ -37,7 +37,7 @@ public class JobView {
    * 执行模式
    */
   @Nonnull
-  private ExecuteTypeEnum executeType = ExecuteTypeEnum.JOB_HANDLER;
+  private ExecuteTypeEnum executeType = ExecuteTypeEnum.BEAN;
   /**
    * JobHandler
    */
