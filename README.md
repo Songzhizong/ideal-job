@@ -14,7 +14,7 @@
 
 ideal-job是一个分布式任务调度系统，其设计目标是简单可靠、易于上手、能够以低耦合的方式与业务系统进行集成。
 
-**本工程仅包含后端服务模块，前端管理页面见 [ideal-job-web](#https://github.com/Songzhizong/ideal-job-web)。**
+**本工程仅包含后端服务模块，前端管理页面见 [ideal-job-web](https://github.com/Songzhizong/ideal-job-web)。**
 
 ### 页面预览
 
@@ -68,7 +68,7 @@ ideal-job是一个分布式任务调度系统，其设计目标是简单可靠�
 
 ## 使用说明
 
-> 详细的WEB操作说明见 [ideal-job-web](#https://github.com/Songzhizong/ideal-job-web)。
+> 详细的WEB操作说明见 [ideal-job-web](https://github.com/Songzhizong/ideal-job-web)。
 
 1.  xxxx
 2.  xxxx
