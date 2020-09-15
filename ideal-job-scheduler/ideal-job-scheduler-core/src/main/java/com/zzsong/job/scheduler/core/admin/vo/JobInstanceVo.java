@@ -106,8 +106,7 @@ public class JobInstanceVo {
   /**
    * 执行状态
    */
-  @Nonnull
-  private String handleStatus;
+  private int handleStatus;
 
   /**
    * 执行信息

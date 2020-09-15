@@ -46,7 +46,7 @@ public final class JobInstanceConverter {
       jobInstanceVo.setFinishedTime("N/A");
     }
 
-    jobInstanceVo.setHandleStatus(instance.getHandleStatus().getDesc());
+    jobInstanceVo.setHandleStatus(instance.getHandleStatus().getCode());
     jobInstanceVo.setResult(instance.getResult());
     return jobInstanceVo;
 
