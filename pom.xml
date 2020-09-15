@@ -22,14 +22,14 @@
 
     <ideal-job.version>0.0.1</ideal-job.version>
 
-    <reactor-bom.version>Dysprosium-SR11</reactor-bom.version>
+    <reactor-bom.version>Dysprosium-SR12</reactor-bom.version>
     <spring.boot.version>2.3.3.RELEASE</spring.boot.version>
-    <spring.cloud.version>Hoxton.SR7</spring.cloud.version>
+    <spring.cloud.version>Hoxton.SR8</spring.cloud.version>
     <spring-boot-starter-actuator.version>2.2.9.RELEASE</spring-boot-starter-actuator.version>
 
     <caffeine.version>2.8.5</caffeine.version>
     <commons-lang3.version>3.11</commons-lang3.version>
-    <commons-pool2.version>2.8.0</commons-pool2.version>
+    <commons-pool2.version>2.8.1</commons-pool2.version>
     <guava.version>29.0-jre</guava.version>
     <hibernate-validator.version>6.1.5.Final</hibernate-validator.version>
     <HikariCP.version>3.4.5</HikariCP.version>
