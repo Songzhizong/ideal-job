@@ -4,15 +4,19 @@ import com.google.common.collect.ImmutableList;
 import com.zzsong.job.common.constants.HandleStatusEnum;
 import com.zzsong.job.common.constants.WorkerRouter;
 import com.zzsong.job.common.loadbalancer.LbFactory;
+import com.zzsong.job.common.message.payload.InstanceLogReport;
 import com.zzsong.job.common.message.payload.LoginMessage;
 import com.zzsong.job.common.message.payload.TaskCallback;
 import com.zzsong.job.common.transfer.Res;
 import com.zzsong.job.common.utils.DateTimes;
 import com.zzsong.job.common.utils.JsonUtils;
 import com.zzsong.job.common.worker.TaskWorker;
+import com.zzsong.job.scheduler.core.admin.service.InstanceLogService;
 import com.zzsong.job.scheduler.core.admin.service.JobInstanceService;
 import com.zzsong.job.scheduler.core.admin.storage.param.TaskResult;
 import com.zzsong.job.scheduler.core.conf.JobSchedulerProperties;
+import com.zzsong.job.scheduler.core.converter.InstanceLogConverter;
+import com.zzsong.job.scheduler.core.pojo.InstanceLog;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +26,7 @@ import org.springframework.messaging.rsocket.RSocketRequester;
 import org.springframework.messaging.rsocket.annotation.ConnectMapping;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
 import javax.annotation.Nonnull;
 
@@ -32,17 +37,25 @@ import javax.annotation.Nonnull;
 public class RSocketWorkerServer {
   private static final Logger log = LoggerFactory.getLogger(RSocketWorkerServer.class);
   @Nonnull
+  private final Scheduler blockScheduler;
+  @Nonnull
   private final LbFactory<TaskWorker> lbFactory;
   @Nonnull
   private final JobInstanceService instanceService;
   @Nonnull
+  private final InstanceLogService instanceLogService;
+  @Nonnull
   private final JobSchedulerProperties schedulerProperties;
 
-  public RSocketWorkerServer(@Nonnull LbFactory<TaskWorker> lbFactory,
+  public RSocketWorkerServer(@Nonnull Scheduler blockScheduler,
+                             @Nonnull LbFactory<TaskWorker> lbFactory,
                              @Nonnull JobInstanceService instanceService,
+                             @Nonnull InstanceLogService instanceLogService,
                              @Nonnull JobSchedulerProperties schedulerProperties) {
+    this.blockScheduler = blockScheduler;
     this.lbFactory = lbFactory;
     this.instanceService = instanceService;
+    this.instanceLogService = instanceLogService;
     this.schedulerProperties = schedulerProperties;
   }
 
@@ -113,5 +126,15 @@ public class RSocketWorkerServer {
     taskResult.setUpdateTime(DateTimes.now());
     return instanceService.updateByTaskResult(taskResult)
         .map(i -> Res.success());
+  }
+
+  /**
+   * 接收任务执行过程中产生的日志
+   */
+  @MessageMapping(WorkerRouter.INSTANCE_LOG)
+  Mono<Void> instanceLogReport(@Nonnull InstanceLogReport report) {
+    InstanceLog instanceLog = InstanceLogConverter.fromInstanceLogReport(report);
+    blockScheduler.schedule(() -> instanceLogService.save(instanceLog).subscribe());
+    return Mono.empty();
   }
 }

@@ -161,6 +161,7 @@ public class LocalClusterNode implements ClusterNode {
     LocalDateTime now = DateTimes.now();
     JobInstance instance = new JobInstance();
     instance.setJobId(jobView.getJobId());
+    instance.setJobName(jobView.getJobName());
     instance.setWorkerId(jobView.getWorkerId());
     instance.setTriggerType(triggerType);
     instance.setSchedulerInstance(config.getIpPort());

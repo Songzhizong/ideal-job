@@ -36,6 +36,12 @@ public class JobInstance {
   private long jobId = DBDefaults.DEFAULT_LONG_VALUE;
 
   /**
+   * 任务名称
+   */
+  @Nonnull
+  private String jobName = DBDefaults.DEFAULT_STRING_VALUE;
+
+  /**
    * 执行器Id
    */
   private long workerId = DBDefaults.DEFAULT_LONG_VALUE;

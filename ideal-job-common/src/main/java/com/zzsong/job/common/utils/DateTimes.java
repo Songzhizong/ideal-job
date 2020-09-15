@@ -105,4 +105,25 @@ public final class DateTimes {
   public static LocalDateTime now(@Nonnull ZoneOffset zoneOffset) {
     return LocalDateTime.now(zoneOffset);
   }
+
+  @Nonnull
+  public static String calculateTimeDifference(long start, long end) {
+    if (start == end) {
+      return "0";
+    }
+    long time = Math.abs(end - start);
+    long h = time / (1000 * 60 * 60);
+    long m = time % (1000 * 60 * 60) / (1000 * 60);
+    long s = time % (1000 * 60 * 60) % (1000 * 60) / 1000;
+    long ms = time % (1000 * 60 * 60) % (1000 * 60) % 1000;
+    StringBuilder sb = new StringBuilder();
+    if (h != 0) {
+      sb.append(h).append("小时");
+    }
+    if (m != 0) {
+      sb.append(m).append("分钟");
+    }
+    sb.append(s).append(".").append(ms).append("秒");
+    return sb.toString();
+  }
 }

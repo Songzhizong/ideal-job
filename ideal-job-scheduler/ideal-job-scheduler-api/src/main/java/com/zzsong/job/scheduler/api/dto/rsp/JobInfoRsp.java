@@ -1,7 +1,5 @@
 package com.zzsong.job.scheduler.api.dto.rsp;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,6 +31,12 @@ public class JobInfoRsp {
    */
   @Nonnull
   private String jobName;
+
+  /**
+   * 任务描述
+   */
+  @Nonnull
+  private String desc;
   /**
    * 告警邮件地址
    */

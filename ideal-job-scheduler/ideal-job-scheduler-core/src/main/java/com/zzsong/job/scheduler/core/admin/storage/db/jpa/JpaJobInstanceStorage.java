@@ -69,7 +69,8 @@ public class JpaJobInstanceStorage implements JobInstanceStorage {
   }
 
   @Override
-  public Mono<Res<List<JobInstance>>> query(@Nonnull QueryInstanceArgs args, @Nonnull Paging paging) {
+  public Mono<Res<List<JobInstance>>> query(@Nonnull QueryInstanceArgs args,
+                                            @Nonnull Paging paging) {
     final Long jobId = args.getJobId();
     final Long parentId = args.getParentId();
     final Long workerId = args.getWorkerId();

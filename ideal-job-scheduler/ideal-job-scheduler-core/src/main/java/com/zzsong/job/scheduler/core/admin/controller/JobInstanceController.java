@@ -48,6 +48,7 @@ public class JobInstanceController implements JobInstanceClient {
     if (paging == null) {
       paging = Paging.of(1, 20);
     }
+    paging.cleanOrders().descBy("instanceId");
     return instanceService.query(args, paging)
         .map(res ->
             res.convertData(list ->

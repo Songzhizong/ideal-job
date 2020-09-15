@@ -21,6 +21,7 @@ public final class JobInstanceDoConverter {
     }
     jobInstanceDo.setParentId(jobInstance.getParentId());
     jobInstanceDo.setJobId(jobInstance.getJobId());
+    jobInstanceDo.setJobName(jobInstance.getJobName());
     jobInstanceDo.setWorkerId(jobInstance.getWorkerId());
     jobInstanceDo.setTriggerType(jobInstance.getTriggerType());
     jobInstanceDo.setSchedulerInstance(jobInstance.getSchedulerInstance());
@@ -45,6 +46,7 @@ public final class JobInstanceDoConverter {
     jobInstance.setInstanceId(jobInstanceDo.getInstanceId());
     jobInstance.setParentId(jobInstanceDo.getParentId());
     jobInstance.setJobId(jobInstanceDo.getJobId());
+    jobInstance.setJobName(jobInstanceDo.getJobName());
     jobInstance.setWorkerId(jobInstanceDo.getWorkerId());
     jobInstance.setTriggerType(jobInstanceDo.getTriggerType());
     jobInstance.setSchedulerInstance(jobInstanceDo.getSchedulerInstance());

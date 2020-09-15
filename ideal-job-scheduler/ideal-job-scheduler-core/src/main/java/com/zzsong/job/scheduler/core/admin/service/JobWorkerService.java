@@ -39,7 +39,7 @@ public class JobWorkerService {
   private static final String CACHE_NAME = "ideal:job:cache:worker:";
   private static final String UN_CACHE_VALUE = "UN_CACHE";
   private static final Duration CACHE_EXPIRE = Duration.ofDays(1);
-  private static final Duration UN_CACHE_EXPIRE = Duration.ofMillis(60);
+  private static final Duration UN_CACHE_EXPIRE = Duration.ofMinutes(60);
 
   @Autowired
   @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
@@ -206,7 +206,7 @@ public class JobWorkerService {
     String key = CACHE_NAME + workerId;
     return reactiveCache.get(key).defaultIfEmpty("")
         .flatMap(cache -> {
-          // 如果缓存中存在, 直接返回缓存的内衣
+          // 如果缓存中存在, 直接返回缓存的内容
           if (StringUtils.isNotBlank(cache)) {
             JobWorker worker = JsonUtils.parseJson(cache, JobWorker.class);
             return Mono.just(Optional.of(worker));

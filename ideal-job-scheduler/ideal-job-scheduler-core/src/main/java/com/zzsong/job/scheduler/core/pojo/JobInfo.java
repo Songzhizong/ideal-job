@@ -40,6 +40,12 @@ public class JobInfo {
   private String jobName = DBDefaults.DEFAULT_STRING_VALUE;
 
   /**
+   * 任务描述
+   */
+  @Nonnull
+  private String desc = DBDefaults.DEFAULT_STRING_VALUE;
+
+  /**
    * 告警邮件地址
    */
   @Nonnull

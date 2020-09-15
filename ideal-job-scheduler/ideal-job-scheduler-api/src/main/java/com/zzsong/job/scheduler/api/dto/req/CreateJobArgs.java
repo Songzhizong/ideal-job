@@ -72,6 +72,11 @@ public class CreateJobArgs {
    */
   @Nonnull
   private String alarmEmail = DBDefaults.DEFAULT_STRING_VALUE;
+  /**
+   * 任务描述
+   */
+  @Nonnull
+  private String desc = DBDefaults.DEFAULT_STRING_VALUE;
 
   // ---------------------------- 以下为扩展查询字段, 适用于各种业务场景的查询需求
 

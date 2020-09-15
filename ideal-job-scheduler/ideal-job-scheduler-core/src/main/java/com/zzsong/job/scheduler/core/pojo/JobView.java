@@ -1,6 +1,7 @@
 package com.zzsong.job.scheduler.core.pojo;
 
 import com.zzsong.job.common.constants.BlockStrategyEnum;
+import com.zzsong.job.common.constants.DBDefaults;
 import com.zzsong.job.common.constants.ExecuteTypeEnum;
 import com.zzsong.job.common.constants.RouteStrategyEnum;
 import lombok.Getter;
@@ -19,6 +20,11 @@ public class JobView {
    * 任务Id
    */
   private long jobId;
+  /**
+   * 任务名称
+   */
+  @Nonnull
+  private String jobName = DBDefaults.DEFAULT_STRING_VALUE;
   /**
    * 所属执行器Id
    */
@@ -73,12 +79,13 @@ public class JobView {
   public JobView() {
   }
 
-  public JobView(long jobId, long workerId, @Nonnull String cron,
+  public JobView(long jobId, @Nonnull String jobName, long workerId, @Nonnull String cron,
                  @Nonnull RouteStrategyEnum routeStrategy,
                  @Nonnull ExecuteTypeEnum executeType, @Nonnull String executorHandler,
                  @Nonnull String executeParam, @Nonnull BlockStrategyEnum blockStrategy,
                  int retryCount, int jobStatus, long lastTriggerTime, long nextTriggerTime) {
     this.jobId = jobId;
+    this.jobName = jobName;
     this.workerId = workerId;
     this.cron = cron;
     this.routeStrategy = routeStrategy;

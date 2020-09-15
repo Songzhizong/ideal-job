@@ -43,8 +43,8 @@ public class JobInstanceDo {
    */
   @Id
   @Nonnull
-  @GeneratedValue(strategy = GenerationType.AUTO, generator = "job_trigger_log_generator")
-  @GenericGenerator(name = "job_trigger_log_generator",
+  @GeneratedValue(strategy = GenerationType.AUTO, generator = "job_instance_generator")
+  @GenericGenerator(name = "job_instance_generator",
       strategy = "com.zzsong.job.scheduler.core.generator.JpaIdentityGenerator")
   @Column(nullable = false, updatable = false)
   private Long instanceId;
@@ -61,6 +61,13 @@ public class JobInstanceDo {
   @Nonnull
   @Column(nullable = false, updatable = false)
   private Long jobId;
+
+  /**
+   * 任务名称
+   */
+  @Nonnull
+  @Column(nullable = false, length = 64)
+  private String jobName;
 
   /**
    * 执行器Id

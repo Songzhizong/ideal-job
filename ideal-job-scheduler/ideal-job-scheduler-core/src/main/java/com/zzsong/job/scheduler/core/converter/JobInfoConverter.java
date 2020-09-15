@@ -20,6 +20,7 @@ public class JobInfoConverter {
     jobInfo.setWorkerId(args.getWorkerId());
     jobInfo.setCron(args.getCron());
     jobInfo.setJobName(args.getJobName());
+    jobInfo.setDesc(args.getDesc());
     jobInfo.setAlarmEmail(args.getAlarmEmail());
     jobInfo.setRouteStrategy(args.getRouteStrategy());
     jobInfo.setExecuteType(args.getExecuteType());
@@ -29,7 +30,7 @@ public class JobInfoConverter {
     jobInfo.setRetryCount(args.getRetryCount());
     jobInfo.setJobStatus(JobInfo.JOB_STOP);
     jobInfo.setLastTriggerTime(0);
-//      jobInfo.setNextTriggerTime();
+    jobInfo.setNextTriggerTime(0);
     jobInfo.setApplication(args.getApplication());
     jobInfo.setTenantId(args.getTenantId());
     jobInfo.setBizType(args.getBizType());
@@ -47,6 +48,7 @@ public class JobInfoConverter {
     jobInfoRsp.setWorkerId(jobInfo.getWorkerId());
     jobInfoRsp.setCron(jobInfo.getCron());
     jobInfoRsp.setJobName(jobInfo.getJobName());
+    jobInfoRsp.setDesc(jobInfo.getDesc());
     jobInfoRsp.setAlarmEmail(jobInfo.getAlarmEmail());
     jobInfoRsp.setRouteStrategy(jobInfo.getRouteStrategy().name());
     jobInfoRsp.setExecuteType(jobInfo.getExecuteType().name());

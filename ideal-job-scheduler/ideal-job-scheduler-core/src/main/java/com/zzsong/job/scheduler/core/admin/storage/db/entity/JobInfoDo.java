@@ -70,8 +70,15 @@ public class JobInfoDo {
    * 任务名称
    */
   @Nonnull
-  @Column(nullable = false, length = 200)
+  @Column(nullable = false, length = 64)
   private String jobName;
+
+  /**
+   * 任务名称
+   */
+  @Nonnull
+  @Column(nullable = false, length = 200)
+  private String desc;
 
   /**
    * 告警邮件地址

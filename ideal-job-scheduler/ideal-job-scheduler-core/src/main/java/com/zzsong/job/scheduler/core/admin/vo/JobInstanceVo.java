@@ -30,6 +30,11 @@ public class JobInstanceVo {
    * 任务Id
    */
   private long jobId;
+  /**
+   * 任务名称
+   */
+  @Nonnull
+  private String jobName;
 
   /**
    * 执行器Id
@@ -102,6 +107,9 @@ public class JobInstanceVo {
    */
   @Nonnull
   private String finishedTime;
+
+  @Nonnull
+  private String timeConsuming;
 
   /**
    * 执行状态

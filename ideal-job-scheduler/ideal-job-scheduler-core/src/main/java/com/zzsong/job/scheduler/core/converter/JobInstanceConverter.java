@@ -17,6 +17,7 @@ public final class JobInstanceConverter {
     jobInstanceVo.setInstanceId(instance.getInstanceId());
     jobInstanceVo.setParentId(instance.getParentId());
     jobInstanceVo.setJobId(instance.getJobId());
+    jobInstanceVo.setJobName(instance.getJobName());
     jobInstanceVo.setWorkerId(instance.getWorkerId());
     jobInstanceVo.setTriggerType(instance.getTriggerType().getDesc());
     jobInstanceVo.setSchedulerInstance(instance.getSchedulerInstance());
@@ -42,8 +43,10 @@ public final class JobInstanceConverter {
       final LocalDateTime parse = DateTimes.parse(finishedTime);
       final String format = DateTimes.format(parse, DateTimes.yyyy_MM_dd_HH_mm_ss);
       jobInstanceVo.setFinishedTime(format);
+      jobInstanceVo.setTimeConsuming(DateTimes.calculateTimeDifference(finishedTime, handleTime));
     } else {
       jobInstanceVo.setFinishedTime("N/A");
+      jobInstanceVo.setTimeConsuming("N/A");
     }
 
     jobInstanceVo.setHandleStatus(instance.getHandleStatus().getCode());

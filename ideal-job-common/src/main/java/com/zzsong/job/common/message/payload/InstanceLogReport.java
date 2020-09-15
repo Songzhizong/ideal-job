@@ -1,0 +1,41 @@
+package com.zzsong.job.common.message.payload;
+
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.annotation.Nonnull;
+
+/**
+ * 任务执行日志
+ *
+ * @author 宋志宗 on 2020/9/15
+ */
+@Getter
+@Setter
+public class InstanceLogReport {
+  /**
+   * 日志ID
+   */
+  private long logId;
+  /**
+   * 任务实例ID
+   */
+  private long instanceId;
+
+  /**
+   * 日志输出时间
+   */
+  private long logTime;
+
+  /**
+   * Job Handler
+   */
+  @Nonnull
+  private String handler;
+
+  /**
+   * 日志内容
+   */
+  @Nonnull
+  private String message;
+}
