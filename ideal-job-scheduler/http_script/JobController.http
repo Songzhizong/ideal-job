@@ -2,23 +2,20 @@
 POST http://127.0.0.1:8804/job/create
 Content-Type: application/json
 
+
 {
   "autoStart": false,
-  "workerId": 134930081742061568,
-  "executeType": "HTTP_SCRIPT",
-  "executorHandler": "demoJobHandler",
-  "executeParam": "test",
+  "workerId": 0,
+  "executeType": "BEAN",
+  "executorHandler": "",
+  "executeParam": "",
   "routeStrategy": "CONSISTENT_HASH",
-  "blockStrategy": "SERIAL",
-  "cron": "0/30 * * * * ?",
+  "blockStrategy": "PARALLEL",
+  "cron": "",
   "retryCount": 0,
-  "jobName": "test",
+  "jobName": "",
   "alarmEmail": "",
-  "application": "",
-  "tenantId": "",
-  "bizType": "",
-  "customTag": "",
-  "businessId": ""
+  "desc": ""
 }
 
 ### 更新任务
