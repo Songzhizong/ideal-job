@@ -49,6 +49,7 @@ public final class JobInfoDoConverter {
     jobInfoDo.setWorkerId(jobInfo.getWorkerId());
     jobInfoDo.setCron(jobInfo.getCron());
     jobInfoDo.setJobName(jobInfo.getJobName());
+    jobInfo.setDesc(jobInfoDo.getDesc());
     jobInfoDo.setAlarmEmail(jobInfo.getAlarmEmail());
     jobInfoDo.setRouteStrategy(jobInfo.getRouteStrategy());
     jobInfoDo.setExecuteType(jobInfo.getExecuteType());
