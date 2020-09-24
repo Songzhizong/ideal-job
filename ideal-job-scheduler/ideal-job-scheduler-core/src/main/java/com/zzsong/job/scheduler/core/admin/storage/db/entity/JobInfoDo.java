@@ -77,7 +77,7 @@ public class JobInfoDo {
    * 任务名称
    */
   @Nonnull
-  @Column(nullable = false, length = 200)
+  @Column(name = "`desc`", nullable = false, length = 200)
   private String desc;
 
   /**

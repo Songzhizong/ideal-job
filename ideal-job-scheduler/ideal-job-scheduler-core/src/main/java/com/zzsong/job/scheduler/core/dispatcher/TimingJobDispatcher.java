@@ -109,6 +109,7 @@ public class TimingJobDispatcher implements SmartInitializingSingleton {
             jobService.batchUpdateTriggerInfo(jobViews).block();
           }
         });
+
         long cost = System.currentTimeMillis() - start;
         if (cost < 1000) {
           // 如果未来preReadMills秒都没有数据, 那就休眠最多preReadMills秒, 反之最多休眠1秒

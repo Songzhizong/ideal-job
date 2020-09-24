@@ -76,7 +76,8 @@ public abstract class BaseHttpExecuteHandler implements ExecuteHandler {
           || (StringUtils.startsWith(body, "[")
           && StringUtils.endsWith(body, "]"))) {
         requestBody = JsonUtils.parseJson(body, Object.class);
-      } else {
+      } else if (StringUtils.contains(body, "&")
+          || StringUtils.contains(body, "=")) {
         String[] singles = StringUtils.split(body, "&");
         assert singles != null;
         for (String single : singles) {
@@ -87,6 +88,8 @@ public abstract class BaseHttpExecuteHandler implements ExecuteHandler {
             log.warn("任务: {} http script body不合法", jobView.getJobId());
           }
         }
+      } else {
+        requestBody = body;
       }
     }
     VirtualHttpServer server = (VirtualHttpServer) lbServer;
