@@ -8,14 +8,76 @@
     <version>0.0.1</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>ideal-job-scheduler</artifactId>
-  <packaging>pom</packaging>
 
-  <modules>
-    <module>ideal-job-scheduler-api</module>
-    <module>ideal-job-scheduler-core</module>
-    <module>ideal-job-scheduler-server</module>
-    <module>ideal-job-scheduler-client</module>
-    <module>ideal-job-scheduler-client-springboot-starter</module>
-  </modules>
+  <artifactId>ideal-job-scheduler</artifactId>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.zzsong</groupId>
+      <artifactId>ideal-job-scheduler-api</artifactId>
+      <version>${ideal-job.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.zzsong</groupId>
+      <artifactId>ideal-job-common</artifactId>
+      <version>${ideal-job.version}</version>
+    </dependency>
+    <!-- commons-pool2 -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-pool2</artifactId>
+      <version>${commons-pool2.version}</version>
+    </dependency>
+    <!-- reactor-netty -->
+    <dependency>
+      <groupId>io.projectreactor.netty</groupId>
+      <artifactId>reactor-netty</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-commons</artifactId>
+    </dependency>
+    <!-- webflux -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webflux</artifactId>
+    </dependency>
+    <!-- hibernate-validator -->
+    <dependency>
+      <groupId>org.hibernate.validator</groupId>
+      <artifactId>hibernate-validator</artifactId>
+      <version>${hibernate-validator.version}</version>
+    </dependency>
+    <!-- rsocket -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-rsocket</artifactId>
+    </dependency>
+    <!-- jpa -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <!-- redis -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-configuration-processor</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-context</artifactId>
+    </dependency>
+    <!-- lombok -->
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
 </project>

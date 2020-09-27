@@ -12,6 +12,10 @@
     <module>ideal-job-common</module>
     <module>ideal-job-samples</module>
     <module>ideal-job-scheduler</module>
+    <module>ideal-job-scheduler-api</module>
+    <module>ideal-job-scheduler-client</module>
+    <module>ideal-job-scheduler-client-springboot-starter</module>
+    <module>ideal-job-scheduler-server</module>
     <module>ideal-job-worker</module>
     <module>ideal-job-worker-springboot-starter</module>
   </modules>
