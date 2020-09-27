@@ -28,7 +28,7 @@ public class JobView {
   /**
    * 所属执行器Id
    */
-  private long workerId;
+  private long executorId;
   /**
    * cron表达式
    */
@@ -79,14 +79,14 @@ public class JobView {
   public JobView() {
   }
 
-  public JobView(long jobId, @Nonnull String jobName, long workerId, @Nonnull String cron,
+  public JobView(long jobId, @Nonnull String jobName, long executorId, @Nonnull String cron,
                  @Nonnull RouteStrategyEnum routeStrategy,
                  @Nonnull ExecuteTypeEnum executeType, @Nonnull String executorHandler,
                  @Nonnull String executeParam, @Nonnull BlockStrategyEnum blockStrategy,
                  int retryCount, int jobStatus, long lastTriggerTime, long nextTriggerTime) {
     this.jobId = jobId;
     this.jobName = jobName;
-    this.workerId = workerId;
+    this.executorId = executorId;
     this.cron = cron;
     this.routeStrategy = routeStrategy;
     this.executeType = executeType;

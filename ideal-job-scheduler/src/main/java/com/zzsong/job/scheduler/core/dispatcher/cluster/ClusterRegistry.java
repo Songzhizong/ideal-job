@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 集群worker注册表
+ * 集群executor注册表
  * <pre>
- *   保存各worker和集群中各个节点的注册关系
+ *   保存各executor和集群中各个节点的注册关系
  * </pre>
  *
  * @author 宋志宗 2020/9/9
@@ -37,7 +37,7 @@ public interface ClusterRegistry {
   /**
    * 通过appName获取可用的集群节点
    *
-   * @param appName worker app name
+   * @param appName executor app name
    * @return 可用集群节点
    */
   @Nonnull
@@ -54,7 +54,7 @@ public interface ClusterRegistry {
   /**
    * 通过appName查询当前节点是否可用
    *
-   * @param appName worker app name
+   * @param appName executor app name
    * @return 当前节点是否可用
    * @author 宋志宗 on 2020/9/10
    */

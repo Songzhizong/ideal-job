@@ -40,9 +40,9 @@ public class JpaJobInfoStorage implements JobInfoStorage {
   }
 
   @Override
-  public Mono<Boolean> existsByWorkerId(long workerId) {
-    return Mono.just(workerId)
-        .map(jobInfoRepository::existsByWorkerId)
+  public Mono<Boolean> existsByExecutorId(long executorId) {
+    return Mono.just(executorId)
+        .map(jobInfoRepository::existsByExecutorId)
         .subscribeOn(blockScheduler);
   }
 
@@ -99,7 +99,7 @@ public class JpaJobInfoStorage implements JobInfoStorage {
   public Mono<Res<List<JobInfo>>> query(@Nonnull QueryJobArgs args, @Nonnull Paging paging) {
     return Mono.just(1)
         .map(i -> {
-          Long workerId = args.getWorkerId();
+          Long executorId = args.getExecutorId();
           String jobName = args.getJobName();
           String executorHandler = args.getExecutorHandler();
           Integer jobStatus = args.getJobStatus();
@@ -110,8 +110,8 @@ public class JpaJobInfoStorage implements JobInfoStorage {
           String businessId = args.getBusinessId();
           Page<JobInfoDo> page = jobInfoRepository.findAll((root, cq, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            if (workerId != null) {
-              predicates.add(cb.equal(root.get("workerId"), workerId));
+            if (executorId != null) {
+              predicates.add(cb.equal(root.get("executorId"), executorId));
             }
             if (StringUtils.isNotBlank(jobName)) {
               predicates.add(cb.like(root.get("jobName"), jobName + "%"));

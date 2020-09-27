@@ -5,7 +5,7 @@ Content-Type: application/json
 
 {
   "autoStart": false,
-  "workerId": 0,
+  "executorId": 0,
   "executeType": "BEAN",
   "executorHandler": "",
   "executeParam": "",
@@ -24,7 +24,7 @@ Content-Type: application/json
 
 {
   "jobId": 134938329517916160,
-  "workerId": 134930081742061568,
+  "executorId": 134930081742061568,
   "executorHandler": "demoJobHandler",
   "executeParam": "",
   "routeStrategy": "WEIGHT_ROUND_ROBIN",
@@ -43,7 +43,7 @@ POST http://127.0.0.1:8804/job/query
 Content-Type: application/json
 
 {
-  "workerId": 0,
+  "executorId": 0,
   "jobName": "",
   "executorHandler": "",
   "jobStatus": 0,

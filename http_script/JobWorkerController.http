@@ -1,5 +1,5 @@
 ###
-POST http://127.0.0.1:8804/worker/create
+POST http://127.0.0.1:8804/executor/create
 Content-Type: application/json
 
 {
@@ -8,17 +8,17 @@ Content-Type: application/json
 }
 
 ###
-POST http://127.0.0.1:8804/worker/update
+POST http://127.0.0.1:8804/executor/update
 Content-Type: application/json
 
 {
-  "workerId": 134930081742061568,
+  "executorId": 134930081742061568,
   "appName": "SAMPLE-EXECUTOR",
   "title": "示例执行器"
 }
 
 ###
-DELETE http://127.0.0.1:8804/worker/delete/134930081742061568
+DELETE http://127.0.0.1:8804/executor/delete/134930081742061568
 
 ###
-GET http://127.0.0.1:8804/worker/query?page=1&size=10&appName=SAMPLE
+GET http://127.0.0.1:8804/executor/query?page=1&size=10&appName=SAMPLE

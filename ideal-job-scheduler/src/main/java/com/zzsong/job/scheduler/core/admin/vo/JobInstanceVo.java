@@ -39,7 +39,7 @@ public class JobInstanceVo {
   /**
    * 执行器Id
    */
-  private long workerId;
+  private long executorId;
 
   /**
    * 触发类型

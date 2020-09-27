@@ -2,7 +2,6 @@ package com.zzsong.job.scheduler.core.admin.controller;
 
 import com.zzsong.job.common.transfer.Paging;
 import com.zzsong.job.common.transfer.Res;
-import com.zzsong.job.scheduler.api.client.JobInstanceClient;
 import com.zzsong.job.scheduler.api.dto.req.QueryInstanceArgs;
 import com.zzsong.job.scheduler.core.admin.vo.JobInstanceVo;
 import com.zzsong.job.scheduler.core.admin.service.JobInstanceService;
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/job/instance")
-public class JobInstanceController implements JobInstanceClient {
+public class JobInstanceController {
   @Nonnull
   private final JobInstanceService instanceService;
 

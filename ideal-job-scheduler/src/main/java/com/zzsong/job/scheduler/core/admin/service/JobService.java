@@ -48,12 +48,12 @@ public class JobService {
   private JobDispatcher jobDispatcher;
 
   private final JobInfoStorage jobInfoStorage;
-  private final JobWorkerService jobWorkerService;
+  private final JobExecutorService executorService;
 
   public JobService(JobInfoStorage jobInfoStorage,
-                    JobWorkerService jobWorkerService) {
+                    JobExecutorService executorService) {
     this.jobInfoStorage = jobInfoStorage;
-    this.jobWorkerService = jobWorkerService;
+    this.executorService = executorService;
   }
 
   /**
@@ -64,13 +64,13 @@ public class JobService {
    * @author 宋志宗 on 2020/8/26 7:36 下午
    */
   public Mono<JobInfoRsp> createJob(@Nonnull CreateJobArgs createJobArgs) {
-    long workerId = createJobArgs.getWorkerId();
+    long executorId = createJobArgs.getExecutorId();
     boolean autoStart = createJobArgs.isAutoStart();
     String cron = createJobArgs.getCron();
-    return jobWorkerService.loadById(workerId)
-        .flatMap(workerOptional -> {
-          if (!workerOptional.isPresent()) {
-            log.info("新建任务失败, 执行器: {} 不存在", workerId);
+    return executorService.loadById(executorId)
+        .flatMap(executorOptional -> {
+          if (!executorOptional.isPresent()) {
+            log.info("新建任务失败, 执行器: {} 不存在", executorId);
             return Mono.error(new VisibleException(CommonResMsg.NOT_FOUND, "执行器不存在"));
           }
           LocalDateTime now = DateTimes.now();

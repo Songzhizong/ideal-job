@@ -18,7 +18,7 @@ public final class JobInstanceConverter {
     jobInstanceVo.setParentId(instance.getParentId());
     jobInstanceVo.setJobId(instance.getJobId());
     jobInstanceVo.setJobName(instance.getJobName());
-    jobInstanceVo.setWorkerId(instance.getWorkerId());
+    jobInstanceVo.setExecutorId(instance.getExecutorId());
     jobInstanceVo.setTriggerType(instance.getTriggerType().getDesc());
     jobInstanceVo.setSchedulerInstance(instance.getSchedulerInstance());
     jobInstanceVo.setExecutorHandler(instance.getExecutorHandler());

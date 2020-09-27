@@ -46,6 +46,6 @@ public interface ExecuteHandler {
    * @author 宋志宗 on 2020/9/7
    */
   @Nonnull
-  Mono<List<? extends LbServer>> chooseWorkers(@Nonnull JobView jobView,
-                                               @Nonnull Object executeParam);
+  Mono<List<? extends LbServer>> chooseExecutors(@Nonnull JobView jobView,
+                                                 @Nonnull Object executeParam);
 }

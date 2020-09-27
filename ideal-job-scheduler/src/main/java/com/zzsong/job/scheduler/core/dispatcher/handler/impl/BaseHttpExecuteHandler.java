@@ -154,8 +154,8 @@ public abstract class BaseHttpExecuteHandler implements ExecuteHandler {
 
   @Nonnull
   @Override
-  public Mono<List<? extends LbServer>> chooseWorkers(@Nonnull JobView jobView,
-                                                      @Nonnull Object executeParam) {
+  public Mono<List<? extends LbServer>> chooseExecutors(@Nonnull JobView jobView,
+                                                        @Nonnull Object executeParam) {
     HttpRequest httpRequest = converterParam(executeParam);
     String ipPort = httpRequest.getIpPort();
     VirtualHttpServer httpServer = VIRTUAL_SERVER_MAP

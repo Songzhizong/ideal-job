@@ -14,13 +14,13 @@
   <dependencies>
     <dependency>
       <groupId>com.zzsong</groupId>
-      <artifactId>ideal-job-scheduler-api</artifactId>
-      <version>${ideal-job.version}</version>
+      <artifactId>ideal-job-openapi</artifactId>
+      <version>0.0.1</version>
     </dependency>
     <dependency>
       <groupId>com.zzsong</groupId>
       <artifactId>ideal-job-common</artifactId>
-      <version>${ideal-job.version}</version>
+      <version>0.0.1</version>
     </dependency>
     <!-- commons-pool2 -->
     <dependency>

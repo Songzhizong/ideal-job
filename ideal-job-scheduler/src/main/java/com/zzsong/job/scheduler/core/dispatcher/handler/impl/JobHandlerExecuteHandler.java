@@ -7,11 +7,11 @@ import com.zzsong.job.common.loadbalancer.*;
 import com.zzsong.job.common.message.payload.TaskParam;
 import com.zzsong.job.common.transfer.CommonResMsg;
 import com.zzsong.job.common.transfer.Res;
-import com.zzsong.job.common.worker.TaskWorker;
+import com.zzsong.job.common.executor.TaskExecutor;
 import com.zzsong.job.scheduler.core.pojo.JobInstance;
 import com.zzsong.job.scheduler.core.pojo.JobView;
-import com.zzsong.job.scheduler.core.pojo.JobWorker;
-import com.zzsong.job.scheduler.core.admin.service.JobWorkerService;
+import com.zzsong.job.scheduler.core.pojo.JobExecutor;
+import com.zzsong.job.scheduler.core.admin.service.JobExecutorService;
 import com.zzsong.job.scheduler.core.dispatcher.handler.ExecuteHandler;
 import com.zzsong.job.scheduler.core.dispatcher.handler.ExecuteHandlerFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -32,14 +32,14 @@ import java.util.Optional;
 public final class JobHandlerExecuteHandler implements ExecuteHandler {
   private static final Logger log = LoggerFactory.getLogger(JobHandlerExecuteHandler.class);
   @Nonnull
-  private final LbFactory<TaskWorker> lbFactory;
+  private final LbFactory<TaskExecutor> lbFactory;
   @Nonnull
-  private final JobWorkerService jobWorkerService;
+  private final JobExecutorService jobExecutorService;
 
-  public JobHandlerExecuteHandler(@Nonnull LbFactory<TaskWorker> lbFactory,
-                                  @Nonnull JobWorkerService jobWorkerService) {
+  public JobHandlerExecuteHandler(@Nonnull LbFactory<TaskExecutor> lbFactory,
+                                  @Nonnull JobExecutorService jobExecutorService) {
     this.lbFactory = lbFactory;
-    this.jobWorkerService = jobWorkerService;
+    this.jobExecutorService = jobExecutorService;
     ExecuteHandlerFactory.register(ExecuteTypeEnum.BEAN, this);
   }
 
@@ -49,7 +49,7 @@ public final class JobHandlerExecuteHandler implements ExecuteHandler {
                                  @Nonnull JobInstance instance,
                                  @Nonnull JobView jobView,
                                  @Nonnull Object executeParam) {
-    TaskWorker taskWorker = (TaskWorker) lbServer;
+    TaskExecutor taskExecutor = (TaskExecutor) lbServer;
     final String param = (String) executeParam;
     TaskParam taskParam = new TaskParam();
     taskParam.setJobId(jobView.getJobId() + "");
@@ -57,7 +57,7 @@ public final class JobHandlerExecuteHandler implements ExecuteHandler {
     taskParam.setExecutorHandler(jobView.getExecutorHandler());
     taskParam.setExecuteParam(param);
     taskParam.setBlockStrategy(jobView.getBlockStrategy().name());
-    return taskWorker.execute(taskParam);
+    return taskExecutor.execute(taskParam);
   }
 
   @Nonnull
@@ -69,30 +69,30 @@ public final class JobHandlerExecuteHandler implements ExecuteHandler {
   @SuppressWarnings("DuplicatedCode")
   @Nonnull
   @Override
-  public Mono<List<? extends LbServer>> chooseWorkers(@Nonnull JobView jobView,
-                                                      @Nonnull Object executeParam) {
+  public Mono<List<? extends LbServer>> chooseExecutors(@Nonnull JobView jobView,
+                                                        @Nonnull Object executeParam) {
     long jobId = jobView.getJobId();
-    long workerId = jobView.getWorkerId();
+    long executorId = jobView.getExecutorId();
     String executorHandler = jobView.getExecutorHandler();
     RouteStrategyEnum routeStrategy = jobView.getRouteStrategy();
-    Mono<Optional<JobWorker>> workerMono = jobWorkerService.loadById(workerId);
-    return workerMono.flatMap(workerOptional -> {
-      if (!workerOptional.isPresent()) {
-        log.info("任务: {} 调度失败, 执行器: {} 不存在", jobId, workerId);
+    Mono<Optional<JobExecutor>> executorMono = jobExecutorService.loadById(executorId);
+    return executorMono.flatMap(executorOptional -> {
+      if (!executorOptional.isPresent()) {
+        log.info("任务: {} 调度失败, 执行器: {} 不存在", jobId, executorId);
         return Mono.error(new VisibleException(CommonResMsg.NOT_FOUND,
-            "执行器: " + workerId + "不存在"));
+            "执行器: " + executorId + "不存在"));
       }
-      JobWorker worker = workerOptional.get();
-      String appName = worker.getAppName();
+      JobExecutor executor = executorOptional.get();
+      String appName = executor.getAppName();
       if (StringUtils.isBlank(appName)) {
-        log.info("任务: {} 调度失败, 执行器: {} 应用名称为空", jobId, workerId);
+        log.info("任务: {} 调度失败, 执行器: {} 应用名称为空", jobId, executorId);
         return Mono.error(new VisibleException("执行器应用名称为空"));
       }
       if (StringUtils.isBlank(executorHandler)) {
         log.info("任务: {} 的执行处理器为空", jobId);
         return Mono.error(new VisibleException("executorHandler为空"));
       }
-      List<TaskWorker> reachableServers = lbFactory.getReachableServers(appName);
+      List<TaskExecutor> reachableServers = lbFactory.getReachableServers(appName);
       if (reachableServers.isEmpty()) {
         log.info("执行器: {} 当前没有可用的实例", appName);
         return Mono.error(new VisibleException("执行器: " + appName + " 当前没有可用的实例"));
@@ -101,13 +101,13 @@ public final class JobHandlerExecuteHandler implements ExecuteHandler {
         return Mono.just(reachableServers);
       } else {
         LbStrategyEnum lbStrategy = routeStrategy.getLbStrategy();
-        LoadBalancer<TaskWorker> loadBalancer;
+        LoadBalancer<TaskExecutor> loadBalancer;
         if (lbStrategy == null) {
           loadBalancer = lbFactory.getLoadBalancer(appName);
         } else {
           loadBalancer = lbFactory.getLoadBalancer(appName, lbStrategy);
         }
-        TaskWorker chooseServer = loadBalancer.chooseServer(jobId, reachableServers);
+        TaskExecutor chooseServer = loadBalancer.chooseServer(jobId, reachableServers);
         if (chooseServer == null) {
           log.info("执行器: {} 选取实例为空", appName);
           return Mono.error(new VisibleException("执行器选取实例为空"));

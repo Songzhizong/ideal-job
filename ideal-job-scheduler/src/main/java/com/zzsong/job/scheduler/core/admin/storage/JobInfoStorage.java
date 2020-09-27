@@ -20,7 +20,7 @@ public interface JobInfoStorage {
   /**
    * 执行器是否存在任务
    */
-  Mono<Boolean> existsByWorkerId(long workerId);
+  Mono<Boolean> existsByExecutorId(long executorId);
 
   Mono<JobInfo> save(@Nonnull JobInfo jobInfo);
 

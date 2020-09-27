@@ -1,3 +1,0 @@
-# Auto Configure
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  com.zzsong.job.worker.spring.boot.starter.IdealJobBeanConfig

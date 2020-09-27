@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
     indexes = {
         @Index(name = "application", columnList = "application"),
         @Index(name = "tenant_id", columnList = "tenantId"),
-        @Index(name = "worker_id", columnList = "workerId"),
+        @Index(name = "executor_id", columnList = "executorId"),
         @Index(name = "biz_type", columnList = "bizType"),
         @Index(name = "custom_tag", columnList = "customTag"),
         @Index(name = "business_id", columnList = "businessId"),
@@ -57,7 +57,7 @@ public class JobInfoDo {
    * 所属执行器Id
    */
   @Column(nullable = false)
-  private long workerId;
+  private long executorId;
 
   /**
    * 任务执行CRON

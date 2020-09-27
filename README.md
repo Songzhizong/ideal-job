@@ -28,8 +28,8 @@ ideal-job
     ├       ├── ideal-job-scheduler-client-springboot-starter  -- 开放api接口的http客户端springboot-starter
     ├       ├── ideal-job-scheduler-core        -- 调度器核心代码
     ├       └── ideal-job-scheduler-server      -- 调度器服务
-    ├── ideal-job-worker                        -- 执行器核心依赖
-    └── ideal-job-worker-springboot-starter     -- 执行器springboot-starter
+    ├── ideal-job-executor                        -- 执行器核心依赖
+    └── ideal-job-executor-springboot-starter     -- 执行器springboot-starter
 ```
 
 

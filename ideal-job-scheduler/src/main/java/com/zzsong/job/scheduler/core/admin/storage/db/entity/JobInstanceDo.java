@@ -26,7 +26,7 @@ import java.time.LocalDateTime;
     indexes = {
         @Index(name = "parent_id", columnList = "parentId"),
         @Index(name = "job_id", columnList = "jobId"),
-        @Index(name = "worker_Id", columnList = "workerId"),
+        @Index(name = "executor_Id", columnList = "executorId"),
         @Index(name = "handle_status", columnList = "handleStatus"),
         @Index(name = "created_time", columnList = "createdTime"),
     }
@@ -74,7 +74,7 @@ public class JobInstanceDo {
    */
   @Nonnull
   @Column(nullable = false, updatable = false)
-  private Long workerId;
+  private Long executorId;
 
   /**
    * 触发类型

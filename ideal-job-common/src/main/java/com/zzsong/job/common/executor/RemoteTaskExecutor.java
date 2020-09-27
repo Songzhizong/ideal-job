@@ -1,0 +1,20 @@
+package com.zzsong.job.common.executor;
+
+import com.zzsong.job.common.message.payload.TaskCallback;
+import com.zzsong.job.common.transfer.Res;
+import reactor.core.publisher.Mono;
+
+import javax.annotation.Nonnull;
+
+/**
+ * @author 宋志宗 on 2020/8/20
+ */
+public interface RemoteTaskExecutor extends TaskExecutor {
+  /**
+   * 任务执行完成回调
+   *
+   * @param callback 回调消息
+   * @author 宋志宗 on 2020/8/22 23:47
+   */
+  Mono<Res<Void>> taskCallback(@Nonnull TaskCallback callback);
+}

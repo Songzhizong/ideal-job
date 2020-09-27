@@ -14,8 +14,8 @@
   <dependencies>
     <dependency>
       <groupId>com.zzsong</groupId>
-      <artifactId>ideal-job-worker-springboot-starter</artifactId>
-      <version>${ideal-job.version}</version>
+      <artifactId>ideal-job-executor-springboot-starter</artifactId>
+      <version>0.0.1</version>
     </dependency>
     <dependency>
       <groupId>com.github.ben-manes.caffeine</groupId>

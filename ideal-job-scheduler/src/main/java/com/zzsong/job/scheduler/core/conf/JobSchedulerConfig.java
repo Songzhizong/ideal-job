@@ -3,14 +3,13 @@ package com.zzsong.job.scheduler.core.conf;
 import com.google.common.eventbus.EventBus;
 import com.zzsong.job.common.cache.ReactiveCache;
 import com.zzsong.job.common.cache.ReactiveRedisClient;
-import com.zzsong.job.common.worker.TaskWorker;
+import com.zzsong.job.common.executor.TaskExecutor;
 import com.zzsong.job.common.loadbalancer.LbFactory;
 import com.zzsong.job.common.loadbalancer.SimpleLbFactory;
 import com.zzsong.job.common.utils.IpUtil;
 import com.zzsong.job.scheduler.core.dispatcher.LocalClusterNode;
 import com.zzsong.job.scheduler.core.dispatcher.cluster.ClusterRegistry;
 import com.zzsong.job.scheduler.core.dispatcher.cluster.ClusterSocket;
-import com.zzsong.job.scheduler.core.generator.IDGenerator;
 import com.zzsong.job.scheduler.core.generator.JpaIdentityGenerator;
 import com.zzsong.job.scheduler.core.generator.ReactiveRedisSnowFlakeFactory;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
@@ -84,20 +83,20 @@ public class JobSchedulerConfig {
 
   @SuppressWarnings("DuplicatedCode")
   @Bean
-  public LbFactory<TaskWorker> lbFactory(@Nonnull ClusterRegistry registry,
-                                         @Nonnull ClusterSocket clusterSocket,
-                                         @Nonnull LocalClusterNode localClusterNode) {
-    final SimpleLbFactory<TaskWorker> lbFactory = new SimpleLbFactory<>();
+  public LbFactory<TaskExecutor> lbFactory(@Nonnull ClusterRegistry registry,
+                                           @Nonnull ClusterSocket clusterSocket,
+                                           @Nonnull LocalClusterNode localClusterNode) {
+    final SimpleLbFactory<TaskExecutor> lbFactory = new SimpleLbFactory<>();
     lbFactory.registerEventListener((factory, event) -> {
       int reachableServerCount = event.getReachableServerCount();
 
-      final Map<String, List<TaskWorker>> map = factory.getReachableServers();
+      final Map<String, List<TaskExecutor>> map = factory.getReachableServers();
       Map<String, List<String>> supportApps = new HashMap<>();
       map.forEach((appName, list) -> {
         List<String> instanceList = new ArrayList<>();
         if (list != null && list.size() > 0) {
-          for (TaskWorker taskWorker : list) {
-            instanceList.add(taskWorker.getInstanceId());
+          for (TaskExecutor taskExecutor : list) {
+            instanceList.add(taskExecutor.getInstanceId());
           }
         }
         if (instanceList.size() > 0) {

@@ -1,7 +1,7 @@
 package com.zzsong.job.sample.spring.boot;
 
-import com.zzsong.job.worker.annotation.JobHandler;
-import com.zzsong.job.worker.annotation.JobHandlerBean;
+import com.zzsong.job.executor.annotation.JobHandler;
+import com.zzsong.job.executor.annotation.JobHandlerBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

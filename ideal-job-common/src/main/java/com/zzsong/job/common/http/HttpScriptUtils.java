@@ -16,7 +16,7 @@ import java.util.Map;
  *
  *  {
  *    "jobId": 130301268919844864,
- *    "workerId": 130282956815073280,
+ *    "executorId": 130282956815073280,
  *    "executorHandler": "demoJobHandler",
  *    "executeParam": "demoJobHandler",
  *    "routeStrategy": "WEIGHTED_RANDOM",

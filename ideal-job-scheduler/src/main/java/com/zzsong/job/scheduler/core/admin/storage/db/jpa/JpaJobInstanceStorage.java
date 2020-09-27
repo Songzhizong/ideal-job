@@ -73,7 +73,7 @@ public class JpaJobInstanceStorage implements JobInstanceStorage {
                                             @Nonnull Paging paging) {
     final Long jobId = args.getJobId();
     final Long parentId = args.getParentId();
-    final Long workerId = args.getWorkerId();
+    final Long executorId = args.getExecutorId();
     final HandleStatusEnum handleStatus = args.getHandleStatus();
     final Range<LocalDateTime> range = args.getDispatchTimeRange();
     return Mono.just(1)
@@ -86,8 +86,8 @@ public class JpaJobInstanceStorage implements JobInstanceStorage {
             if (jobId != null) {
               predicates.add(cb.equal(root.get("jobId"), jobId));
             }
-            if (workerId != null && workerId > 0) {
-              predicates.add(cb.equal(root.get("workerId"), workerId));
+            if (executorId != null && executorId > 0) {
+              predicates.add(cb.equal(root.get("executorId"), executorId));
             }
             if (handleStatus != null) {
               predicates.add(cb.equal(root.get("handleStatus"), handleStatus));

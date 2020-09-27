@@ -26,7 +26,7 @@ public class JobInfo {
   /**
    * 所属执行器Id
    */
-  private long workerId = DBDefaults.DEFAULT_LONG_VALUE;
+  private long executorId = DBDefaults.DEFAULT_LONG_VALUE;
   /**
    * 任务执行CRON
    */

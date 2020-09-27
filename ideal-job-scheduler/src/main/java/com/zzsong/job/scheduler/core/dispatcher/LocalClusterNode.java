@@ -84,7 +84,7 @@ public class LocalClusterNode implements ClusterNode {
     }
 
     // 选取服务列表
-    return handler.chooseWorkers(jobView, param)
+    return handler.chooseExecutors(jobView, param)
         // 选取服务列表异常, 保存任务实例信息并抛出异常
         .onErrorResume(e -> {
           String errMsg = e.getClass().getName() + ": " + e.getMessage();
@@ -96,7 +96,7 @@ public class LocalClusterNode implements ClusterNode {
               .flatMap(i -> Mono.error(new VisibleException(i.getDispatchMsg())));
         })
         .flatMap(lbServers -> {
-          // 服务列表为空, 抛出异常, 不应该到这一步的, chooseWorkers方法应保证返回的列表不为空, 否则应抛出异常
+          // 服务列表为空, 抛出异常, 不应该到这一步的, chooseExecutors方法应保证返回的列表不为空, 否则应抛出异常
           if (lbServers.size() == 0) {
             log.error("任务: {} 选取的服务列表为空", jobView.getJobId());
             return Mono.just(Res.err("选取服务列表为空"));
@@ -162,7 +162,7 @@ public class LocalClusterNode implements ClusterNode {
     JobInstance instance = new JobInstance();
     instance.setJobId(jobView.getJobId());
     instance.setJobName(jobView.getJobName());
-    instance.setWorkerId(jobView.getWorkerId());
+    instance.setExecutorId(jobView.getExecutorId());
     instance.setTriggerType(triggerType);
     instance.setSchedulerInstance(config.getIpPort());
     instance.setExecutorHandler(jobView.getExecutorHandler());

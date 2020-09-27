@@ -17,7 +17,7 @@ public class JobInfoConverter {
   public static JobInfo fromCreateJobArgs(@Nonnull CreateJobArgs args) {
     JobInfo jobInfo = new JobInfo();
 //    jobInfo.setJobId();
-    jobInfo.setWorkerId(args.getWorkerId());
+    jobInfo.setExecutorId(args.getExecutorId());
     jobInfo.setCron(args.getCron());
     jobInfo.setJobName(args.getJobName());
     jobInfo.setDesc(args.getDesc());
@@ -45,7 +45,7 @@ public class JobInfoConverter {
   public static JobInfoRsp toJobInfoRsp(@Nonnull JobInfo jobInfo) {
     JobInfoRsp jobInfoRsp = new JobInfoRsp();
     jobInfoRsp.setJobId(jobInfo.getJobId());
-    jobInfoRsp.setWorkerId(jobInfo.getWorkerId());
+    jobInfoRsp.setExecutorId(jobInfo.getExecutorId());
     jobInfoRsp.setCron(jobInfo.getCron());
     jobInfoRsp.setJobName(jobInfo.getJobName());
     jobInfoRsp.setDesc(jobInfo.getDesc());

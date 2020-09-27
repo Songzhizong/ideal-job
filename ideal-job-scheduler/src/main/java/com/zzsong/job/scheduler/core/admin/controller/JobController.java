@@ -51,7 +51,7 @@ public class JobController implements JobClient {
    *
    *   {
    *     "autoStart": false,
-   *     "workerId": 134511511480565760,
+   *     "executorId": 134511511480565760,
    *     "executeType": "JOB_HANDLER",
    *     "executorHandler": "demoJobHandler",
    *     "executeParam": "test",
@@ -80,7 +80,7 @@ public class JobController implements JobClient {
    *       "bizType": "",
    *       "customTag": "",
    *       "businessId": "",
-   *       "workerId": "134930081742061568",
+   *       "executorId": "134930081742061568",
    *       "cron": "0/30 * * * * ?",
    *       "jobName": "test",
    *       "alarmEmail": "",
@@ -124,7 +124,7 @@ public class JobController implements JobClient {
    *
    *   {
    *     "jobId": 134938329517916160,
-   *     "workerId": 133924649984589824,
+   *     "executorId": 133924649984589824,
    *     "executorHandler": "",
    *     "executeParam": "",
    *     "routeStrategy": "WEIGHT_ROUND_ROBIN",
@@ -147,7 +147,7 @@ public class JobController implements JobClient {
    *       "bizType": "",
    *       "customTag": "",
    *       "businessId": "",
-   *       "workerId": "133924649984589824",
+   *       "executorId": "133924649984589824",
    *       "cron": "0 0/5 * * * ?",
    *       "jobName": "",
    *       "alarmEmail": "",

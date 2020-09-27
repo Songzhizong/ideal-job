@@ -3,7 +3,7 @@ package com.zzsong.job.scheduler.core.dispatcher.cluster;
 import com.zzsong.job.common.constants.TriggerTypeEnum;
 import com.zzsong.job.common.loadbalancer.LbFactory;
 import com.zzsong.job.common.transfer.Res;
-import com.zzsong.job.common.worker.TaskWorker;
+import com.zzsong.job.common.executor.TaskExecutor;
 import com.zzsong.job.scheduler.core.dispatcher.LocalClusterNode;
 import com.zzsong.job.scheduler.core.pojo.JobView;
 import org.slf4j.Logger;
@@ -36,7 +36,7 @@ public class ClusterSocket {
 
   @Autowired
   @SuppressWarnings("SpringJavaAutowiredFieldsWarningInspection")
-  private LbFactory<TaskWorker> lbFactory;
+  private LbFactory<TaskExecutor> lbFactory;
   private final LocalClusterNode localClusterNode;
 
   public ClusterSocket(LocalClusterNode localClusterNode) {
@@ -70,13 +70,13 @@ public class ClusterSocket {
   public Flux<Map<String, List<String>>> getSupportApps(String instance) {
     log.info("{} get support apps connection", instance);
     return Flux.interval(Duration.ofSeconds(0), Duration.ofSeconds(30)).map(index -> {
-      final Map<String, List<TaskWorker>> map = lbFactory.getReachableServers();
+      final Map<String, List<TaskExecutor>> map = lbFactory.getReachableServers();
       Map<String, List<String>> supportApps = new HashMap<>();
       map.forEach((appName, list) -> {
         List<String> instanceList = new ArrayList<>();
         if (list != null && list.size() > 0) {
-          for (TaskWorker taskWorker : list) {
-            instanceList.add(taskWorker.getInstanceId());
+          for (TaskExecutor taskExecutor : list) {
+            instanceList.add(taskExecutor.getInstanceId());
           }
         }
         if (instanceList.size() > 0) {

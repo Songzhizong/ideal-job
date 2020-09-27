@@ -12,19 +12,15 @@
     <module>ideal-job-common</module>
     <module>ideal-job-samples</module>
     <module>ideal-job-scheduler</module>
-    <module>ideal-job-scheduler-api</module>
-    <module>ideal-job-scheduler-client</module>
-    <module>ideal-job-scheduler-client-springboot-starter</module>
+    <module>ideal-job-openapi</module>
     <module>ideal-job-scheduler-server</module>
-    <module>ideal-job-worker</module>
-    <module>ideal-job-worker-springboot-starter</module>
+    <module>ideal-job-executor</module>
+    <module>ideal-job-executor-springboot-starter</module>
   </modules>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>1.8</java.version>
-
-    <ideal-job.version>0.0.1</ideal-job.version>
 
     <reactor-bom.version>Dysprosium-SR12</reactor-bom.version>
     <spring.boot.version>2.3.3.RELEASE</spring.boot.version>

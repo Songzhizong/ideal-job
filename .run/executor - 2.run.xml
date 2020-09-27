@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="executor - 2" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <module name="ideal-job-sample-springboot" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.zzsong.job.sample.spring.boot.ExecutorApplication" />
+    <option name="PROGRAM_PARAMETERS" value="--server.port=8082 --ideal.job.weight=2 --ideal.job.scheduler-addresses=127.0.0.1:9904" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

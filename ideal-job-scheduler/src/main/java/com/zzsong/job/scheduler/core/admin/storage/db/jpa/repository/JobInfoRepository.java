@@ -29,7 +29,7 @@ public interface JobInfoRepository
 
   @Nullable
   @Query("select new com.zzsong.job.scheduler.core.pojo.JobView(" +
-      "job.jobId, job.jobName, job.workerId, job.cron, job.routeStrategy, job.executeType, " +
+      "job.jobId, job.jobName, job.executorId, job.cron, job.routeStrategy, job.executeType, " +
       "job.executorHandler, job.executeParam, job.blockStrategy, job.retryCount, " +
       "job.jobStatus,job.lastTriggerTime,job.nextTriggerTime)" +
       " from JobInfoDo job" +
@@ -38,7 +38,7 @@ public interface JobInfoRepository
 
   @Nonnull
   @Query("select new com.zzsong.job.scheduler.core.pojo.JobView(" +
-      "job.jobId, job.jobName, job.workerId, job.cron, job.routeStrategy, job.executeType, " +
+      "job.jobId, job.jobName, job.executorId, job.cron, job.routeStrategy, job.executeType, " +
       "job.executorHandler, job.executeParam, job.blockStrategy, job.retryCount, " +
       "job.jobStatus,job.lastTriggerTime,job.nextTriggerTime)" +
       " from JobInfoDo job " +
@@ -47,5 +47,5 @@ public interface JobInfoRepository
                                      @Param("maxNextTime") long maxNextTime,
                                      @Param("pageable") Pageable pageable);
 
-  boolean existsByWorkerId(@Param("workerId") long workerId);
+  boolean existsByExecutorId(@Param("executorId") long executorId);
 }

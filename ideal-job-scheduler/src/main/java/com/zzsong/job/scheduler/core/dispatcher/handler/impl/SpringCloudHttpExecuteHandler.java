@@ -7,11 +7,11 @@ import com.zzsong.job.common.loadbalancer.LbServer;
 import com.zzsong.job.common.loadbalancer.LbStrategyEnum;
 import com.zzsong.job.common.loadbalancer.LoadBalancer;
 import com.zzsong.job.common.transfer.CommonResMsg;
-import com.zzsong.job.scheduler.core.admin.service.JobWorkerService;
+import com.zzsong.job.scheduler.core.admin.service.JobExecutorService;
 import com.zzsong.job.scheduler.core.admin.service.JobInstanceService;
 import com.zzsong.job.scheduler.core.dispatcher.handler.ExecuteHandlerFactory;
 import com.zzsong.job.scheduler.core.pojo.JobView;
-import com.zzsong.job.scheduler.core.pojo.JobWorker;
+import com.zzsong.job.scheduler.core.pojo.JobExecutor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,16 +36,16 @@ public final class SpringCloudHttpExecuteHandler extends BaseHttpExecuteHandler 
       .getLogger(SpringCloudHttpExecuteHandler.class);
 
   @Nonnull
-  private final JobWorkerService jobWorkerService;
+  private final JobExecutorService jobExecutorService;
   @Nullable
   private final DiscoveryClient discoveryClient;
 
   protected SpringCloudHttpExecuteHandler(
       @Nonnull JobInstanceService instanceService,
-      @Nonnull JobWorkerService jobWorkerService,
+      @Nonnull JobExecutorService jobExecutorService,
       @Nullable DiscoveryClient discoveryClient) {
     super(instanceService);
-    this.jobWorkerService = jobWorkerService;
+    this.jobExecutorService = jobExecutorService;
     this.discoveryClient = discoveryClient;
     ExecuteHandlerFactory.register(ExecuteTypeEnum.LB_HTTP, this);
   }
@@ -53,25 +53,25 @@ public final class SpringCloudHttpExecuteHandler extends BaseHttpExecuteHandler 
   @SuppressWarnings("DuplicatedCode")
   @Nonnull
   @Override
-  public Mono<List<? extends LbServer>> chooseWorkers(@Nonnull JobView jobView,
-                                                      @Nonnull Object executeParam) {
+  public Mono<List<? extends LbServer>> chooseExecutors(@Nonnull JobView jobView,
+                                                        @Nonnull Object executeParam) {
     if (discoveryClient == null) {
       return Mono.error(new VisibleException("DiscoveryClient not found, nonsupport lb http script"));
     }
     long jobId = jobView.getJobId();
-    long workerId = jobView.getWorkerId();
+    long executorId = jobView.getExecutorId();
     RouteStrategyEnum routeStrategy = jobView.getRouteStrategy();
-    Mono<Optional<JobWorker>> workerMono = jobWorkerService.loadById(workerId);
-    return workerMono.flatMap(workerOptional -> {
-      if (!workerOptional.isPresent()) {
-        log.info("任务: {} 调度失败, 执行器: {} 不存在", jobId, workerId);
+    Mono<Optional<JobExecutor>> executorMono = jobExecutorService.loadById(executorId);
+    return executorMono.flatMap(executorOptional -> {
+      if (!executorOptional.isPresent()) {
+        log.info("任务: {} 调度失败, 执行器: {} 不存在", jobId, executorId);
         return Mono.error(new VisibleException(CommonResMsg.NOT_FOUND,
-            "执行器: " + workerId + "不存在"));
+            "执行器: " + executorId + "不存在"));
       }
-      JobWorker worker = workerOptional.get();
-      String appName = worker.getAppName();
+      JobExecutor executor = executorOptional.get();
+      String appName = executor.getAppName();
       if (StringUtils.isBlank(appName)) {
-        log.info("任务: {} 调度失败, 执行器: {} 应用名称为空", jobId, workerId);
+        log.info("任务: {} 调度失败, 执行器: {} 应用名称为空", jobId, executorId);
         return Mono.error(new VisibleException("执行器应用名称为空"));
       }
       List<ServiceInstance> instances = discoveryClient.getInstances(appName);

@@ -44,7 +44,7 @@ public class JobInstance {
   /**
    * 执行器Id
    */
-  private long workerId = DBDefaults.DEFAULT_LONG_VALUE;
+  private long executorId = DBDefaults.DEFAULT_LONG_VALUE;
 
   /**
    * 触发类型

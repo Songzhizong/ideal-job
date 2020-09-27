@@ -15,7 +15,7 @@ public final class JobInfoDoConverter {
   public static JobInfo toJobInfo(@Nonnull JobInfoDo jobInfoDo) {
     JobInfo jobInfo = new JobInfo();
     jobInfo.setJobId(jobInfoDo.getJobId());
-    jobInfo.setWorkerId(jobInfoDo.getWorkerId());
+    jobInfo.setExecutorId(jobInfoDo.getExecutorId());
     jobInfo.setCron(jobInfoDo.getCron());
     jobInfo.setJobName(jobInfoDo.getJobName());
     jobInfo.setDesc(jobInfoDo.getDesc());
@@ -46,7 +46,7 @@ public final class JobInfoDoConverter {
     if (jobInfo.getJobId() != null && jobInfo.getJobId() > 0) {
       jobInfoDo.setJobId(jobInfo.getJobId());
     }
-    jobInfoDo.setWorkerId(jobInfo.getWorkerId());
+    jobInfoDo.setExecutorId(jobInfo.getExecutorId());
     jobInfoDo.setCron(jobInfo.getCron());
     jobInfoDo.setJobName(jobInfo.getJobName());
     jobInfoDo.setDesc(jobInfo.getDesc());

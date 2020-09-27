@@ -4,7 +4,7 @@ Content-Type: application/json
 
 {
   "autoStart": true,
-  "workerId": 131360599572480000,
+  "executorId": 131360599572480000,
   "executeType": "HTTP_SCRIPT",
   "executeParam": "POST http://127.0.0.1:8804/executor/query?page=1&size=10\nContent-Type: application/json\n\n{\n  \"appName\": \"SAMPLE-EXECUTOR\"\n}",
   "routeStrategy": "RANDOM",
@@ -18,7 +18,7 @@ Content-Type: application/json
 
 {
   "autoStart": false,
-  "workerId": 134930081742061568,
+  "executorId": 134930081742061568,
   "executeType": "JOB_HANDLER",
   "executorHandler": "demoJobHandler",
   "executeParam": "test",
